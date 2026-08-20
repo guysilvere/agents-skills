@@ -8,7 +8,8 @@
 | Élément | Emplacement | Description |
 |---------|-------------|-------------|
 | Workflow | `workflow-projet-vibe-code.md` | Workflow projet complet (phases 0-10) |
-| Agents | `migration-opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) |
+| Agents | `migration-opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) — format OpenCode |
+| Agents AG | `antigravity/agents/` | Les 3 mêmes rôles — format Antigravity |
 | Skills | `migration-opencode/skills/` | 10 skills (avec assets séparés 🟦/🟩/⚪) |
 | Assets | `migration-opencode/assets/` | Templates, scripts, checklists, configs par skill |
 | Commandes | `migration-opencode/commands/` | 6 commandes slash OpenCode |

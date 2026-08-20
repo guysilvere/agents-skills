@@ -26,12 +26,14 @@ SRC_SKILLS="${REPO_DIR}/migration-opencode/skills"
 SRC_AGENTS="${REPO_DIR}/migration-opencode/agents"
 SRC_COMMANDS="${REPO_DIR}/migration-opencode/commands"
 SRC_WORKFLOWS="${REPO_DIR}/antigravity/workflows"
+SRC_AG_AGENTS="${REPO_DIR}/antigravity/agents"
 
 # Cibles
 OC_SKILLS="${HOME}/.config/opencode/skills"
 OC_AGENTS="${HOME}/.config/opencode/agents"
 OC_COMMANDS="${HOME}/.config/opencode/commands"
 AG_SKILLS="${HOME}/.gemini/config/skills"
+AG_AGENTS="${HOME}/.gemini/config/agents"
 AG_WORKFLOWS="${HOME}/.gemini/workflows"
 
 # ---- Options ---------------------------------------------------------------
@@ -115,6 +117,7 @@ if (( DO_BACKUP )) && (( ! DRY_RUN )); then
   fi
   if (( DO_ANTIGRAVITY )); then
     [[ -d "$AG_SKILLS" ]] && cp -R "$AG_SKILLS" "$BACKUP_DIR/antigravity-skills" 2>/dev/null || true
+    [[ -d "$AG_AGENTS" ]] && cp -R "$AG_AGENTS" "$BACKUP_DIR/antigravity-agents" 2>/dev/null || true
     [[ -d "$AG_WORKFLOWS" ]] && cp -R "$AG_WORKFLOWS" "$BACKUP_DIR/antigravity-workflows" 2>/dev/null || true
   fi
   log "Backup : $BACKUP_DIR"
@@ -133,6 +136,7 @@ fi
 if (( DO_ANTIGRAVITY )); then
   log "── Antigravity ──────────────────────────────────────"
   purge_and_copy "$SRC_SKILLS"    "$AG_SKILLS"    "Skills Antigravity (10)"
+  purge_and_copy "$SRC_AG_AGENTS" "$AG_AGENTS"    "Agents Antigravity (3)"
   purge_and_copy "$SRC_WORKFLOWS" "$AG_WORKFLOWS" "Workflows Antigravity (6)"
 fi
 

@@ -18,9 +18,9 @@ GitHub (guysilvere/agents-skills)  ──clone/pull──►  repo local ~/agent
         ~/.config/opencode/commands/
 ```
 
-- **Source de vérité** : `migration-opencode/skills/` (10 skills), `migration-opencode/agents/` (3 agents), `migration-opencode/commands/` (6 commandes), `antigravity/workflows/` (6 workflows).
+- **Source de vérité** : `migration-opencode/skills/` (10 skills), `migration-opencode/agents/` (3 agents), `migration-opencode/commands/` (6 commandes), `antigravity/workflows/` (6 workflows), `antigravity/agents/` (3 agents AG).
 - **Cible skills** : le même dossier de skills est copié dans les DEUX outils (format `SKILL.md` compatible — standard agentskills.io).
-- **Cible agents** : uniquement OpenCode (format AG différent, géré via la skill `opencode-admin`).
+- **Cible agents** : `migration-opencode/agents/` → OpenCode ; `antigravity/agents/` → Antigravity (formats différents, deux sources séparées).
 - **Cible workflows** : uniquement Antigravity (les commandes OpenCode n'y fonctionnent pas).
 
 ## Usage
@@ -61,14 +61,15 @@ Un test symlink a confirmé que les skills globales peuvent être **liées** au 
 ```
 migration-opencode/
 ├── skills/            # 10 skills (SKILL.md + assets/)
-├── agents/            # lead-dev.md, ops-quality.md, integrations.md
+├── agents/            # lead-dev.md, ops-quality.md, integrations.md (format OpenCode)
 └── commands/          # cadrage.md, spec.md, validate.md, release.md, deploy.md, docs-sync.md
 antigravity/
+├── agents/            # lead-dev.md, ops-quality.md, integrations.md (format Antigravity)
 └── workflows/         # cadrage.md, spec.md, validate.md, release.md, deploy.md, docs-sync.md
 ```
 
 ## Limites connues
 
-- Les **agents Antigravity** ne sont pas synchronisés (format frontmatter incompatible) — templates dans `opencode-admin/assets/antigravity/agent.md`.
+- Les **agents Antigravity** sont synchronisés depuis `antigravity/agents/` (format frontmatter différent d'OpenCode).
 - Les **règles Antigravity** (`GEMINI.md`, `.agents/rules/`) ne sont pas synchronisées — modèles dans `opencode-admin/assets/antigravity/`.
 - Les **MCP** (`opencode.jsonc`, `~/.gemini/config/mcp_config.json`) ne sont pas synchronisés — secrets locaux par machine.
