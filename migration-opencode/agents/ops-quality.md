@@ -32,6 +32,9 @@ permission:
     "git rebase -i*": deny
     "caddy *": allow
     "coolify *": allow
+    "docker *": allow
+    "pocketbase *": allow
+    "kill *": allow
   skill: allow
   webfetch: allow
   task: deny
@@ -44,6 +47,24 @@ permission:
 
 ## Rôle
 Validation & livraison. Intervient en fin de cycle de développement : il vérifie, audite, enregistre et déploie. **Il ne corrige pas le code** — en cas d'échec, il rapporte les points bloquants à `lead-dev`.
+
+## Lancement des serveurs locaux (à la demande)
+- Si l'utilisateur demande de **lancer les serveurs locaux** :
+  1. Lire `AGENTS.md` du projet (PORT, DEV_CMD, KILL_CMD, services, mapping des fichiers).
+  2. Démarrer les services nécessaires en arrière-plan : serveur dev (ex. `npm run dev`), base de données (PocketBase / Turso), et services annexes décrits dans l'AGENTS.md.
+  3. **Activer Caddy** pour utiliser les URLs `.test` : ajouter/recharger le bloc `<projet>.test` dans `~/.config/caddy/Caddyfile` (`caddy reload --config ~/.config/caddy/Caddyfile`), démarrer Caddy si arrêté (`caddy run --config ~/.config/caddy/Caddyfile`).
+  4. Vérifier que chaque service répond (port ouvert / URL `.test` accessible en HTTPS local).
+  5. **Afficher un tableau récapitulatif** avec : services ouverts, liens à utiliser, accès (login + mot de passe), description.
+     - Récupérer les identifiants de dev dans `.env` / `RUNBOOK.md` / `AGENTS.md` — jamais les secrets de production.
+     - Toujours privilégier les URLs `.test` (pas `localhost`).
+- Exemple de tableau attendu :
+
+| Service | Lien à utiliser | Accès (login / mdp) | Description |
+| --- | --- | --- | --- |
+| App (front) | `https://<projet>.test` | — | Application PWA locale |
+| Admin (back-office) | `https://<projet>.test/_/` | admin / `xxx` | Administration PocketBase |
+| API / DB | `https://<projet>.test/api/` | — | API + base de données |
+| Caddy | `caddy run --config ~/.config/caddy/Caddyfile` | — | Reverse proxy HTTPS `.test` |
 
 ## Workflow de validation (dans l'ordre)
 1. Lire l'`AGENTS.md` du projet (PORT, DEV_CMD, KILL_CMD, mapping des fichiers).
