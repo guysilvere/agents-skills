@@ -24,6 +24,7 @@ permission:
     "bun *": allow
     "vite *": allow
     "lighthouse *": allow
+    "playwright-cli *": allow
     "gh *": allow
     "git *": allow
     "git push --force*": deny
@@ -50,11 +51,13 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 3. **Tests** : `npm test` (unitaires + intégration webhooks si présents).
 4. **Build** : `npm run build` sans erreur ni warning bloquant.
 5. **Preview locale** : via Caddy (`~/.config/caddy/Caddyfile`, domaine `<projet>.test` — jamais localhost). Ajouter/recharger le bloc Caddy si besoin (`caddy reload --config ~/.config/caddy/Caddyfile`).
-6. **Lighthouse** : `npx lighthouse http://<projet>.test --view` — cibles : Performance ≥ 80 (LCP < 2.5 s), Accessibilité ≥ 90, PWA installable, CLS < 0.1, INP < 200 ms.
-7. **Audit a11y** : contraste WCAG AA, focus visible, navigation clavier, ARIA, `prefers-reduced-motion`.
-8. **Audit SEO** : title/meta uniques, OpenGraph/Twitter Cards, robots.txt, sitemap.xml, données structurées.
-9. **Audit sécurité** : secrets en clair (grep `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN`), `.env` non commité, CSP/headers, CORS, OWASP Top 10 (injection, XSS, IDOR).
-10. **Verdict** : ✅ prêt à commiter / ⚠️ corrections requises (liste priorisée) / ⛔ blocage sécurité (pas de tag ni release).
+6. **Tests E2E** : playwright-cli — parcours réels (auth, paiement, CRUD, hors-ligne), screenshots succès/échec (`playwright-cli open/snapshot/click/fill/screenshot`). Charger la skill `pwa-validation` pour la checklist complète.
+7. **Audit design automatisé** : `npx impeccable detect <src>` — 59 règles déterministes anti-slop (typo surutilisées, dégradés violet, cartes imbriquées, contrastes) ; sortie `--json` CI-friendly.
+8. **Lighthouse** : `npx lighthouse http://<projet>.test --view` — cibles : Performance ≥ 80 (LCP < 2.5 s), Accessibilité ≥ 90, PWA installable, CLS < 0.1, INP < 200 ms.
+9. **Audit a11y** : contraste WCAG AA, focus visible, navigation clavier, ARIA, `prefers-reduced-motion`.
+10. **Audit SEO** : title/meta uniques, OpenGraph/Twitter Cards, robots.txt, sitemap.xml, données structurées.
+11. **Audit sécurité** : secrets en clair (grep `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN`), `.env` non commité, CSP/headers, CORS, OWASP Top 10 (injection, XSS, IDOR).
+12. **Verdict** : ✅ prêt à commiter / ⚠️ corrections requises (liste priorisée) / ⛔ blocage sécurité (pas de tag ni release).
 
 ## Cycle Git & livraison
 - Toujours vérifier la branche : jamais de modif sur `main` (travailler sur `testing`).

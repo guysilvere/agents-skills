@@ -36,12 +36,13 @@ Le script :
 
 > ⚠️ Les agents OpenCode et Antigravity ont des formats **différents** : le script synchronise les agents OpenCode (`migration-opencode/agents/`) et les workflows Antigravity (`antigravity/workflows/`). Les agents Antigravity restent gérés séparément (format AG, voir `opencode-admin/assets/antigravity/agent.md`).
 
-## Skills (10)
+## Skills (11)
 
 - `pwa-cadrage` — cadrage, naming, stack, blueprint, roadmap
 - `pwa-developpement` — scaffolding, AGENTS.md, SPEC-XXX, DATABASE.md, conventions
-- `design-pwa-system` — direction artistique, design system, layout signature
-- `pwa-validation` — tests locaux, Lighthouse, a11y, SEO, sécurité
+- `design-pwa-system` — direction artistique, design system, layout signature, brief inference + dials + bibliothèque DESIGN.md
+- `design-3d` — visuels 3D procéduraux Three.js depuis une image (héros produits, objets animés)
+- `pwa-validation` — tests locaux, E2E Playwright, audit design automatisé, Lighthouse, a11y, SEO, sécurité
 - `pwa-deploiement` — Coolify, Cloudflare, R2, RUNBOOK
 - `api-paiements` — Jèko + CinetPay, webhooks, dunning, factures
 - `api-best-practices` — design API REST
