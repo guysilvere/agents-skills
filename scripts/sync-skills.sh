@@ -15,7 +15,7 @@
 set -euo pipefail
 
 # ---- Configuration ---------------------------------------------------------
-REPO_URL="${AGENTS_SKILLS_REPO_URL:-git@github.com:guysilvere/agents-skills.git}"
+REPO_URL="${AGENTS_SKILLS_REPO_URL:-https://github.com/guysilvere/agents-skills.git}"
 BRANCH="main"
 CACHE_DIR="${HOME}/.cache/agents-skills-sync"
 REPO_DIR="${CACHE_DIR}/agents-skills"
@@ -98,12 +98,8 @@ if [[ -d "$REPO_DIR/.git" ]]; then
     git -C "$REPO_DIR" reset --hard --quiet "origin/$BRANCH" 2>/dev/null || true
   fi
 else
-  log "Clone du repo $REPO_URL…"
-  if (( ! DRY_RUN )); then
-    git clone --quiet --branch "$BRANCH" "$REPO_URL" "$REPO_DIR" || die "Clone impossible — vérifie l'URL et tes accès GitHub"
-  else
-    log "[dry-run] (clone non exécuté)"
-  fi
+  log "Clone du repo ${REPO_URL}…"
+  git clone --quiet --branch "$BRANCH" "$REPO_URL" "$REPO_DIR" || die "Clone impossible — vérifie l'URL et tes accès GitHub"
 fi
 [[ -d "$SRC_SKILLS" ]] || die "Sources skills introuvables dans $REPO_DIR (clone échoué ?)"
 
