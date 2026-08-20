@@ -34,8 +34,10 @@ mon-projet.test, mon-projet.localhost {
 3. **Tests unitaires** : `npm test` (+ `test:coverage` si configuré)
 4. **Build** : `npm run build` sans erreur ni warning bloquant
 5. **Preview** : `npm run preview` + domaine Caddy (`http://mon-projet.test`)
-6. **Lighthouse** : `npx lighthouse http://mon-projet.test --view` — cibles : Performance ≥ 80 (LCP < 2.5 s), Accessibilité ≥ 90, PWA installable, CLS < 0.1, INP < 200 ms
-7. **Test hors-ligne** : DevTools → Application → Service Workers → Offline → page de repli + fonctions de base
+6. **Tests E2E** : playwright-cli — parcours réels (auth, paiement, CRUD, hors-ligne), screenshots succès/échec. Checklist : `assets/checklists/e2e.md`
+7. **Audit design automatisé** : `npx impeccable detect <src>` — 59 règles déterministes anti-slop (typo surutilisées, dégradés violet, cartes imbriquées, contraste) ; sortie `--json` CI-friendly ; ignorer cas légitimes via `impeccable ignores add-value`
+8. **Lighthouse** : `npx lighthouse http://mon-projet.test --view` — cibles : Performance ≥ 80 (LCP < 2.5 s), Accessibilité ≥ 90, PWA installable, CLS < 0.1, INP < 200 ms
+9. **Test hors-ligne** : DevTools → Application → Service Workers → Offline → page de repli + fonctions de base
 
 ## 3. Audit accessibilité (a11y)
 - Contraste ≥ 4.5:1 (WCAG AA) ; focus visible ; navigation clavier et tactile
@@ -66,10 +68,12 @@ mon-projet.test, mon-projet.localhost {
 ## Règles
 - Ne pas modifier le code applicatif — signaler puis livrer.
 - Toujours charger `shared-eco-tokens` pour un rapport concis.
+- Outils externes (non copiés dans le repo) : playwright-cli (`@playwright/cli`), impeccable (`npx`).
 
 ## Assets
 - `assets/checklists/pre-commit.md`
 - `assets/checklists/security.md`
 - `assets/checklists/seo.md`
 - `assets/checklists/a11y.md`
+- `assets/checklists/e2e.md`
 - `assets/configs/Caddyfile.test`
