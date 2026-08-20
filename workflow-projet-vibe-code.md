@@ -197,7 +197,7 @@ Le fichier **`AGENTS.md`** sert de point d'entrée unique et de table d'orientat
 
 > **Statut** : DRAFT / APPROVED / IN_PROGRESS / DONE
 > **Phase Roadmap** : [Phase 0 / 1 / 2 / 3 / 4]
-> **Agent(s)** : `architecte` → `chef-pwa` → `pwa-tester` → `gestionnaire-git`
+> **Agent(s)** : `lead-dev` → `ops-quality` (validation + livraison)
 
 ---
 
@@ -235,8 +235,8 @@ En tant que **[Rôle]**, je veux **[action]**, afin de **[valeur]**.
 ## 6. Tâches d'exécution
 - [ ] **T1** — Backend/schéma (REQ-01)
 - [ ] **T2** — UI/composant (REQ-02)
-- [ ] **T3** — Build & lint (`pwa-tester`)
-- [ ] **T4** — Commit sémantique (`gestionnaire-git`)
+- [ ] **T3** — Build & lint (`ops-quality` — validation)
+- [ ] **T4** — Commit sémantique + merge `testing`→`main` (`ops-quality` — livraison)
 
 ---
 *Une fois DONE, ce fichier fait foi comme référence unique de la fonctionnalité.*

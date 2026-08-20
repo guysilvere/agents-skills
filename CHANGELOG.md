@@ -2,6 +2,16 @@
 
 > Versioning SemVer — les changements notables sont listés par version.
 
+## [1.2.0] — 2026-08-20
+
+### Ajouté
+- **`ops-quality` (Antigravity + OpenCode)** : nouvelle capacité « Lancement des serveurs locaux » à la demande — démarrage du serveur dev + base de données (PocketBase/Turso) en arrière-plan, activation Caddy pour les URLs `.test` (`caddy run` / `caddy reload`), vérification de disponibilité et affichage d'un tableau récapitulatif (service, lien `.test`, accès dev, description ; identifiants depuis `.env`/`RUNBOOK.md`/`AGENTS.md`, jamais de secrets de prod).
+- **`ops-quality` (Antigravity)** : `commandExecutionPolicy` `sandbox` → `auto` pour permettre le lancement de serveurs persistants (cohérent avec `lead-dev`).
+- **`ops-quality` (OpenCode)** : permissions `docker *`, `pocketbase *`, `kill *` pour la gestion des services locaux.
+
+### Modifié
+- **`workflow-projet-vibe-code.md`** : nettoyage des références aux anciens agents (`architecte`, `chef-pwa`, `pwa-tester`, `gestionnaire-git`) → `lead-dev` (développement) et `ops-quality` (validation + livraison) dans le modèle de SPEC et les tâches d'exécution.
+
 ## [1.1.0] — 2026-08-20
 
 ### Ajouté
