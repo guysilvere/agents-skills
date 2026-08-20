@@ -1,0 +1,55 @@
+{
+  "note": "Palettes de référence — échantillon représentatif (hérité de design-pwa-data). Utiliser comme source d'inspiration pour la direction artistique, puis figer les choix dans DESIGN_SYSTEM.md.",
+  "palettes": [
+    {
+      "name": "Framboise Agence Bulles",
+      "hex": ["#D81B60", "#1A1A1A", "#FFFFFF", "#C2E8E8", "#134242"],
+      "usage": "Identité Agence Bulles par défaut — rose framboise + fonds sombres + accent menthe"
+    },
+    {
+      "name": "Sahel Dusk",
+      "hex": ["#E76F51", "#264653", "#2A9D8F", "#F4A261", "#FFF3E0"],
+      "usage": "Chaleur artisanale, artisanat, marché local"
+    },
+    {
+      "name": "Lagoon CI",
+      "hex": ["#0077B6", "#00B4D8", "#CAF0F8", "#03045E", "#FFFFFF"],
+      "usage": "Fraîcheur côtière, logistique, livraison"
+    },
+    {
+      "name": "Terracotta",
+      "hex": ["#BC6C25", "#DDA15E", "#FEFAE0", "#606C38", "#283618"],
+      "usage": "Terre, agriculture, alimentaire"
+    },
+    {
+      "name": "Indigo Nuit",
+      "hex": ["#4F46E5", "#818CF8", "#C7D2FE", "#0F172A", "#E2E8F0"],
+      "usage": "Fintech, SaaS pro, confiance"
+    },
+    {
+      "name": "Cacao",
+      "hex": ["#6F4518", "#8B5E34", "#D4A373", "#FAEDCD", "#582F0E"],
+      "usage": "Café, chocolat, gourmandise premium"
+    },
+    {
+      "name": "Brousse Verte",
+      "hex": ["#2F5233", "#7A9E7E", "#E9EDC9", "#432818", "#D4A373"],
+      "usage": "Agritech, environnement, produits naturels"
+    },
+    {
+      "name": "Océan Profond",
+      "hex": ["#023E8A", "#0077B6", "#90E0EF", "#03045E", "#FFFFFF"],
+      "usage": "Marine, transport, eau"
+    },
+    {
+      "name": "Mangue",
+      "hex": ["#F77F00", "#FCBF49", "#EAE2B7", "#003049", "#D62828"],
+      "usage": "Énergie, jeunesse, restauration rapide"
+    },
+    {
+      "name": "Basalte",
+      "hex": ["#1C1C1E", "#3A3A3C", "#8E8E93", "#F2F2F7", "#FF9F0A"],
+      "usage": "Premium sobre, dark-first, luxe accessible"
+    }
+  ]
+}

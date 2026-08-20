@@ -1,0 +1,70 @@
+/* layout-signature.css — Layout Signature PWA Agence Bulles (mobile-first) */
+:root {
+  --top-bar-height: 56px;
+  --bottom-nav-height: 64px;
+  --fab-size: 56px;
+  --safe-bottom: env(safe-area-inset-bottom, 16px);
+  --color-primary: #D81B60;
+  --color-bg: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1A1A;
+  --color-text-muted: #134242;
+  --color-accent: #C2E8E8;
+}
+
+/* 1. Top App Bar — compacte, titre contextuel */
+.top-app-bar {
+  position: sticky; top: 0; z-index: 40;
+  height: var(--top-bar-height);
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+  background: var(--color-bg);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+/* 2. Bottom Navigation — ancrée, accès pouce */
+.bottom-nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  height: var(--bottom-nav-height);
+  padding-bottom: var(--safe-bottom);
+  display: flex; justify-content: space-around; align-items: center;
+  background: var(--color-bg);
+  border-top: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 48px; font-size: 11px; }
+
+/* 3. FAB — action créatrice, bas droite au-dessus de la nav */
+.fab {
+  position: fixed; right: 16px; bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px);
+  width: var(--fab-size); height: var(--fab-size); border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--color-primary); color: #fff;
+  box-shadow: 0 4px 12px rgb(0 0 0 / .25);
+}
+
+/* 4. Main content — évite le chevauchement des barres fixes */
+main { padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px); min-height: 100dvh; }
+
+/* 5. Bottom Sheet — panneau coulissant (remplace les modales centrées sur mobile) */
+.bottom-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  border-radius: 16px 16px 0 0;
+  background: var(--color-surface);
+  padding: 16px; padding-bottom: var(--safe-bottom);
+  transform: translateY(100%);
+  transition: transform 250ms ease;
+}
+.bottom-sheet.open { transform: translateY(0); }
+
+/* 6. Responsive ≥ 768px — sidebar repliable à la place de la bottom nav */
+@media (min-width: 768px) {
+  .bottom-nav { display: none; }
+  .sidebar { display: flex; position: sticky; top: var(--top-bar-height); height: calc(100dvh - var(--top-bar-height)); }
+  main { padding-left: 240px; }
+}
+
+/* 7. Accessibilité & motion */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }

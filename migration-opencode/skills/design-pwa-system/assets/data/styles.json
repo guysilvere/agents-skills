@@ -1,0 +1,62 @@
+{
+  "note": "Styles de référence — échantillon représentatif (hérité de design-pwa-data). Chercher une direction, puis la figer dans DESIGN_SYSTEM.md.",
+  "styles": [
+    {
+      "name": "Brutaliste épuré",
+      "keywords": ["brutalism", "bordures nettes", "typographie assumée", "couleurs vives"],
+      "usage": "Produits audacieux, communautés, marques jeunes"
+    },
+    {
+      "name": "Glassmorphism",
+      "keywords": ["verre dépoli", "flou", "transparence", "profondeur"],
+      "usage": "Dashboards modernes, apps de création"
+    },
+    {
+      "name": "Flat minimal",
+      "keywords": ["a-plat", "beaucoup d'air", "grille stricte", "une couleur d'accent"],
+      "usage": "SaaS pro, outils de productivité"
+    },
+    {
+      "name": "Éditorial magazine",
+      "keywords": ["grandes typographies", "colonnes", "photographie", "contrastes"],
+      "usage": "Médias, contenus, storytelling"
+    },
+    {
+      "name": "Mobile banking",
+      "keywords": ["cartes", "montants", "vert/bleu confiance", "FAB central"],
+      "usage": "Fintech, paiements, portefeuilles mobiles"
+    },
+    {
+      "name": "Neumorphisme doux",
+      "keywords": ["ombres internes/externes", "fond uni", "éléments extrudés"],
+      "usage": "Apps wellness, interfaces tactiles simples"
+    },
+    {
+      "name": "Dark tech",
+      "keywords": ["fond sombre", "néons", "monospace", "grid lines"],
+      "usage": "Dev tools, analytics, crypto"
+    },
+    {
+      "name": "Nature organique",
+      "keywords": ["vertes", "arrondis généreux", "textures", "photos nature"],
+      "usage": "Agritech, santé, bien-être"
+    },
+    {
+      "name": "Bento grid",
+      "keywords": ["grille en tuiles", "cards hétérogènes", "profondeur"],
+      "usage": "Dashboard produit, landing modernes"
+    },
+    {
+      "name": "Sérigraphie populaire",
+      "keywords": ["couleurs contrastées", "motifs", "lettrage marqué", "culture locale"],
+      "usage": "Événements, e-commerce urbain, street"
+    }
+  ],
+  "font_pairings": [
+    { "name": "Product Sans + Open Sans", "usage": "Défaut Agence Bulles — titres géométriques, corps lisible" },
+    { "name": "Space Grotesk + Inter", "usage": "Tech moderne, startup" },
+    { "name": "Fraunces + Source Sans", "usage": "Éditorial, premium" },
+    { "name": "Clash Display + DM Sans", "usage": "Mode, créatif" },
+    { "name": "Sora + Work Sans", "usage": "SaaS, produit" }
+  ]
+}

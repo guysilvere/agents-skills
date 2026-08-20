@@ -1,0 +1,48 @@
+{{! invoice.pdf.hbs — Template de facture/reçu PDF (Handlebars) }}
+{{! À compiler avec un moteur HTML→PDF (ex : puppeteer, wkhtmltopdf, hono + pdf-lib) }}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: #1A1A1A; margin: 32px; }
+    h1 { color: #D81B60; font-size: 20px; margin: 0 0 4px; }
+    .muted { color: #134242; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e5e5e5; font-size: 13px; }
+    .total { font-weight: 700; font-size: 15px; }
+    .footer { margin-top: 32px; font-size: 11px; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>{{company_name}}</h1>
+  <div class="muted">Conçu par Agence Bulles (agencebulles.net)</div>
+
+  <h2>Facture {{invoice_number}}</h2>
+  <p class="muted">Date : {{invoice_date}} · Client : {{customer_name}} ({{customer_email}})</p>
+
+  <table>
+    <thead>
+      <tr><th>Description</th><th>Qté</th><th>Prix unitaire</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      {{#each line_items}}
+      <tr>
+        <td>{{this.description}}</td>
+        <td>{{this.quantity}}</td>
+        <td>{{this.unit_price}} {{currency}}</td>
+        <td>{{this.total}} {{currency}}</td>
+      </tr>
+      {{/each}}
+      <tr class="total">
+        <td colspan="3">Total</td>
+        <td>{{total}} {{currency}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="muted">Paiement : {{payment_method}} · Référence : {{payment_reference}}</p>
+  <p class="footer">Merci de votre confiance. Support : contact@agencebulles.net</p>
+</body>
+</html>

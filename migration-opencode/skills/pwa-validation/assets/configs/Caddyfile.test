@@ -1,0 +1,37 @@
+# Caddyfile — Config de test locale (.test)
+
+# Fichier de référence pour la preview locale PWA.
+# Intégrer dans ~/.config/caddy/Caddyfile (fichier unique) puis recharger :
+#   caddy reload --config ~/.config/caddy/Caddyfile
+
+# --- Exemple : projet PWA servi par Vite preview ---
+mon-projet.test, mon-projet.localhost, mon-projet.local {
+    tls internal
+    reverse_proxy localhost:4173
+}
+
+# --- Exemple : routage multi-ports (app + back-office + API) ---
+mon-projet.test {
+    tls internal
+    handle /api/* {
+        reverse_proxy localhost:8090
+    }
+    handle /admin/* {
+        reverse_proxy localhost:5173
+    }
+    handle {
+        reverse_proxy localhost:4173
+    }
+}
+
+# --- Exemple : PocketBase sidecar ---
+db.mon-projet.test {
+    tls internal
+    reverse_proxy localhost:8090
+}
+
+# Règles :
+# 1. Toujours un domaine `.test` / `.localhost` — jamais de test via localhost nu.
+# 2. `tls internal` = certificats HTTPS locaux automatiques.
+# 3. Vérifier qu'aucun service n'écoute déjà sur le port cible avant d'ajouter.
+# 4. Après modification : `caddy reload --config ~/.config/caddy/Caddyfile`.

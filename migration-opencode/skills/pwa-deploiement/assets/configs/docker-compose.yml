@@ -1,0 +1,35 @@
+# docker-compose.yml — Prod/Staging : app PWA + PocketBase sidecar
+# Adapter les variables d'environnement dans l'UI Coolify (ne pas committer les secrets).
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app          # stage Nginx/Node final
+    restart: unless-stopped
+    ports:
+      - "8080:80"          # Nginx : servir l'app statique
+    depends_on:
+      - pocketbase
+    environment:
+      - PUBLIC_POCKETBASE_URL=http://pocketbase:8090
+      # ... autres variables d'env via Coolify
+
+  pocketbase:
+    image: alpine:latest
+    restart: unless-stopped
+    volumes:
+      - pb_data:/pb/pb_data
+    ports:
+      - "127.0.0.1:8090:8090"   # exposé localement ; accès public via tunnel Zero Trust
+    command: >
+      sh -c "apk add --no-cache curl unzip && \
+      curl -fsSL 'https://github.com/pocketbase/pocketbase/releases/download/v0.22.0/pocketbase_0.22.0_linux_amd64.zip' -o /tmp/pb.zip && \
+      unzip -o /tmp/pb.zip -d /pb/ && rm /tmp/pb.zip && \
+      /pb/pocketbase serve --http=0.0.0.0:8090 --dir=/pb/pb_data"
+
+volumes:
+  pb_data:
+
+# Variante Turso : supprimer le service pocketbase, utiliser DATABASE_URL=libsql://...

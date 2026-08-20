@@ -1,0 +1,8 @@
+{
+  "id": "PAYMENT_FAILED",
+  "message": "Le paiement a échoué. Veuillez réessayer ou utiliser un autre moyen de paiement.",
+  "extras": {
+    "request_id": "req_abc123",
+    "retry_after_seconds": 30
+  }
+}
