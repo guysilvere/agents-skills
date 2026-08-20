@@ -27,6 +27,9 @@ metadata:
 ## 3. Recherche de références
 - Assets : `assets/data/palettes.json` (96 palettes) et `assets/data/styles.json` (67 styles) pour trouver des références concrètes avant de figer les choix.
 - Typos : 57 font pairings référencés ; choisir une paire puis la figer dans le design system.
+- Bibliothèque DESIGN.md : `assets/reference/design-md-library.md` — 15 références de sites réels (Stripe, Linear, Supabase…) à récupérer via `getdesign.md/<slug>` ; ne pas copier dans le repo, référencer par lien.
+- Brief inference : `assets/reference/brief-inference.md` — lire le contexte (type de page, audience, contraintes) et déclarer un Design Read 1 ligne avant de coder.
+- Dials : `assets/reference/dials.md` — fixer VARIANCE / MOTION / DENSITY après le Design Read ; chaque décision layout/motion/densité en découle.
 
 ## 4. Persistance (MASTER + overrides)
 - Écrire le design system validé dans `design-system/MASTER.md` (source de vérité : couleurs, typo, espacements, effets, états).
@@ -71,3 +74,6 @@ metadata:
 - `assets/checklists/mobile-pwa.md`
 - `assets/data/palettes.json`
 - `assets/data/styles.json`
+- `assets/reference/brief-inference.md`
+- `assets/reference/dials.md`
+- `assets/reference/design-md-library.md`
