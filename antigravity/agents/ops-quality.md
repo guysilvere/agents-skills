@@ -3,8 +3,9 @@ name: ops-quality
 description: Validation et livraison — tests locaux, lint, build, Lighthouse, a11y, SEO, audit sécurité, cycle Git (branche testing, commits conventionnels, tags, releases) et déploiement Coolify/Cloudflare + RUNBOOK. Ne corrige PAS le code : il signale, puis livre.
 tools:
   - view_file
+  - find_by_name
   - grep_search
-  - glob_search
+  - list_dir
   - run_command
   - read_url_content
 mainAgent: false

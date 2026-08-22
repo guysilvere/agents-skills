@@ -2,6 +2,17 @@
 
 > Versioning SemVer — les changements notables sont listés par version.
 
+## [1.4.0] — 2026-08-22
+
+### Ajouté
+- **Commandes OpenCode `audit.md` et `new-pwa.md`** : parité 8/8 avec les workflows Antigravity.
+- **Source de vérité MCP `migration-opencode/mcp.servers.json`** : standardisation des serveurs MCP (Notion, GitHub, n8n, Supabase, Brevo) avec résolution sécurisée des tokens sans secret en clair.
+- **Option `--local` dans `sync-skills.sh`** : permet de synchroniser directement depuis le workspace local sans passer par le cache GitHub.
+
+### Modifié
+- **Agents Antigravity (`lead-dev`, `integrations`, `ops-quality`)** : correction des outils déclarés (`glob_search` → `find_by_name`, ajout des outils système `write_to_file`, `list_dir`, `search_web`, `invoke_subagent`, `send_message`).
+- **`sync-skills.sh`** : fusion intelligente des configurations MCP pour préserver les serveurs existants (ex. Turso) et mise à jour du comptage (12 skills, 8 workflows/commandes).
+
 ## [1.3.0] — 2026-08-22
 
 ### Ajouté

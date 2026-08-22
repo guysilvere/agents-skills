@@ -1,0 +1,66 @@
+{
+  "$comment": "Source de vérité MCP Agence Bulles — AUCUN secret en clair. Les tokens sont référencés par {{TOKEN:nom}} et résolus par scripts/sync-skills.sh depuis ~/.config/opencode/.tokens/<nom> (chmod 600). Formats de sortie : opencode.jsonc (OC, {file:...}) et mcp_config.json (AG, injection directe). Doc AG : antigravity.google/docs/mcp.",
+  "servers": [
+    {
+      "name": "Notion",
+      "transport": "remote",
+      "url": "https://mcp.notion.com/mcp",
+      "enabled": false,
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "github",
+      "transport": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {{TOKEN:github}}"
+      },
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "n8n",
+      "transport": "remote",
+      "url": "https://n8n.agencebulles.net/mcp-server/http",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {{TOKEN:n8n}}"
+      },
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "supabase",
+      "transport": "remote",
+      "url": "https://mcp.supabase.com/mcp",
+      "enabled": true,
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "supabase-agencebulles",
+      "transport": "remote",
+      "url": "https://db.agencebulles.net/mcp",
+      "enabled": true,
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "brevo",
+      "transport": "local",
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.brevo.com/v1/brevo/mcp",
+        "--header",
+        "Authorization:Bearer {{TOKEN:brevo}}"
+      ],
+      "enabled": true,
+      "oc": {},
+      "ag": {}
+    }
+  ]
+}

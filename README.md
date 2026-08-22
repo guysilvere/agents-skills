@@ -10,10 +10,11 @@
 | Workflow | `workflow-projet-vibe-code.md` | Workflow projet complet (phases 0-10) |
 | Agents | `migration-opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) — format OpenCode |
 | Agents AG | `antigravity/agents/` | Les 3 mêmes rôles — format Antigravity |
-| Skills | `migration-opencode/skills/` | 10 skills (avec assets séparés 🟦/🟩/⚪) |
+| Skills | `migration-opencode/skills/` | 12 skills (avec assets séparés 🟦/🟩/⚪) |
 | Assets | `migration-opencode/assets/` | Templates, scripts, checklists, configs par skill |
-| Commandes | `migration-opencode/commands/` | 6 commandes slash OpenCode |
-| Workflows AG | `antigravity/workflows/` | Équivalents Antigravity des commandes |
+| Commandes | `migration-opencode/commands/` | 8 commandes slash OpenCode |
+| Workflows AG | `antigravity/workflows/` | 8 workflows Antigravity équivalents |
+| MCP | `migration-opencode/mcp.servers.json` | Source de vérité serveurs MCP (sans secret en clair) |
 | Migration | `migration-opencode/` | README-MIGRATION, PLAN, ARCHIVAGE, DIFF, opencode.jsonc.new |
 
 ## Installation & mise à jour
@@ -24,21 +25,24 @@ git clone git@github.com:guysilvere/agents-skills.git ~/agents-skills
 
 # 2. Synchroniser skills/agents/commandes/workflows vers OpenCode + Antigravity
 ~/agents-skills/scripts/sync-skills.sh --dry-run   # prévisualiser
-~/agents-skills/scripts/sync-skills.sh             # appliquer
+~/agents-skills/scripts/sync-skills.sh             # appliquer (depuis remote)
+~/agents-skills/scripts/sync-skills.sh --local     # appliquer (depuis workspace local)
 ```
 
 Le script :
-- Clone/pull le repo depuis GitHub (source de vérité).
+- Clone/pull le repo depuis GitHub (source de vérité) ou utilise `--local`.
 - **Backup** les dossiers cibles existants (`~/.config/opencode-backups/sync-<date>/`).
 - **Supprime** les anciens agents/skills/commandes/workflows des deux outils.
 - **Copie** les nouveaux fichiers à jour.
-- Options : `--dry-run`, `--opencode-only`, `--antigravity-only`, `--no-backup`, `--help`.
+- **Génère et fusionne** les configurations MCP (sans secrets exposés).
+- Options : `--local`, `--dry-run`, `--opencode-only`, `--antigravity-only`, `--no-backup`, `--help`.
 
-> ⚠️ Les agents OpenCode et Antigravity ont des formats **différents** : le script synchronise les agents OpenCode (`migration-opencode/agents/`) et les workflows Antigravity (`antigravity/workflows/`). Les agents Antigravity restent gérés séparément (format AG, voir `opencode-admin/assets/antigravity/agent.md`).
+> ⚠️ Les agents OpenCode et Antigravity ont des formats **différents** : le script synchronise les agents OpenCode (`migration-opencode/agents/`), les agents Antigravity (`antigravity/agents/`) et les workflows Antigravity (`antigravity/workflows/`).
 
-## Skills (11)
+## Skills (12)
 
 - `pwa-cadrage` — cadrage, naming, stack, blueprint, roadmap
+- `design-ux-flow` — méthodologie UX 10 étapes, problème chirurgical, micro-victoires, onboarding
 - `pwa-developpement` — scaffolding, AGENTS.md, SPEC-XXX, DATABASE.md, conventions
 - `design-pwa-system` — direction artistique, design system, layout signature, brief inference + dials + bibliothèque DESIGN.md
 - `design-3d` — visuels 3D procéduraux Three.js depuis une image (héros produits, objets animés)
