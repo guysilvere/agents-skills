@@ -2,6 +2,14 @@
 
 > Versioning SemVer — les changements notables sont listés par version.
 
+## [1.3.0] — 2026-08-22
+
+### Ajouté
+- **Skill `design-ux-flow`** : méthodologie UX en 10 étapes pour PWA — problème chirurgical, fonctionnalité principale unique, user flow réaliste, navigation orientée utilisateur, micro-victoires, notifications ciblées, onboarding couloir. S'articule entre `pwa-cadrage` (étapes 1-3) et `design-pwa-system` (persistance visuelle).
+
+### Modifié
+- **`design-pwa-system`** : référence croisée vers `design-ux-flow` en amont du design visuel (parcours UX d'abord).
+
 ## [1.2.0] — 2026-08-20
 
 ### Ajouté
