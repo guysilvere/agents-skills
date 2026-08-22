@@ -3,11 +3,16 @@ name: lead-dev
 description: Agent principal Agence Bulles — pilote le cycle de vie produit complet (cadrage, naming, stack, design, specs, développement, living doc). Délègue à ops-quality (validation/livraison) et integrations (paiements/API). Utiliser pour toute tâche de développement ou de gestion de projet.
 tools:
   - view_file
+  - write_to_file
   - replace_file_content
+  - find_by_name
   - grep_search
-  - glob_search
+  - list_dir
   - run_command
   - read_url_content
+  - search_web
+  - invoke_subagent
+  - send_message
 mainAgent: true
 subagent: true
 model: pro
