@@ -2,7 +2,7 @@
 
 > Règle d'or : **jamais de `rm` définitif**. Tout est déplacé par `mv` vers les dossiers d'archive.
 > Emplacements : `~/.config/opencode/agents-archive/` et `~/.config/opencode/skills-archive/`.
-> Backup complet de secours : `~/.config/opencode-backups/backup-20260820/`.
+> Backup complet de secours : `~/.config/opencode-backups/bak/2026-08-20/`.
 
 ## Agents archivés (→ `~/.config/opencode/agents-archive/`)
 

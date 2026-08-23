@@ -37,16 +37,16 @@ Migration complète du setup OpenCode de l'utilisateur (écosystème Agence Bull
 
 1. **Agents flexibles** : tous les agents ont `permission.skill: allow` → chargement dynamique de TOUTES les skills (existantes et futures) sans modifier les agents. Aucune liste restrictive de skills dans le frontmatter. Chaque agent documente une section « Intégration de nouvelles skills ».
 2. **Traçabilité d'abord** : tous les fichiers de migration sont écrits dans ce dossier AVANT application dans `~/.config/opencode/`.
-3. **Archivage réversible** : aucun `rm` définitif. Les agents/skills remplacés sont déplacés vers `~/.config/opencode/agents-archive/` et `~/.config/opencode/skills-archive/`. Backup complet dans `~/.config/opencode-backups/backup-20260820/`.
+3. **Archivage réversible** : aucun `rm` définitif. Les agents/skills remplacés sont déplacés vers `~/.config/opencode/agents-archive/` et `~/.config/opencode/skills-archive/`. Backup complet dans `~/.config/opencode-backups/bak/2026-08-20/`.
 4. **Plugin Svelte conservé** : choix conservateur (voir ARCHIVAGE.md pour la note sur svelte-file-editor). Peut être désactivé si la stack finale n'est pas Svelte.
 5. **Notion MCP désactivé** (`enabled: false`) : non utilisé dans les flux actuels. Réversible en 1 ligne.
 6. **Structure assets** : les assets sont écrits dans `skills/<nom>/assets/` (copie directe vers `~/.config/opencode/skills/<nom>/`). Le dossier racine `assets/` du plan sert de localisation documentaire ; les liens `## Assets` des SKILL.md sont relatifs au dossier skill.
 
 ## Réversibilité
 
-- **Restaurer la config** : `cp ~/.config/opencode-backups/backup-20260820/opencode.jsonc ~/.config/opencode/opencode.jsonc`
+- **Restaurer la config** : `cp ~/.config/opencode-backups/bak/2026-08-20/opencode.jsonc ~/.config/opencode/opencode.jsonc`
 - **Restaurer agents/skills/commandes** : déplacer les dossiers depuis `agents-archive/` / `skills-archive/` vers leur emplacement d'origine, et inversement pour les 3 agents / 10 skills / 6 commandes créés.
-- **Restaurer l'état complet** : `rsync -a ~/.config/opencode-backups/backup-20260820/ ~/.config/opencode/` (hors node_modules).
+- **Restaurer l'état complet** : `rsync -a ~/.config/opencode-backups/bak/2026-08-20/ ~/.config/opencode/` (hors node_modules).
 
 ## Statut final
 
@@ -70,6 +70,6 @@ Migration complète du setup OpenCode de l'utilisateur (écosystème Agence Bull
 
 **Prochaines étapes**
 - Redémarrer OpenCode pour charger le nouvel agent par défaut et les nouvelles skills.
-- Commit git du dossier `migration-opencode/` dans le repo agents-skills.
+- Commit git du dossier `opencode/` dans le repo agents-skills.
 - Test de bout en bout : lancer `/cadrage` sur un nouveau projet, `/validate` sur un projet existant.
 - Réactivation n8n si nécessaire : fusionner les 5 skills n8n-* de `skills-archive/` en une skill `n8n` (instructions dans ARCHIVAGE.md).

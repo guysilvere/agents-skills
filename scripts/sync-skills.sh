@@ -66,7 +66,7 @@ die()  { printf '\033[1;31m[ERR]\033[0m  %s\n' "$*" >&2; exit 1; }
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-if (( USE_LOCAL )) || [[ -d "${WORKSPACE_ROOT}/migration-opencode/skills" && ! -d "${CACHE_DIR}" ]]; then
+if (( USE_LOCAL )) || [[ -d "${WORKSPACE_ROOT}/opencode/skills" && ! -d "${CACHE_DIR}" ]]; then
   log "Mode local actif : utilisation des sources dans ${WORKSPACE_ROOT}"
   BASE_SRC="${WORKSPACE_ROOT}"
 else
@@ -85,12 +85,12 @@ else
 fi
 
 # Sources dans le repo (source de vérité)
-SRC_SKILLS="${BASE_SRC}/migration-opencode/skills"
-SRC_AGENTS="${BASE_SRC}/migration-opencode/agents"
-SRC_COMMANDS="${BASE_SRC}/migration-opencode/commands"
+SRC_SKILLS="${BASE_SRC}/opencode/skills"
+SRC_AGENTS="${BASE_SRC}/opencode/agents"
+SRC_COMMANDS="${BASE_SRC}/opencode/commands"
 SRC_WORKFLOWS="${BASE_SRC}/antigravity/workflows"
 SRC_AG_AGENTS="${BASE_SRC}/antigravity/agents"
-SRC_MCP="${BASE_SRC}/migration-opencode/mcp.servers.json"
+SRC_MCP="${BASE_SRC}/opencode/mcp.servers.json"
 
 # Cibles
 OC_SKILLS="${HOME}/.config/opencode/skills"
@@ -141,6 +141,11 @@ for s in data["servers"]:
             re.sub(r"\{\{TOKEN:([^}]+)\}\}", lambda m: "{file:%s/%s}" % (tdir, m.group(1)), a)
             for a in s.get("args", [])
         ]
+        if s.get("environment"):
+            entry["environment"] = {
+                k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", lambda m: "{file:%s/%s}" % (tdir, m.group(1)), v)
+                for k, v in s["environment"].items()
+            }
     else:
         entry["type"] = "remote"
         entry["url"] = s["url"]
@@ -175,6 +180,8 @@ for s in data["servers"]:
     if s["transport"] == "local":
         entry["command"] = s["command"]
         entry["args"] = [re.sub(r"\{\{TOKEN:([^}]+)\}\}", subst, a) for a in s.get("args", [])]
+        if s.get("environment"):
+            entry["env"] = {k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", subst, v) for k, v in s["environment"].items()}
     else:
         entry["serverUrl"] = s["url"]
     if s.get("headers"):
@@ -231,8 +238,8 @@ PY
 }
 
 # ---- 2. Backup -------------------------------------------------------------
-TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP_DIR="${BACKUP_ROOT}/sync-${TIMESTAMP}"
+TIMESTAMP="$(date +%Y-%m-%d-%H%M%S)"
+BACKUP_DIR="${BACKUP_ROOT}/bak/${TIMESTAMP}"
 if (( DO_BACKUP )) && (( ! DRY_RUN )); then
   mkdir -p "$BACKUP_DIR"
   if (( DO_OPENCODE )); then
@@ -249,7 +256,7 @@ if (( DO_BACKUP )) && (( ! DRY_RUN )); then
   fi
   log "Backup : $BACKUP_DIR"
 elif (( DRY_RUN )); then
-  log "[dry-run] Backup serait créé dans ${BACKUP_ROOT}/sync-${TIMESTAMP}"
+  log "[dry-run] Backup serait créé dans ${BACKUP_DIR}"
 fi
 
 # ---- 3+4. Purge & copie ----------------------------------------------------

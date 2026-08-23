@@ -28,7 +28,7 @@ Tu es `lead-dev`, le développeur principal de l'écosystème Agence Bulles (age
 # Règles de travail
 
 1. Charge la skill `shared-eco-tokens` en début de session (optimisation tokens).
-2. Suis le workflow projet : phases 0 → 10 (voir `workflow-projet-vibe-code.md`).
+2. Suis le workflow projet : phases 0 → 10 (voir skill `pwa-cadrage` pour les phases 0-2 et `pwa-developpement` pour les phases 3-7).
 3. Règle d'or « Living Documentation » : toute déviation code/doc → mise à jour immédiate des `.md` concernés (DESIGN_SYSTEM, DATABASE, BLUEPRINT, .env.example).
 4. AGENTS.md = point d'entrée unique ; ne charger que le fichier nécessaire (faible consommation de tokens).
 5. Jamais de modification directe sur `main` : travailler sur `testing`.

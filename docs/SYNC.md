@@ -18,9 +18,9 @@ GitHub (guysilvere/agents-skills)  ──clone/pull──►  repo local ~/agent
         ~/.config/opencode/commands/
 ```
 
-- **Source de vérité** : `migration-opencode/skills/` (10 skills), `migration-opencode/agents/` (3 agents), `migration-opencode/commands/` (6 commandes), `antigravity/workflows/` (6 workflows), `antigravity/agents/` (3 agents AG).
+- **Source de vérité** : `opencode/skills/` (12 skills), `opencode/agents/` (3 agents), `opencode/commands/` (8 commandes), `antigravity/workflows/` (8 workflows), `antigravity/agents/` (3 agents AG).
 - **Cible skills** : le même dossier de skills est copié dans les DEUX outils (format `SKILL.md` compatible — standard agentskills.io).
-- **Cible agents** : `migration-opencode/agents/` → OpenCode ; `antigravity/agents/` → Antigravity (formats différents, deux sources séparées).
+- **Cible agents** : `opencode/agents/` → OpenCode ; `antigravity/agents/` → Antigravity (formats différents, deux sources séparées).
 - **Cible workflows** : uniquement Antigravity (les commandes OpenCode n'y fonctionnent pas).
 
 ## Usage
@@ -37,7 +37,7 @@ GitHub (guysilvere/agents-skills)  ──clone/pull──►  repo local ~/agent
 ## Étapes internes
 
 1. **Clone/pull** : `git clone` (1er run) ou `git pull` (runs suivants) depuis GitHub dans `~/.cache/agents-skills-sync/`.
-2. **Backup** : copie des dossiers cibles existants vers `~/.config/opencode-backups/sync-<horodatage>/`.
+2. **Backup** : copie des dossiers cibles existants vers `~/.config/opencode-backups/bak/<horodatage>/`.
 3. **Purge** : suppression des anciens dossiers cibles (skills/agents/commands/workflows) — les fichiers hors des dossiers gérés ne sont PAS touchés.
 4. **Copie** : recopie depuis le repo local vers les cibles.
 5. **Rapport** : liste des dossiers installés par outil, chemin du backup.
@@ -59,13 +59,13 @@ Un test symlink a confirmé que les skills globales peuvent être **liées** au 
 ## Structure des sources
 
 ```
-migration-opencode/
-├── skills/            # 10 skills (SKILL.md + assets/)
+opencode/
+├── skills/            # 12 skills (SKILL.md + assets/)
 ├── agents/            # lead-dev.md, ops-quality.md, integrations.md (format OpenCode)
-└── commands/          # cadrage.md, spec.md, validate.md, release.md, deploy.md, docs-sync.md
+└── commands/          # 8 commandes : audit, cadrage, deploy, docs-sync, new-pwa, release, spec, validate
 antigravity/
 ├── agents/            # lead-dev.md, ops-quality.md, integrations.md (format Antigravity)
-└── workflows/         # cadrage.md, spec.md, validate.md, release.md, deploy.md, docs-sync.md
+└── workflows/         # 8 workflows : audit, cadrage, deploy, docs-sync, new-pwa, release, spec, validate
 ```
 
 ## Limites connues

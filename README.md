@@ -7,15 +7,14 @@
 
 | Élément | Emplacement | Description |
 |---------|-------------|-------------|
-| Workflow | `workflow-projet-vibe-code.md` | Workflow projet complet (phases 0-10) |
-| Agents | `migration-opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) — format OpenCode |
+| Agents | `opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) — format OpenCode |
 | Agents AG | `antigravity/agents/` | Les 3 mêmes rôles — format Antigravity |
-| Skills | `migration-opencode/skills/` | 12 skills (avec assets séparés 🟦/🟩/⚪) |
-| Assets | `migration-opencode/assets/` | Templates, scripts, checklists, configs par skill |
-| Commandes | `migration-opencode/commands/` | 8 commandes slash OpenCode |
+| Skills | `opencode/skills/` | 12 skills versionnées (assets séparés 🟦/🟩/⚪) |
+| Assets | `opencode/assets/` | Templates, scripts, checklists, configs par skill |
+| Commandes | `opencode/commands/` | 8 commandes slash OpenCode |
 | Workflows AG | `antigravity/workflows/` | 8 workflows Antigravity équivalents |
-| MCP | `migration-opencode/mcp.servers.json` | Source de vérité serveurs MCP (sans secret en clair) |
-| Migration | `migration-opencode/` | README-MIGRATION, PLAN, ARCHIVAGE, DIFF, opencode.jsonc.new |
+| MCP | `opencode/mcp.servers.json` | Source de vérité serveurs MCP (sans secret en clair) |
+| Migration | `opencode/` | README-MIGRATION, PLAN, ARCHIVAGE, DIFF, opencode.jsonc.new |
 
 ## Installation & mise à jour
 
@@ -31,13 +30,13 @@ git clone git@github.com:guysilvere/agents-skills.git ~/agents-skills
 
 Le script :
 - Clone/pull le repo depuis GitHub (source de vérité) ou utilise `--local`.
-- **Backup** les dossiers cibles existants (`~/.config/opencode-backups/sync-<date>/`).
+- **Backup** les dossiers cibles existants (`~/.config/opencode-backups/bak/<date>/`).
 - **Supprime** les anciens agents/skills/commandes/workflows des deux outils.
 - **Copie** les nouveaux fichiers à jour.
 - **Génère et fusionne** les configurations MCP (sans secrets exposés).
 - Options : `--local`, `--dry-run`, `--opencode-only`, `--antigravity-only`, `--no-backup`, `--help`.
 
-> ⚠️ Les agents OpenCode et Antigravity ont des formats **différents** : le script synchronise les agents OpenCode (`migration-opencode/agents/`), les agents Antigravity (`antigravity/agents/`) et les workflows Antigravity (`antigravity/workflows/`).
+> ⚠️ Les agents OpenCode et Antigravity ont des formats **différents** : le script synchronise les agents OpenCode (`opencode/agents/`), les agents Antigravity (`antigravity/agents/`) et les workflows Antigravity (`antigravity/workflows/`).
 
 ## Skills (12)
 
@@ -68,4 +67,4 @@ Le script :
 - `docs/SYNC.md` — fonctionnement du script de synchronisation
 - `docs/OPENCODE.md` — spécificités OpenCode (agents, skills, permissions)
 - `docs/ANTIGRAVITY.md` — spécificités Antigravity (subagents, workflows, rules)
-- `migration-opencode/README-MIGRATION.md` — historique de la migration (17 → 3 agents, 36 → 10 skills)
+- `opencode/README-MIGRATION.md` — historique de la migration (17 → 3 agents, 36 → 10 skills)

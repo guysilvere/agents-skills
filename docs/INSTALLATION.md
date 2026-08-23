@@ -32,8 +32,8 @@ cd ~/agents-skills
 ```
 
 Le script installe :
-- 🟦 OpenCode : 10 skills → `~/.config/opencode/skills/`, 3 agents → `~/.config/opencode/agents/`, 6 commandes → `~/.config/opencode/commands/`
-- 🟩 Antigravity : 10 skills → `~/.gemini/config/skills/`, 6 workflows → `~/.gemini/workflows/`
+- 🟦 OpenCode : 12 skills → `~/.config/opencode/skills/`, 3 agents → `~/.config/opencode/agents/`, 8 commandes → `~/.config/opencode/commands/`
+- 🟩 Antigravity : 12 skills → `~/.gemini/config/skills/`, 8 workflows → `~/.gemini/workflows/`
 
 ## 3. Config OpenCode
 
@@ -52,7 +52,7 @@ mkdir -p ~/.config/opencode
 ```
 
 - Ajouter les providers/modèles (Anthropic, OpenAI, etc.) via `opencode auth login`.
-- (Optionnel) Reprendre `migration-opencode/opencode.jsonc.new` pour les MCP (github, brevo, n8n, supabase).
+- (Optionnel) Reprendre `opencode/opencode.jsonc.new` pour les MCP (github, brevo, n8n, supabase).
 
 ## 4. Config Antigravity
 
@@ -93,5 +93,5 @@ Le script est idempotent : il remplace toujours par l'état du repo.
 | Skill non chargée dans OpenCode | Vérifier `SKILL.md` (majuscules), frontmatter `name`==dossier, `permission.skill: allow` |
 | Skill non visible dans Antigravity | Vérifier `~/.gemini/config/skills/<nom>/SKILL.md`, redémarrer la conversation |
 | Agent Antigravity bloqué (hange) | Outil mal orthographié dans `tools[]` (ex: `view_file`, `run_command`) |
-| Backup accidentel | Restaurer depuis `~/.config/opencode-backups/sync-<date>/` |
+| Backup accidentel | Restaurer depuis `~/.config/opencode-backups/bak/<date>/` |
 | Conflit avec un ancien setup | `./scripts/sync-skills.sh` supprime puis recopie : état du repo garanti |
