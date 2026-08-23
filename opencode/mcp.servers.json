@@ -33,22 +33,6 @@
       "ag": {}
     },
     {
-      "name": "supabase",
-      "transport": "remote",
-      "url": "https://mcp.supabase.com/mcp",
-      "enabled": true,
-      "oc": {},
-      "ag": {}
-    },
-    {
-      "name": "supabase-agencebulles",
-      "transport": "remote",
-      "url": "https://db.agencebulles.net/mcp",
-      "enabled": true,
-      "oc": {},
-      "ag": {}
-    },
-    {
       "name": "brevo",
       "transport": "local",
       "command": "npx",
