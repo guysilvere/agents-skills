@@ -4,7 +4,7 @@
 
 | # | Étape | Statut |
 |---|-------|--------|
-| 0 | Backup complet `~/.config/opencode` → `~/.config/opencode-backups/backup-20260820/` (hors node_modules) | ✅ Fait |
+| 0 | Backup complet `~/.config/opencode` → `~/.config/opencode-backups/bak/2026-08-20/` (hors node_modules) | ✅ Fait |
 | 1 | Créer `/Users/silveremeya/Projets/agents-skills/opencode/` (README-MIGRATION.md, PLAN.md, ARCHIVAGE.md) | ✅ Fait |
 | 2 | Écrire les 3 agents finaux (`agents/lead-dev.md`, `agents/ops-quality.md`, `agents/integrations.md`) | ✅ Fait |
 | 3 | Écrire les 10 skills (`skills/<nom>/SKILL.md` + assets dans `skills/<nom>/assets/`) | ✅ Fait (10 SKILL.md + 43 assets) |

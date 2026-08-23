@@ -7,10 +7,9 @@
 
 | Élément | Emplacement | Description |
 |---------|-------------|-------------|
-| Workflow | `workflow-projet-vibe-code.md` | Workflow projet complet (phases 0-10) |
 | Agents | `opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) — format OpenCode |
 | Agents AG | `antigravity/agents/` | Les 3 mêmes rôles — format Antigravity |
-| Skills | `opencode/skills/` | 17 skills (avec assets séparés 🟦/🟩/⚪) |
+| Skills | `opencode/skills/` | 12 skills versionnées (assets séparés 🟦/🟩/⚪) |
 | Assets | `opencode/assets/` | Templates, scripts, checklists, configs par skill |
 | Commandes | `opencode/commands/` | 8 commandes slash OpenCode |
 | Workflows AG | `antigravity/workflows/` | 8 workflows Antigravity équivalents |
@@ -31,7 +30,7 @@ git clone git@github.com:guysilvere/agents-skills.git ~/agents-skills
 
 Le script :
 - Clone/pull le repo depuis GitHub (source de vérité) ou utilise `--local`.
-- **Backup** les dossiers cibles existants (`~/.config/opencode-backups/sync-<date>/`).
+- **Backup** les dossiers cibles existants (`~/.config/opencode-backups/bak/<date>/`).
 - **Supprime** les anciens agents/skills/commandes/workflows des deux outils.
 - **Copie** les nouveaux fichiers à jour.
 - **Génère et fusionne** les configurations MCP (sans secrets exposés).
@@ -39,7 +38,7 @@ Le script :
 
 > ⚠️ Les agents OpenCode et Antigravity ont des formats **différents** : le script synchronise les agents OpenCode (`opencode/agents/`), les agents Antigravity (`antigravity/agents/`) et les workflows Antigravity (`antigravity/workflows/`).
 
-## Skills (17)
+## Skills (12)
 
 - `pwa-cadrage` — cadrage, naming, stack, blueprint, roadmap
 - `design-ux-flow` — méthodologie UX 10 étapes, problème chirurgical, micro-victoires, onboarding
@@ -53,11 +52,6 @@ Le script :
 - `shared-git-conventions` — git, SemVer, releases
 - `shared-eco-tokens` — optimisation de tokens (toujours chargée)
 - `opencode-admin` — administration des outils IA (OC + AG)
-- `plannotator-annotate` — annotation UI d'un fichier markdown/HTML/URL/dossier
-- `plannotator-last` — annotation de la dernière réponse rendue
-- `plannotator-review` — revue de code UI du worktree ou d'une PR
-- `supabase` — bonnes pratiques Supabase (agents skills officiels)
-- `supabase-postgres-best-practices` — optimisation SQL/Postgres Supabase
 
 ## Agents (3)
 

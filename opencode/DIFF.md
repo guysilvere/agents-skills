@@ -23,11 +23,11 @@
 
 ## Application
 ```bash
-cp ~/.config/opencode/opencode.jsonc ~/.config/opencode-backups/backup-20260820/opencode.jsonc
+cp ~/.config/opencode/opencode.jsonc ~/.config/opencode-backups/bak/2026-08-20/opencode.jsonc
 cp opencode.jsonc.new ~/.config/opencode/opencode.jsonc
 ```
 
 ## Réversibilité
 ```bash
-cp ~/.config/opencode-backups/backup-20260820/opencode.jsonc ~/.config/opencode/opencode.jsonc
+cp ~/.config/opencode-backups/bak/2026-08-20/opencode.jsonc ~/.config/opencode/opencode.jsonc
 ```
