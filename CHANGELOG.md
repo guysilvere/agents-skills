@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [1.7.0] — 2026-08-23
+
+### Modifié
+- **Renommage `migration-opencode/` → `opencode/`** : refactor de l'écosystème OpenCode — l'historique de migration devient le dossier canonique `opencode/` (skills, agents, commandes, `mcp.servers.json`, `sync-skills.sh`, README).
+- **`mcp.servers.json`** : suppression des serveurs MCP Supabase (`supabase`, `supabase-local`) — MCP Supabase n'est plus utilisé dans l'écosystème (accès via CLI/API), configuration allégée.
+
+### Corrigé
+- **Décomptes écosystème** : correction du nombre de skills synchronisées (**12**) et de commandes/workflows (**8**) dans `opencode/README.md`.
+- **Chemins de backup** : correction des références — les backups sont centralisés dans `~/.config/opencode-backups/bak/<date>` (plus `~/backups/`).
+
+### Nettoyage
+- **Centralisation des backups** : les sauvegardes avant refactoring sont regroupées sous `~/.config/opencode-backups/bak/<date>` (`chore(backup)`).
+- **`.gitignore`** : exclusion des fichiers de config locaux générés (`.claude/`, `.gemini/`, `.ignore`, `.mcp.json`, `AGENTS.md`, `GEMINI.md`, `mcp-servers.md`, `opencode.json`) pour éviter qu'un `git add -A` les committe — ces fichiers sont propres à chaque machine et jamais versionnés.
+
 ## [1.6.0] — 2026-08-22
 
 ### Ajouté
