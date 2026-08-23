@@ -5,7 +5,7 @@
 | # | Étape | Statut |
 |---|-------|--------|
 | 0 | Backup complet `~/.config/opencode` → `~/.config/opencode-backups/backup-20260820/` (hors node_modules) | ✅ Fait |
-| 1 | Créer `/Users/silveremeya/Projets/agents-skills/migration-opencode/` (README-MIGRATION.md, PLAN.md, ARCHIVAGE.md) | ✅ Fait |
+| 1 | Créer `/Users/silveremeya/Projets/agents-skills/opencode/` (README-MIGRATION.md, PLAN.md, ARCHIVAGE.md) | ✅ Fait |
 | 2 | Écrire les 3 agents finaux (`agents/lead-dev.md`, `agents/ops-quality.md`, `agents/integrations.md`) | ✅ Fait |
 | 3 | Écrire les 10 skills (`skills/<nom>/SKILL.md` + assets dans `skills/<nom>/assets/`) | ✅ Fait (10 SKILL.md + 43 assets) |
 | 4 | Écrire les 6 commandes slash (`commands/*.md`) | ✅ Fait |
@@ -19,7 +19,7 @@
 
 ## Ordre d'application (contrainte utilisateur)
 
-1. Écrire TOUS les fichiers dans `agents-skills/migration-opencode/` (étapes 1–5)
+1. Écrire TOUS les fichiers dans `agents-skills/opencode/` (étapes 1–5)
 2. PUIS appliquer dans `~/.config/opencode/` (étapes 6–10)
 3. Enfin vérifier (étape 11)
 
@@ -45,7 +45,7 @@ Diff vs actuel :
 - `model` / `small_model`: inchangés
 
 ### Étapes 6–10 — Application
-Copie depuis `migration-opencode/` vers `~/.config/opencode/`, puis archivage par `mv` (jamais `rm`).
+Copie depuis `opencode/` vers `~/.config/opencode/`, puis archivage par `mv` (jamais `rm`).
 
 ### Étape 11 — Vérification
 - `ls ~/.config/opencode/agents/` → exactement 3 fichiers actifs (lead-dev, ops-quality, integrations)

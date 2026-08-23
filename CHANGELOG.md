@@ -1,12 +1,39 @@
 # CHANGELOG
 
+## [1.6.0] — 2026-08-22
+
+### Ajouté
+- **Standards de Scalabilité & Forte Charge** :
+  - **Stack & Architecture** : Directives de dimensionnement selon le trafic (PocketBase WAL pour <100 rps, PostgreSQL + PgBouncer pour fortes écritures, Turso pour Edge), cache Redis/Upstash, queues asynchrones (BullMQ).
+  - **Optimisation Base de Données (`DATABASE.md`)** : Indexation chirurgicale (B-tree sur FK, composites, partiels), interdiction du `OFFSET/LIMIT` profond au profit de la **pagination par curseur (keyset)**, connection pooling strict, profilage `EXPLAIN ANALYZE`.
+  - **Code & Backend (`pwa-developpement`, `style-code.md`)** : I/O non bloquantes, déchargement des tâches lourdes (PDF, emails, webhooks) en tâche de fond, interdiction stricte du `SELECT *` et des requêtes N+1.
+  - **API Best Practices (`api-best-practices`, `api-review.md`)** : Rate limiting distribué, cache HTTP (`ETag`, `Cache-Control`), endpoints asynchrones `202 Accepted` pour gros calculs/exports.
+  - **Validation Pré-commit (`pre-commit.md`)** : Validation des index BDD, anti-N+1 et temps de latence P95.
+
+## [1.5.0] — 2026-08-22
+
+### Ajouté
+- **Centralisation des skills tierces dans `opencode/skills/`** : plannotator-annotate / plannotator-last / plannotator-review (annotation UI) + supabase / supabase-postgres-best-practices (officielles Supabase) → 17 skills synchronisées vers OpenCode ET Antigravity.
+- **MCP locaux Turso dev (lodgi) dans `mcp.servers.json`** : `turso-master-local`, `turso-tenant-ivoire`, `turso-cloud` (désactivé) — config projet préservée et centralisée.
+
+### Modifié
+- **`sync-skills.sh`** : support des variables d'environnement (`environment` → `environment` pour OpenCode, `env` pour Antigravity) pour les serveurs MCP locaux.
+- **README** : comptage skills 12 → 17.
+
+### Nettoyage
+- Suppression des skills/MCP/agents locaux dans les dossiers projets (`/Users/silveremeya/Projets`) : `.claude`, `.cursor`, `.agents`, `.opencode`.
+- Purge des artefacts gérés dans `~/.gemini/config`, `~/.gemini` et `~/.config/opencode` (skills, agents, commandes, workflows, archives, plugins).
+- Sécurisation `~/.agents/mcp_config.json` (secrets en clair supprimés — tokens déjà dans `~/.config/opencode/.tokens/` chmod 600).
+- Backup complet avant nettoyage : `~/backups/cleanup-agents-20260822/`.
+
+
 > Versioning SemVer — les changements notables sont listés par version.
 
 ## [1.4.0] — 2026-08-22
 
 ### Ajouté
 - **Commandes OpenCode `audit.md` et `new-pwa.md`** : parité 8/8 avec les workflows Antigravity.
-- **Source de vérité MCP `migration-opencode/mcp.servers.json`** : standardisation des serveurs MCP (Notion, GitHub, n8n, Supabase, Brevo) avec résolution sécurisée des tokens sans secret en clair.
+- **Source de vérité MCP `opencode/mcp.servers.json`** : standardisation des serveurs MCP (Notion, GitHub, n8n, Supabase, Brevo) avec résolution sécurisée des tokens sans secret en clair.
 - **Option `--local` dans `sync-skills.sh`** : permet de synchroniser directement depuis le workspace local sans passer par le cache GitHub.
 
 ### Modifié

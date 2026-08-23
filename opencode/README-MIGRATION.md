@@ -70,6 +70,6 @@ Migration complète du setup OpenCode de l'utilisateur (écosystème Agence Bull
 
 **Prochaines étapes**
 - Redémarrer OpenCode pour charger le nouvel agent par défaut et les nouvelles skills.
-- Commit git du dossier `migration-opencode/` dans le repo agents-skills.
+- Commit git du dossier `opencode/` dans le repo agents-skills.
 - Test de bout en bout : lancer `/cadrage` sur un nouveau projet, `/validate` sur un projet existant.
 - Réactivation n8n si nécessaire : fusionner les 5 skills n8n-* de `skills-archive/` en une skill `n8n` (instructions dans ARCHIVAGE.md).

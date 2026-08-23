@@ -52,7 +52,7 @@ mkdir -p ~/.config/opencode
 ```
 
 - Ajouter les providers/modèles (Anthropic, OpenAI, etc.) via `opencode auth login`.
-- (Optionnel) Reprendre `migration-opencode/opencode.jsonc.new` pour les MCP (github, brevo, n8n, supabase).
+- (Optionnel) Reprendre `opencode/opencode.jsonc.new` pour les MCP (github, brevo, n8n, supabase).
 
 ## 4. Config Antigravity
 
