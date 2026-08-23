@@ -238,8 +238,8 @@ PY
 }
 
 # ---- 2. Backup -------------------------------------------------------------
-TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP_DIR="${BACKUP_ROOT}/sync-${TIMESTAMP}"
+TIMESTAMP="$(date +%Y-%m-%d-%H%M%S)"
+BACKUP_DIR="${BACKUP_ROOT}/bak/${TIMESTAMP}"
 if (( DO_BACKUP )) && (( ! DRY_RUN )); then
   mkdir -p "$BACKUP_DIR"
   if (( DO_OPENCODE )); then
@@ -256,7 +256,7 @@ if (( DO_BACKUP )) && (( ! DRY_RUN )); then
   fi
   log "Backup : $BACKUP_DIR"
 elif (( DRY_RUN )); then
-  log "[dry-run] Backup serait créé dans ${BACKUP_ROOT}/sync-${TIMESTAMP}"
+  log "[dry-run] Backup serait créé dans ${BACKUP_DIR}"
 fi
 
 # ---- 3+4. Purge & copie ----------------------------------------------------
