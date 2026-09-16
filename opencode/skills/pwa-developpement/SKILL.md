@@ -17,9 +17,10 @@ metadata:
 
 ## 1. Initialisation du projet
 - Créer `AGENTS.md` à la racine (point d'entrée unique IA) si absent — template avec section « Compatibilité Antigravity » incluse.
-- 🟩 Antigravity : dupliquer les règles projet dans `.agents/rules/*.md` (AGENTS.md n'y est pas lu) — template `assets/antigravity/rule.md` (skill `opencode-admin`).
+- 🟩 Antigravity : dupliquer les règles projet dans `.agents/rules/*.md` (AGENTS.md n'y est pas lu) — template `~/.config/opencode/skills/opencode-admin/assets/antigravity/rule.md`.
 - Créer `README.md` depuis l'ébauche du blueprint ; mise à jour à chaque feature.
 - Créer `.env.example` listant TOUTES les clés (Jeko, CinetPay, Brevo/Mailtrap, Turnstile, R2, VAPID, PocketBase/Turso).
+- Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build).
 - Template : `assets/templates/AGENTS.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
 
 ## 2. Règle de branche
@@ -55,6 +56,13 @@ metadata:
 - TypeScript strict, types explicites sur les APIs/contrats de données.
 - Pas d'`any` silencieux, pas de logique métier dans les composants.
 
+### Python (FastAPI / Micro-services / Workers / IA)
+- **Typage strict & validation** : Python 3.12+, `typing` systématique, modèles **Pydantic v2** pour tous les schemas d'entrée/sortie.
+- **Framework & Asynchronisme** : **FastAPI** avec handlers `async def` non bloquants ; dépendances injectées via `Depends()`.
+- **Outillage** : **Ruff** pour le linting/formatage (`ruff check .`, `ruff format .`) ; gestionnaire de paquets **uv** ou `pyproject.toml`.
+- **Architecture** : Séparation stricte : `routers/`, `services/` (logique métier), `models/` (Pydantic / DB), `workers/` (tâches de fond).
+- **Sécurité & secrets** : Variables d'environnement validées via `pydantic-settings` (`SettingsConfigDict`).
+
 ### PWA
 - Manifest complet, service worker offline-first, IndexedDB pour les données locales.
 
@@ -64,16 +72,28 @@ metadata:
 3. Ne PAS toucher aux fichiers générés, config ou code tiers.
 4. Recharger `pwa-validation` après nettoyage (lint + typecheck + build).
 
-## 6. Structure de projet type (Docker + PocketBase)
+## 6. Environnement & Structure de projet (Docker en 1er choix)
+- **Dev local conteneurisé (défaut)** : Lancement systématique via Docker Desktop :
+  ```bash
+  docker compose -f docker-compose.dev.yml up
+  ```
+  - Volumes montés pour le hot-reloading automatique (`src/`, `backend/`, `pb_hooks/`).
+  - PocketBase / DB locale et micro-services isolés dans leur réseau Docker.
+  - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs.
+
 ```
 projet/
-├── src/                       # Code source app
+├── src/                       # Code source frontend (SvelteKit / PWA)
+├── src/lib/services/          # Logique métier — hors composants
+├── backend/                   # Micro-services Python / Hono (optionnel)
 ├── docker/pocketbase/
-│   ├── pb_hooks/              # Logique métier serveur
+│   ├── pb_hooks/              # Logique métier serveur (⚠️ moteur JS embarqué, pas Node.js)
 │   ├── pb_migrations/         # Migrations versionnées
-│   └── pb_data/               # Données (volume Docker)
-├── Dockerfile                 # Multi-stage : build app + PocketBase
-├── docker-compose.yml         # Dev local
+│   └── pb_data/               # Données locales (volume Docker)
+├── .github/workflows/ci.yml   # CI : secrets → lint → typecheck → tests → build
+├── Dockerfile                 # Multi-stage production (Coolify)
+├── docker-compose.dev.yml     # Dev local avec hot-reload (Docker Desktop)
+├── docker-compose.yml         # Prod / Staging
 ├── .env.example
 └── docs/ (CADRAGE, BLUEPRINT, DATABASE, DESIGN_SYSTEM, specs/, RUNBOOK)
 ```
@@ -95,4 +115,6 @@ projet/
 - `assets/templates/DATABASE.md`
 - `assets/templates/README.md`
 - `assets/configs/.env.example`
+- `assets/configs/docker-compose.dev.yml`
+- `assets/configs/ci.yml`
 - `assets/checklists/style-code.md`

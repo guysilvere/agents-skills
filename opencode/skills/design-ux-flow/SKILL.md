@@ -1,6 +1,6 @@
 ---
 name: design-ux-flow
-description: Méthodologie UX en 10 étapes pour PWA Agence Bulles — du problème chirurgical à la découverte progressive : fonctionnalité principale unique, user flow réaliste, navigation orientée utilisateur, chemins secondaires, micro-victoires, notifications ciblées, onboarding couloir. Charger pour définir l'UX d'un produit, entre le cadrage (pwa-cadrage) et le design system visuel (design-pwa-system).
+description: Méthodologie UX en 10 étapes pour PWA Agence Bulles — du problème chirurgical à la découverte progressive — fonctionnalité principale unique, user flow réaliste, navigation orientée utilisateur, chemins secondaires, micro-victoires, notifications ciblées, onboarding couloir. Charger pour définir l'UX d'un produit, entre le cadrage (pwa-cadrage) et le design system visuel (design-pwa-system).
 license: MIT
 compatibility: opencode
 metadata:

@@ -50,9 +50,17 @@
 
 ## Webhooks
 - Header `Jeko-Signature` : HMAC-SHA256 avec le secret webhook
+- **Vérifier la signature sur le corps BRUT** de la requête, comparaison à **temps constant**
 - Payload : `id`, `amount`, `fees`, `status`, `counterpartLabel`, `paymentMethod`, `transactionDetails`
 - Retry : jusqu'à 3 fois, backoff exponentiel
 - Types : paiements (redirect, soundbox, lien) et virements
+- Ne jamais créditer sur la seule foi du webhook → re-vérifier via `GET /transactions` ou `/payment_requests/{id}`
+
+## À VÉRIFIER (non confirmé par la doc disponible)
+- Présence d'un **horodatage signé** dans le webhook (protection anti-rejeu)
+- Support du header **`Idempotency-Key`** sur les créations (`POST /payment_requests`, `/payment_links`)
+- Existence d'un **prélèvement récurrent automatique** (le dunning Mobile Money repose en général sur des relances, pas des retries de débit)
+- Format exact de la signature (encodage, préfixe `sha256=`, ordre des champs signés)
 
 ## Modèles d'intégration
 1. **Soundbox** : QR code sur terminal → client scanne → webhook

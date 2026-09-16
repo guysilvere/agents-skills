@@ -15,9 +15,11 @@
 
 ## Notifications (webhooks)
 - Type : notification de statut de transaction
-- Vérifier : signature / secret avant traitement
-- Statuts : [à confirmer selon doc dashboard — success/failed/pending]
-- Idempotence obligatoire : une transaction ne doit être créditée qu'une seule fois
+- **Vérifier la signature sur le corps BRUT**, comparaison à **temps constant**
+- Statuts : `success` / `failed` / `pending` — **à confirmer** selon le dashboard
+- Idempotence obligatoire, garantie par **contrainte d'unicité en base**
+- Ne jamais créditer sur la seule foi de la notification → re-vérifier le statut côté serveur
+- **À VÉRIFIER** : horodatage signé (anti-rejeu) · support d'`Idempotency-Key`
 
 ## Cas d'usage Agence Bulles
 - **Secours Mobile Money** : si Jèko est indisponible ou en erreur → basculer sur CinetPay.

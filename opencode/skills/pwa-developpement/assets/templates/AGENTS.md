@@ -15,7 +15,8 @@
 | ROADMAP.md | Racine | Jalons court/moyen/long terme |
 | README.md | Racine | Build, setup Caddy local, variables, lancement |
 | CHANGELOG.md | Racine | Versions sémantiques + notes de release |
-| RUNBOOK.md | docs/RUNBOOK.md | Déploiement Coolify, proxy Cloudflare, backups R2 |
+| RUNBOOK.md | docs/RUNBOOK.md | Déploiement Coolify, proxy Cloudflare, backups R2, migrations, rollback, monitoring |
+| ci.yml | .github/workflows/ci.yml | CI bloquante sur PR (secrets, lint, typecheck, tests, build) |
 
 ## Configuration projet
 - PORT=`<prochain_port>`
@@ -37,6 +38,12 @@
 - Typage strict TypeScript ; fonctions pures ; pas d'`any` silencieux.
 - Respect du Layout Signature PWA (Top App Bar, Bottom Navigation, FAB).
 - Cibles tactiles ≥ 44px ; safe areas ; contraste WCAG AA ; mode sombre.
+- **Budget de performance** : JS initial < 150 KB gzip ; images AVIF/WebP ; cible réseau lent (3G). Toute régression bloque la PR.
+
+## CI & jalons humains
+- CI : `.github/workflows/ci.yml` — secrets → lint → typecheck → tests → audit → build, sur chaque PR.
+- Merge `main` **uniquement via PR** (CI verte + validation humaine) — jamais de merge local.
+- ⛔ **STOP — validation humaine requise** avant : merge `main` / tag / release · déploiement staging et prod · migration non locale · appel à une API de paiement hors sandbox · suppression de ressource.
 
 ## Interdictions strictes
 - ❌ Aucun emoji dans l'interface (sauf demande explicite)

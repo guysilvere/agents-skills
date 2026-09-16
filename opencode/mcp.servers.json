@@ -22,17 +22,6 @@
       "ag": {}
     },
     {
-      "name": "n8n",
-      "transport": "remote",
-      "url": "https://n8n.agencebulles.net/mcp-server/http",
-      "enabled": true,
-      "headers": {
-        "Authorization": "Bearer {{TOKEN:n8n}}"
-      },
-      "oc": {},
-      "ag": {}
-    },
-    {
       "name": "brevo",
       "transport": "local",
       "command": "npx",
@@ -43,6 +32,17 @@
         "Authorization:Bearer {{TOKEN:brevo}}"
       ],
       "enabled": true,
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "coolify",
+      "transport": "remote",
+      "url": "https://home.agencebulles.net/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {{TOKEN:coolify}}"
+      },
       "oc": {},
       "ag": {}
     }

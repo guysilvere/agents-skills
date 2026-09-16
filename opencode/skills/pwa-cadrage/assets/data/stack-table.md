@@ -10,12 +10,14 @@
 | State | **Zustand** | Minimaliste |
 | PWA | **vite-plugin-pwa** (Workbox) | Manifest + SW préconfigurés |
 
-## Backend
+## Backend & Micro-services
 | Rôle | Outil | Pourquoi |
 |------|-------|----------|
-| API légère | **Hono** | TS natif, Node/Bun/Edge |
-| API complète | **Fastify** | Middleware, plugins |
-| BaaS | **PocketBase** — **défaut** | BDD + auth + fichiers + realtime en 1 binaire Go (~30 Mo, ~20-50 Mo RAM) |
+| API légère / Edge | **Hono** | TS natif, Node/Bun/Edge, latence minimale |
+| API complète | **Fastify** | Middleware, plugins, typage JSON Schema |
+| BaaS clé en main | **PocketBase** — **défaut** | BDD + auth + fichiers + realtime en 1 binaire Go (~30 Mo, ~20-50 Mo RAM) |
+| Cerveau IA / Data / Algorithmes | **Python (FastAPI + Pydantic v2)** | Traitement lourd, OCR, IA/LLMs, scraping, calculs financiers/statistiques, pipelines de données |
+| Workers asynchrones | **Python (Celery / ARQ) ou Node (BullMQ)** | Tâches de fond non bloquantes, génération de rapports, scraping récurrent |
 
 ## Base de données
 | Cas | Outil |
@@ -31,12 +33,15 @@
 | Intégrée | PocketBase Auth (email, OAuth2 Google, magic link) |
 | Standalone | Auth.js / Clerk — ⚠️ **Lucia déprécié depuis avril 2025** |
 
-## Tests & déploiement
+## Tests & outillage
 | Rôle | Outil |
 |------|-------|
-| Unitaires/intégration | Vitest |
+| Dev local (1er choix) | **Docker Compose (Docker Desktop)** — parité dev/prod, hot-reload, isolation |
+| Unitaires/intégration Web | Vitest |
+| Tests Python (IA/Data) | Pytest |
+| Lint & formatage Python | Ruff (ultra-rapide en Rust) / uv |
 | E2E | Playwright |
-| Conteneurs | Docker multi-stage (build → Nginx/Node) |
+| Conteneurs | Docker multi-stage (Node/Nginx et Python/FastAPI) |
 | Hébergement SaaS | Coolify (déploiement GitHub, SSL auto) |
 | Hébergement statique client | o2switch (cPanel) |
 

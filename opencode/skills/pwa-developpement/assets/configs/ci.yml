@@ -1,0 +1,47 @@
+# CI minimale — Agence Bulles
+# À copier dans <projet>/.github/workflows/ci.yml
+# Objectif : la qualité ne dépend plus de la bonne exécution d'un agent — résultat reproductible.
+# Adapter les commandes si le projet n'est pas Node (ex. Python : ruff + mypy + pytest).
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [testing, main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # historique complet requis par gitleaks
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # 1. Secrets — bloquant et bon marché, on le fait avant tout le reste
+      - name: Détection de secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. Lockfile commité obligatoire pour npm ci
+      - name: Dépendances
+        run: npm ci
+
+      # 3. Qualité
+      - run: npm run lint
+      - run: npm run typecheck
+
+      # 4. Tests (écrits par lead-dev / integrations)
+      - run: npm test
+
+      # 5. CVE bloquantes — passer en bloquant quand le projet est stabilisé
+      - run: npm audit --audit-level=high || true
+
+      # 6. Build de production
+      - run: npm run build

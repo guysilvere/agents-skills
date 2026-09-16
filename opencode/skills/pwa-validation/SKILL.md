@@ -14,13 +14,14 @@ metadata:
 - Exécute la séquence complète de validation d'une PWA avant commit.
 - Centralise l'ancienne skill pwa-tests-locaux + audits a11y/SEO/sécurité.
 
-## 1. Preview locale — Caddy (pas localhost)
+## 1. Preview locale — Caddy + Docker Desktop (pas localhost)
 - Caddy installé : `/opt/homebrew/bin/caddy`, config unique `~/.config/caddy/Caddyfile` (lancé via `caddy run --config ~/.config/caddy/Caddyfile`).
-- Ajouter un bloc par projet :
+- App lancée via Docker Desktop (`docker compose -f docker-compose.dev.yml up`).
+- Ajouter un bloc par projet dans Caddyfile (mappage vers le port exposé par le conteneur Docker) :
 ```caddy
 mon-projet.test, mon-projet.localhost {
     tls internal
-    reverse_proxy localhost:4173
+    reverse_proxy localhost:5173
 }
 ```
 - Recharger après modification : `caddy reload --config ~/.config/caddy/Caddyfile`.
@@ -29,14 +30,23 @@ mon-projet.test, mon-projet.localhost {
 - Config de référence : `assets/configs/Caddyfile.test`.
 
 ## 2. Séquence de validation (dans l'ordre, chaque étape doit passer)
-1. **Lint** : `npm run lint` (ESLint / Biome)
-2. **Typecheck** : `npm run typecheck` (si applicable)
-3. **Tests unitaires** : `npm test` (+ `test:coverage` si configuré)
+0. **Détection de secrets EN PREMIER** — bloquante et bon marché : inutile de lancer Lighthouse si une clé est commitée.
+   - `gitleaks detect --source . --redact` (couvre aussi l'historique Git ; `brew install gitleaks` si absent).
+   - Fallback grep : `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN`.
+   - `npm audit --audit-level=high` + vérifier que le lockfile est commité.
+1. **Lint** : `npm run lint` (ESLint / Biome) + `ruff check .` (si backend Python)
+2. **Typecheck** : `npm run typecheck` (TS) + `mypy .` / `pyright` (Python si configuré)
+3. **Tests unitaires** : `npm test` + `pytest` (si micro-services Python) — écrits par `lead-dev` / `integrations`, pas par `ops-quality`
 4. **Build** : `npm run build` sans erreur ni warning bloquant
-5. **Preview** : `npm run preview` + domaine Caddy (`http://mon-projet.test`)
-6. **Tests E2E** : playwright-cli — parcours réels (auth, paiement, CRUD, hors-ligne), screenshots succès/échec. Checklist : `assets/checklists/e2e.md`
-7. **Audit design automatisé** : `npx impeccable detect <src>` — 59 règles déterministes anti-slop (typo surutilisées, dégradés violet, cartes imbriquées, contraste) ; sortie `--json` CI-friendly ; ignorer cas légitimes via `impeccable ignores add-value`
-8. **Lighthouse** : `npx lighthouse http://mon-projet.test --view` — cibles : Performance ≥ 80 (LCP < 2.5 s), Accessibilité ≥ 90, PWA installable, CLS < 0.1, INP < 200 ms
+5. **Preview** : servir le **build de production** (`npm run preview`) via Caddy en **`https://mon-projet.test`** — jamais `localhost`, jamais le serveur de dev (scores non représentatifs).
+6. **Tests E2E** : `playwright-cli` — parcours réels (auth, paiement, CRUD, hors-ligne), screenshots succès/échec. Checklist : `assets/checklists/e2e.md`
+7. **Audit design automatisé** : `impeccable detect <src>` — 59 règles déterministes anti-slop ; sortie `--json` CI-friendly. **Épingler en devDependency** (`npm i -D impeccable`) — pas de `npx` à la volée sur un paquet non épinglé.
+8. **Lighthouse**, sur le build de prod servi en **HTTPS** :
+   `npx lighthouse https://mon-projet.test --view --chrome-flags="--ignore-certificate-errors"`
+   - Le Chrome lancé par Lighthouse doit accepter le certificat `tls internal` de Caddy, sinon l'audit échoue.
+   - Cibles : Performance ≥ 80 (LCP < 2.5 s) · Accessibilité ≥ 90 · CLS < 0.1 · **TBT < 200 ms**.
+   - ⚠️ La catégorie **« PWA installable » n'existe plus dans Lighthouse ≥ 12** → vérifier l'installabilité via la checklist PWA et le panneau Application de Chrome DevTools.
+   - ⚠️ **INP** est une métrique terrain, non mesurable dans un audit de navigation : utiliser **TBT** comme proxy en labo.
 9. **Test hors-ligne** : DevTools → Application → Service Workers → Offline → page de repli + fonctions de base
 
 ## 3. Audit accessibilité (a11y)
@@ -49,9 +59,10 @@ mon-projet.test, mon-projet.localhost {
 - robots.txt, sitemap.xml ; données structurées JSON-LD
 - Checklist : `assets/checklists/seo.md`
 
-## 5. Audit sécurité
-- **Secrets** : grep `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN` ; `.env` non commité (vérifier .gitignore) ; aucun token dans logs/commentaires
-- **OWASP Top 10** : injection (SQL/shell/NoSQL), XSS (innerHTML non contrôlé), IDOR, stack traces exposées, dépendances avec CVE
+## 5. Audit sécurité (complète l'étape 0)
+- **Secrets** : `gitleaks` (historique Git inclus) ; `.env` non commité (vérifier .gitignore) ; aucun token dans logs/commentaires
+- **Dépendances** : `npm audit` + lockfile commité
+- **OWASP Top 10** : injection (SQL/shell/NoSQL), XSS (innerHTML non contrôlé), IDOR, stack traces exposées
 - **PWA** : SW scope trop large, cache poisoning, permissions manifest excessives, HTTPS obligatoire, CSP restrictive, headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy), CORS explicite
 - **Données** : pas de données sensibles en clair dans localStorage/IndexedDB ; transmission chiffrée
 - Checklist : `assets/checklists/security.md`
@@ -68,7 +79,7 @@ mon-projet.test, mon-projet.localhost {
 ## Règles
 - Ne pas modifier le code applicatif — signaler puis livrer.
 - Toujours charger `shared-eco-tokens` pour un rapport concis.
-- Outils externes (non copiés dans le repo) : playwright-cli (`@playwright/cli`), impeccable (`npx`).
+- Outils externes : `playwright-cli` — paquet **`@playwright/cli`** (le paquet npm `playwright-cli` est déprécié) ; `impeccable` — à épingler en devDependency.
 
 ## Assets
 - `assets/checklists/pre-commit.md`

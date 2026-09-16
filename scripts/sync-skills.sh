@@ -101,6 +101,8 @@ AG_SKILLS="${HOME}/.gemini/config/skills"
 AG_AGENTS="${HOME}/.gemini/config/agents"
 AG_WORKFLOWS="${HOME}/.gemini/workflows"
 AG_MCP="${HOME}/.gemini/config/mcp_config.json"
+AG_RULES="${HOME}/.gemini/GEMINI.md"
+AG_CLI_PLUGIN="${HOME}/.gemini/antigravity-cli/plugins/agence-bulles"
 
 # Tokens locaux (jamais commités)
 TOKENS_DIR="${HOME}/.config/opencode/.tokens"
@@ -253,6 +255,7 @@ if (( DO_BACKUP )) && (( ! DRY_RUN )); then
     [[ -d "$AG_AGENTS" ]] && cp -R "$AG_AGENTS" "$BACKUP_DIR/antigravity-agents" 2>/dev/null || true
     [[ -d "$AG_WORKFLOWS" ]] && cp -R "$AG_WORKFLOWS" "$BACKUP_DIR/antigravity-workflows" 2>/dev/null || true
     [[ -f "$AG_MCP" ]] && cp -R "$AG_MCP" "$BACKUP_DIR/antigravity-mcp_config.json" 2>/dev/null || true
+    [[ -d "$AG_CLI_PLUGIN" ]] && cp -R "$AG_CLI_PLUGIN" "$BACKUP_DIR/antigravity-cli-plugin-agence-bulles" 2>/dev/null || true
   fi
   log "Backup : $BACKUP_DIR"
 elif (( DRY_RUN )); then
@@ -294,6 +297,26 @@ if (( DO_ANTIGRAVITY )); then
     fi
   else
     warn "Source MCP absente : $SRC_MCP — ignorée"
+  fi
+
+  # Alignement Antigravity CLI Plugin (agence-bulles)
+  if [[ -d "$(dirname "$AG_CLI_PLUGIN")" ]]; then
+    log "Alignement du plugin Antigravity CLI (agence-bulles)…"
+    mkdir -p "${AG_CLI_PLUGIN}/agents" "${AG_CLI_PLUGIN}/skills" "${AG_CLI_PLUGIN}/rules"
+    purge_and_copy "$SRC_AG_AGENTS" "${AG_CLI_PLUGIN}/agents" "Agents Antigravity CLI (3)"
+    purge_and_copy "$SRC_SKILLS"    "${AG_CLI_PLUGIN}/skills" "Skills Antigravity CLI (12)"
+    if [[ -f "$AG_RULES" ]]; then
+      cp "$AG_RULES" "${AG_CLI_PLUGIN}/rules/GEMINI.md"
+      ok "Règles Antigravity CLI : rules/GEMINI.md synchronisé"
+    fi
+    cat > "${AG_CLI_PLUGIN}/plugin.json" <<'EOF'
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "agence-bulles",
+  "description": "Écosystème Agence Bulles : lead-dev, ops-quality, integrations, 12 skills PWA et workflows."
+}
+EOF
+    ok "Manifest Antigravity CLI : plugin.json à jour"
   fi
 fi
 

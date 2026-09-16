@@ -18,23 +18,13 @@
         "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/github}"
       }
     },
-    "n8n": {
+    "coolify": {
       "type": "remote",
-      "url": "https://n8n.agencebulles.net/mcp-server/http",
+      "url": "https://home.agencebulles.net/mcp",
       "enabled": true,
       "headers": {
-        "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/n8n}"
+        "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/coolify}"
       }
-    },
-    "supabase": {
-      "type": "remote",
-      "url": "https://mcp.supabase.com/mcp",
-      "enabled": true
-    },
-    "supabase-agencebulles": {
-      "type": "remote",
-      "url": "https://db.agencebulles.net/mcp",
-      "enabled": true
     },
     "brevo": {
       "type": "local",

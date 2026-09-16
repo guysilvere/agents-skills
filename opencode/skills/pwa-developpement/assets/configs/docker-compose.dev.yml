@@ -1,0 +1,50 @@
+# docker-compose.dev.yml — Environnement de développement local (Docker Desktop)
+# Lancement : docker compose -f docker-compose.dev.yml up --build
+
+services:
+  # 1. Frontend PWA (Vite + React / Vanilla) avec Hot-Reload
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_POCKETBASE_URL=http://localhost:8090
+      - VITE_API_URL=http://localhost:3000
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+      - pocketbase
+
+  # 2. PocketBase (BaaS local)
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./docker/pocketbase/pb_data:/pb_data
+      - ./docker/pocketbase/pb_hooks:/pb_hooks
+      - ./docker/pocketbase/pb_migrations:/pb_migrations
+    command:
+      - --dir=/pb_data
+      - --hooksDir=/pb_hooks
+      - --migrationsDir=/pb_migrations
+      - --publicDir=/pb_public
+      - --dev
+
+  # 3. Backend Python (Optionnel - FastAPI / Cerveau IA / Data)
+  # backend-python:
+  #   image: python:3.12-slim
+  #   working_dir: /app
+  #   volumes:
+  #     - ./backend:/app
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - PYTHONUNBUFFERED=1
+  #     - POCKETBASE_URL=http://pocketbase:8090
+  #   command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
