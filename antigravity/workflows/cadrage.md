@@ -12,7 +12,7 @@ Lance le cadrage d'un nouveau projet pour l'idée mentionnée.
 Charge la skill `pwa-cadrage` :
 - Poser les questions de cadrage pour combler les zones d'ombre.
 - Stress-tester l'idée (problème, public, différenciation).
-- Identifier personas, KPIs, modèle de monétisation (Jèko principale, CinetPay secours).
+- Identifier personas, KPIs, modèle de monétisation (GeniusPay — sandbox `pk_sandbox_…`).
 
 ## Étape 2 — Naming et disponibilité
 
@@ -23,9 +23,9 @@ Toujours avec la skill `pwa-cadrage` :
 
 ## Étape 3 — Stack et blueprint
 
-- Choisir la stack dans le cadre recommandé (PWA mobile-first, PocketBase/Turso, Coolify + Cloudflare).
+- Choisir la stack dans le cadre recommandé (SvelteKit + Turso, Coolify + Cloudflare).
 - Produire `docs/CADRAGE.md` et `docs/BLUEPRINT.md`.
-- Rédiger `docs/DATABASE.md` (schéma + règles d'accès) et `ROADMAP.md`.
+- Rédiger `docs/DATABASE.md` (schéma + **matrice d'autorisation** — Turso n'a pas de RLS) et `ROADMAP.md`.
 
 ## Étape 4 — Livrables
 

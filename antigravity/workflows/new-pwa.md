@@ -25,7 +25,7 @@ Avec la skill `pwa-cadrage` :
 ### Étape 3 — Roadmap et monétisation
 
 - Roadmap v0/v1/v2 (ROADMAP.md).
-- Stratégie de monétisation (Jèko principale, CinetPay secours).
+- Stratégie de monétisation (GeniusPay — sandbox `pk_sandbox_…`).
 
 ## Phase 2 — Construction
 
