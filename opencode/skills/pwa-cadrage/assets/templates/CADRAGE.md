@@ -26,6 +26,15 @@
 - **v1 (lancement public)** : [liste]
 - **Reporté (v2+)** : [liste]
 
+## Données personnelles & conformité
+- **Régime applicable** : Côte d'Ivoire — loi **n°2013-450** relative à la protection des données à caractère personnel, autorité **ARTCI**. ⚠️ Obligations exactes à faire valider par une personne compétente.
+- **Données collectées** : [liste — champs strictement nécessaires]
+- **Minimisation** : justifier chaque champ ; supprimer tout champ collecté « au cas où »
+- **Base légale & durée de conservation** : [consentement / exécution du contrat ; durée]
+- **Données sensibles** : numéros Mobile Money, téléphone, email → chiffrement en transit et au repos, **masquage dans les logs**
+- **Sous-traitants** : [Brevo, Cloudflare, Jèko/CinetPay, Coolify — nature et localisation de l'hébergement]
+- **Droits des personnes** : accès, rectification, suppression → [modalité prévue]
+
 ## Hypothèses non confirmées
 - [ ] [hypothèse 1]
 - [ ] [hypothèse 2]

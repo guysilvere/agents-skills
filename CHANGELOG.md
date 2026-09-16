@@ -1,5 +1,39 @@
 # CHANGELOG
 
+## [1.10.0] — 2026-09-16
+
+### Sécurité
+- **Durcissement des permissions des 3 agents** : `npx`/`node`/`bun`, `curl`, `psql`, `docker`, `coolify`, `gh`, `kill` ne passent plus sans validation. `lead-dev` est limité à la lecture Git (`status`/`diff`/`log`/`branch`/`add`/`commit`) ; `ops-quality` passe `edit`/`write` en `deny` (aligne enfin la permission sur la règle « ne corrige jamais le code »).
+- **Faille force-push comblée** : le motif `git push --force*` ne couvrait pas `git push origin main --force` (option en fin de commande) — remplacé par `git push*` + `git *` en `ask`. Idem `git reset --hard`, `git clean`, `git branch -D`.
+- **Protection `.env` et des tokens d'agent** : les 3 agents refusent la lecture de `*.env` / `*.env.*` et de `~/.config/opencode/.tokens/**` ; `.env.local` reste autorisé pour le dev.
+- **`integrations`** : `psql` et `pb` retirés (incohérents avec PocketBase, `pb` inexistant) ; l'édition des `pb_hooks` — code serveur qui manipule l'argent — repasse en validation.
+
+### Ajouté
+- **`opencode/WORKFLOW.md`** : référence unique des phases 0–10, des jalons humains (merge `main`, déploiement, migration non locale, appel paiement hors sandbox, suppression de ressource), de l'attribution des tests et du format de relais (3 allers-retours max, puis escalade humaine).
+- **Réconciliation des paiements** (`api-paiements/assets/checklists/reconciliation.md`) : job périodique fournisseur ↔ base, détection et traitement des écarts — un webhook perdu signifiait un client débité non crédité.
+- **CI GitHub Actions minimale** (`pwa-developpement/assets/configs/ci.yml`) : secrets → lint → typecheck → tests → audit → build, sur chaque PR.
+- **Section « Autorisations » obligatoire** dans le template `SPEC-XXX.md` (anti-IDOR) et « tests écrits et verts » dans la DoD.
+- **Stratégie offline, mise à jour du service worker et budget de performance** dans le template `BLUEPRINT.md`.
+- **Volet données personnelles (loi n°2013-450 / ARTCI)** dans le template `CADRAGE.md`.
+- **Migrations + rollback, test de restauration périodique et monitoring** dans le template `RUNBOOK.md`.
+
+### Modifié
+- **Attribution des tests** : `lead-dev` et `integrations` écrivent leurs tests, `ops-quality` les exécute et juge la couverture — personne ne les écrivait auparavant.
+- **Validation réordonnée** : détection de secrets en étape 0 (bloquante et bon marché), `gitleaks` + `npm audit` + lockfile commité ; merge `main` uniquement via PR avec CI verte.
+- **Lighthouse corrigé** : audit sur le build de production servi en HTTPS (certificat Caddy accepté), catégorie « PWA installable » retirée (Lighthouse ≥ 12) → DevTools, `INP` remplacé par `TBT` (métrique terrain vs labo).
+- **`impeccable` épinglé en devDependency** au lieu de `npx` à la volée (risque supply chain).
+- **Règles webhooks complétées** : signature sur corps brut + comparaison à temps constant, anti-rejeu, 2xx après persistance durable, machine à états, idempotence par contrainte d'unicité en base.
+- **Factures PDF et AVIF/WebP hors `pb_hooks`** : PocketBase embarque un moteur JS sans Node.js.
+- **Section « Intégration de nouvelles skills » dédupliquée** (3 copies → 1 dans `WORKFLOW.md`).
+
+### Corrigé
+- **4 frontmatters YAML invalides** (deux-points non échappé dans la `description`) : `ops-quality.md`, `commands/deploy.md`, `commands/release.md`, `design-ux-flow/SKILL.md`. Celui d'`ops-quality` pouvait invalider l'intégralité de son bloc `permission`.
+- **Lien `assets/antigravity/rule.md` cassé** dans `pwa-developpement` (le fichier vit dans la skill `opencode-admin`).
+
+### À trancher
+- **React vs SvelteKit** : les templates mentionnent React, le plugin `@sveltejs/opencode` et le MCP Svelte sont actifs. Le défaut est fixé à SvelteKit dans `lead-dev` et `BLUEPRINT.md`, mais les docs React n'ont pas été réécrites.
+- **Protection de branche `main`** sur GitHub (PR obligatoire, no force-push) : toujours à activer — c'est la seule protection indépendante des agents.
+
 ## [1.9.0] — 2026-09-09
 
 ### Ajouté

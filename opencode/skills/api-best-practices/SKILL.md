@@ -21,7 +21,7 @@ metadata:
 
 ## Authentification & sécurité
 - API Keys : header personnalisé (`X-API-KEY`) pour les serveurs ; OAuth 2.1 / JWT pour les apps utilisateur.
-- **Jamais de clés en clair** : `{file:...}` ou variables d'environnement.
+- **Jamais de clés en clair** : variables d'environnement pour l'application (Coolify en prod, `.env.local` en dev). `{file:...}` est réservé aux **secrets d'agent OpenCode** — ne pas confondre les deux.
 - Rate limiting : headers `X-RateLimit-Remaining`, `Retry-After`.
 - CORS : origines autorisées explicites en production.
 - Headers : `Strict-Transport-Security`, `X-Content-Type-Options`.
@@ -32,13 +32,17 @@ metadata:
 - Toujours catcher les erreurs HTTP (timeout, 4xx, 5xx) ; timeout raisonnable 10-30 s.
 
 ## Webhooks
-- Signature HMAC pour vérifier l'authenticité ; URLs HTTPS uniquement.
-- Idempotence : même payload = même résultat ; répondre 2xx pour accuser réception.
+- Signature HMAC vérifiée sur le **corps BRUT**, comparaison à **temps constant** ; URLs HTTPS uniquement.
+- **Idempotence garantie EN BASE** (contrainte d'unicité sur l'id fournisseur), pas seulement applicative.
+- **2xx seulement après persistance durable** ; signature invalide → 4xx ; événement inconnu → 2xx + log.
+- **Ne jamais se fier au payload seul** pour une opération financière : re-vérifier via l'API de la source.
 - Retry : backoff exponentiel + jitter, max 3-5 tentatives.
 
 ## Retry strategy
-- Exponential backoff avec jitter ; max 3 tentatives appels API.
-- Header `Idempotency-Key` pour éviter les doublons d'écriture.
+- Exponential backoff avec jitter ; max 3 tentatives pour les appels API.
+- Header `Idempotency-Key` pour les écritures — **uniquement si le fournisseur le supporte** (à vérifier, ne pas présumer).
+- **Un timeout n'est pas un échec** : sur une opération financière, re-vérifier le statut avant de relancer (risque de double débit).
+- Ne jamais relancer automatiquement une écriture non idempotente.
 
 ## Review d'API (checklist)
 - Passer `assets/checklists/api-review.md` avant chaque mise en production d'un endpoint.

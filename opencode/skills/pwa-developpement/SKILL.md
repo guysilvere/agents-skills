@@ -17,9 +17,10 @@ metadata:
 
 ## 1. Initialisation du projet
 - Créer `AGENTS.md` à la racine (point d'entrée unique IA) si absent — template avec section « Compatibilité Antigravity » incluse.
-- 🟩 Antigravity : dupliquer les règles projet dans `.agents/rules/*.md` (AGENTS.md n'y est pas lu) — template `assets/antigravity/rule.md` (skill `opencode-admin`).
+- 🟩 Antigravity : dupliquer les règles projet dans `.agents/rules/*.md` (AGENTS.md n'y est pas lu) — template `~/.config/opencode/skills/opencode-admin/assets/antigravity/rule.md`.
 - Créer `README.md` depuis l'ébauche du blueprint ; mise à jour à chaque feature.
 - Créer `.env.example` listant TOUTES les clés (Jeko, CinetPay, Brevo/Mailtrap, Turnstile, R2, VAPID, PocketBase/Turso).
+- Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build).
 - Template : `assets/templates/AGENTS.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
 
 ## 2. Règle de branche
@@ -82,12 +83,14 @@ metadata:
 
 ```
 projet/
-├── src/                       # Code source frontend (React / PWA)
+├── src/                       # Code source frontend (SvelteKit / PWA)
+├── src/lib/services/          # Logique métier — hors composants
 ├── backend/                   # Micro-services Python / Hono (optionnel)
 ├── docker/pocketbase/
-│   ├── pb_hooks/              # Logique métier serveur
+│   ├── pb_hooks/              # Logique métier serveur (⚠️ moteur JS embarqué, pas Node.js)
 │   ├── pb_migrations/         # Migrations versionnées
 │   └── pb_data/               # Données locales (volume Docker)
+├── .github/workflows/ci.yml   # CI : secrets → lint → typecheck → tests → build
 ├── Dockerfile                 # Multi-stage production (Coolify)
 ├── docker-compose.dev.yml     # Dev local avec hot-reload (Docker Desktop)
 ├── docker-compose.yml         # Prod / Staging
@@ -113,4 +116,5 @@ projet/
 - `assets/templates/README.md`
 - `assets/configs/.env.example`
 - `assets/configs/docker-compose.dev.yml`
+- `assets/configs/ci.yml`
 - `assets/checklists/style-code.md`

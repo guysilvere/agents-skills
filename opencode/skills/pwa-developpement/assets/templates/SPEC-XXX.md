@@ -1,7 +1,7 @@
 # [SPEC-XXX] [Nom de la fonctionnalité]
 
 > **Statut** : DRAFT / APPROVED / IN_PROGRESS / DONE
-> **Phase Roadmap** : [Phase 0 / 1 / 2 / 3 / 4]
+> **Phase Roadmap** : [Phase 0–10 — voir WORKFLOW.md]
 > **Agent(s)** : `lead-dev` → `ops-quality` → `integrations` (si paiements/intégrations)
 
 ---
@@ -33,16 +33,28 @@ En tant que **[Rôle]**, je veux **[action]**, afin de **[valeur]**.
 - `POST /api/...` : [payload / usage]
 - Webhooks : [événements écoutés/émis, signature, idempotence]
 
-## 5. Fichiers impactés
+## 5. Autorisations (obligatoire — anti-IDOR)
+> Toute spec doit répondre. « Aucune » est une réponse valide ; un blanc ne l'est pas.
+
+| Ressource | Lire | Créer | Modifier | Supprimer |
+|-----------|------|-------|----------|-----------|
+| [collection] | [qui] | [qui] | [qui] | [qui] |
+
+- **Règles d'accès PocketBase (API rules)** : [règle par collection → reporter dans `docs/DATABASE.md`]
+- **Données personnelles collectées** : [champs — justifier la minimisation]
+
+## 6. Fichiers impactés
 - `backend/pb_hooks/...` [NEW/MODIFY]
 - `backoffice/src/components/...` [NEW/MODIFY]
 - `backoffice/src/services/...` [NEW/MODIFY]
 
-## 6. Tâches d'exécution
+## 7. Tâches d'exécution
 - [ ] **T1** — Backend/schéma (REQ-01)
 - [ ] **T2** — UI/composant (REQ-02)
-- [ ] **T3** — Build & lint (`ops-quality`)
-- [ ] **T4** — Commit sémantique (`ops-quality`)
+- [ ] **T3** — Tests écrits (`lead-dev` : unitaires + intégration)
+- [ ] **T4** — Build & lint (`ops-quality`)
+- [ ] **T5** — Commit sémantique (`ops-quality`)
 
 ---
 *Une fois DONE, ce fichier fait foi comme référence unique de la fonctionnalité.*
+*DoD global : aucune spec ne passe à DONE sans « tests écrits et verts » — voir `WORKFLOW.md`.*
