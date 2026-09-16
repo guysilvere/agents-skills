@@ -1,11 +1,20 @@
 # DATABASE — <Nom du projet>
 
-> Schéma relationnel succinct + règles d'accès. Mis à jour à chaque modification de schéma. Ultra-léger.
+> Schéma + **règles d'autorisation**. Mis à jour à chaque modification de schéma. Ultra-léger.
 
 ## Moteur
-- [PocketBase (SQLite) — défaut] / [Turso (libSQL)] / [PostgreSQL]
+- **Turso (libSQL)** — base principale.
+- ⚠️ **Turso n'a pas de row-level security.** Contrairement à PocketBase (API rules) ou PostgreSQL (RLS), **aucune règle d'accès n'est déclarée dans la base** : toute l'autorisation est **applicative**.
 
-## Collections / Tables
+## Autorisation — règle structurante
+- **Un seul runtime possède la base et l'autorisation** : les server routes SvelteKit (`src/lib/server/`).
+- Aucun accès Turso ailleurs — pas de client dans le navigateur, pas de second service qui écrirait directement.
+- Un module unique `src/lib/server/auth/authorize.ts` : **chaque** lecture/écriture passe par lui.
+- **Requêtes scopées par utilisateur** : jamais de `SELECT * FROM orders` sans clause de propriété. C'est là que naissent les IDOR.
+- Jeton Turso **scopé** par environnement quand c'est possible (`turso db tokens create <db> --read-only`, `-p <table>:<actions>`).
+
+## Tables
+
 ### `users`
 | Champ | Type | Contraintes |
 |-------|------|-------------|
@@ -17,22 +26,36 @@
 ### `[nom_table]`
 | Champ | Type | Contraintes |
 |-------|------|-------------|
+| id | text | PK |
+| user_id | text | FK → users.id, **indexé** |
+
+## Matrice d'autorisation (obligatoire)
+> Toute table doit figurer ici. « Aucun accès » est une réponse valide ; une case vide ne l'est pas.
+
+| Table | Lire | Créer | Modifier | Supprimer | Implémenté dans |
+|-------|------|-------|----------|-----------|-----------------|
+| users | soi-même | inscription | soi-même | admin | `authorize.ts` |
+| [table] | | | | | |
 
 ## Relations
 - `users` 1—N `[nom_table]` (via `user_id`)
 
-## Règles d'accès (RLS / règles PocketBase)
-- Lecture : [règle]
-- Écriture : [règle]
-- Multi-tenant : [workspaces/organisations + rôles si applicable]
+## Multi-tenant (si applicable)
+- [workspaces / organisations + rôles] — et **comment le `tenant_id` est imposé à chaque requête**
+
+## Paiements (si applicable)
+- Idempotence webhook : **contrainte d'unicité sur `geniuspay_reference`**.
+- Machine à états des statuts — transitions interdites refusées.
+- Montants stockés en **entiers XOF**.
 
 ## Stratégie de migration
-- Migrations versionnées : `pb_migrations/` (PocketBase) ou SQL versionné (Turso)
-- Isolation stricte : base `testing` vs `production`
-- Seeders : jeu de données réalistes pour tests (`scripts/seed`)
+- Migrations SQL versionnées dans `migrations/` — numérotées, **jamais modifiées après application**.
+- Isolation stricte : deux bases Turso (staging / production) et deux jetons distincts.
+- Ordre : backup → migration testée sur copie de staging → déploiement → vérification. Rollback documenté dans `RUNBOOK.md`.
+- Seeders : `scripts/seed` — **refuse de s'exécuter hors local/staging**.
 
 ## Dictionnaire de données (champs calculés / globaux)
 - [champ] : [définition / formule]
 
 ## Synchronisation
-- Toute modification de champs/tables/règles → mise à jour immédiate de ce fichier (Living Documentation).
+- Toute modification de table, de contrainte **ou de règle d'autorisation** → mise à jour immédiate de ce fichier (Living Documentation).

@@ -1,35 +1,30 @@
-# docker-compose.yml — Prod/Staging : app PWA + PocketBase sidecar
-# Adapter les variables d'environnement dans l'UI Coolify (ne pas committer les secrets).
+# docker-compose.yml — Prod/Staging : app SvelteKit (adapter-node)
+# Les secrets sont injectés par Coolify (UI) — ne jamais les committer ici.
 
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-      target: app          # stage Nginx/Node final
     restart: unless-stopped
     ports:
-      - "8080:80"          # Nginx : servir l'app statique
-    depends_on:
-      - pocketbase
+      - "3000:3000"                # adapter-node
     environment:
-      - PUBLIC_POCKETBASE_URL=http://pocketbase:8090
-      # ... autres variables d'env via Coolify
+      - ORIGIN=https://<domaine>   # requis par adapter-node
+      - DATABASE_URL=${DATABASE_URL}                 # libsql://<db>.turso.io
+      - TURSO_AUTH_TOKEN=${TURSO_AUTH_TOKEN}
+      - GENIUSPAY_API_KEY=${GENIUSPAY_API_KEY}
+      - GENIUSPAY_API_SECRET=${GENIUSPAY_API_SECRET}
+      - GENIUSPAY_WEBHOOK_SECRET=${GENIUSPAY_WEBHOOK_SECRET}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
-  pocketbase:
-    image: alpine:latest
-    restart: unless-stopped
-    volumes:
-      - pb_data:/pb/pb_data
-    ports:
-      - "127.0.0.1:8090:8090"   # exposé localement ; accès public via tunnel Zero Trust
-    command: >
-      sh -c "apk add --no-cache curl unzip && \
-      curl -fsSL 'https://github.com/pocketbase/pocketbase/releases/download/v0.22.0/pocketbase_0.22.0_linux_amd64.zip' -o /tmp/pb.zip && \
-      unzip -o /tmp/pb.zip -d /pb/ && rm /tmp/pb.zip && \
-      /pb/pocketbase serve --http=0.0.0.0:8090 --dir=/pb/pb_data"
-
-volumes:
-  pb_data:
-
-# Variante Turso : supprimer le service pocketbase, utiliser DATABASE_URL=libsql://...
+# Base de données : Turso (cloud).
+# Aucun sidecar à héberger, sauvegarder ou mettre à jour.
+# Sauvegardes : `turso db shell <db> .dump` → R2 (voir scripts/backup-r2.sh).
+# Jobs planifiés : tâche planifiée Coolify appelant un endpoint protégé.

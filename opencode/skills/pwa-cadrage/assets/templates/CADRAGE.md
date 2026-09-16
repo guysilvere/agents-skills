@@ -16,9 +16,9 @@
 ## Modèle économique
 - Modèle : [freemium / abonnement / unique / quotas]
 - Paliers : [Gratuit / Pro / Équipe — prix FCFA]
-- Passerelle principale : **Jèko** (Mobile Money)
-- Passerelle secours + cartes : **CinetPay**
-- Dunning : [relances échec prélèvement — oui/non + fréquence]
+- Paiements : **GeniusPay** — Wave, Orange Money, MTN, Moov, cartes bancaires
+- Sandbox : `pk_sandbox_…` (toute intégration passe par là) · passage en `live` = **jalon humain**
+- Dunning : [relances + lien de paiement — le débit récurrent automatique n'existe pas en Mobile Money]
 - Factures PDF : [automatiques — oui/non]
 
 ## Scope
@@ -32,7 +32,7 @@
 - **Minimisation** : justifier chaque champ ; supprimer tout champ collecté « au cas où »
 - **Base légale & durée de conservation** : [consentement / exécution du contrat ; durée]
 - **Données sensibles** : numéros Mobile Money, téléphone, email → chiffrement en transit et au repos, **masquage dans les logs**
-- **Sous-traitants** : [Brevo, Cloudflare, Jèko/CinetPay, Coolify — nature et localisation de l'hébergement]
+- **Sous-traitants** : [Brevo, Cloudflare, GeniusPay, Turso, Coolify — nature et localisation de l'hébergement]
 - **Droits des personnes** : accès, rectification, suppression → [modalité prévue]
 
 ## Hypothèses non confirmées

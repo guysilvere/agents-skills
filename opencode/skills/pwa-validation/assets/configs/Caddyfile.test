@@ -24,10 +24,11 @@ mon-projet.test {
     }
 }
 
-# --- Exemple : PocketBase sidecar ---
-db.mon-projet.test {
+# --- Exemple : endpoint de jobs (réconciliation GeniusPay) ---
+# Appelé par une tâche planifiée Coolify, jamais exposé publiquement sans secret.
+jobs.mon-projet.test {
     tls internal
-    reverse_proxy localhost:8090
+    reverse_proxy localhost:4173
 }
 
 # Règles :

@@ -8,11 +8,11 @@
 ## Stack
 | Couche | Technologie |
 |--------|-------------|
-| Front | Vite + React + TypeScript (PWA) |
-| Back | [Hono / Fastify / PocketBase] |
-| Base | PocketBase (SQLite) / Turso |
+| Front | SvelteKit + TypeScript strict (PWA) |
+| Back | Server routes SvelteKit (`+server.ts`) |
+| Base | Turso (libSQL) + Drizzle ORM |
 | Auth | [Google + email/magic link + Turnstile] |
-| Paiements | Jèko + CinetPay |
+| Paiements | GeniusPay (sandbox `pk_sandbox_…`) |
 | Emails | Brevo / Mailtrap |
 | Stockage | Cloudflare R2 |
 | Déploiement | Coolify + Cloudflare |

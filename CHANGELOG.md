@@ -1,5 +1,42 @@
 # CHANGELOG
 
+## [2.0.0] — 2026-09-16
+
+> **Changement cassant** : la passerelle de paiement, la base de données et le framework front changent. Toute spec ou projet écrit avant cette version doit être relu.
+
+### Modifié — Paiements : Jèko + CinetPay → **GeniusPay** (passerelle unique)
+- **Référence réécrite** (`api-paiements/assets/reference/geniuspay.md`) : endpoints, sandbox, statuts, méthodes, payload webhook.
+- **Sandbox réelle disponible** (`pk_sandbox_…` / `sk_sandbox_…`) — les règles « hors sandbox » redeviennent opérantes.
+- **Piège documenté** : `amount` est un **entier en XOF, minimum 200** — pas des centimes (contrairement à Jèko).
+- **Anti-rejeu** : `X-GeniusPay-Timestamp` existe, mais l'exemple officiel ne signe que le corps → incertitude signalée, à clarifier avec le support.
+- **5 incohérences de la doc fournisseur** relevées et tracées (signature, retry, rate limits, `payment_url` vs `checkout_url`, `paystack`).
+- **MCP GeniusPay** ajouté à `opencode.jsonc` (`https://geniuspay.ci/api/mcp`) — doc à jour plutôt que recopiée.
+- CinetPay supprimé ; `reference/jeko.md`, `reference/cinetpay.md` et `curl-jeko.sh` supprimés, remplacés par `curl-geniuspay.sh`.
+- Factures PDF : plus de contrainte de moteur embarqué (rendu côté serveur Node).
+
+### Modifié — Base de données : PocketBase → **Turso (libSQL)**
+- **Turso n'a pas de row-level security** (le RLS est une demande ouverte de libSQL). La perte des API rules de PocketBase est le principal coût de ce changement : **l'autorisation devient applicative**.
+- Nouvelle règle structurante : **un seul runtime possède la base et l'autorisation** (server routes SvelteKit) — deux runtimes = deux logiques d'autorisation = IDOR.
+- `DATABASE.md` réécrit : matrice d'autorisation obligatoire par table, module `authorize.ts` unique, requêtes scopées.
+- Sauvegardes : export logique `turso db shell .dump` (jamais de copie de fichier) ; `backup-r2.sh` et `restore-r2.sh` réécrits.
+- Suppression de la console PocketBase des tunnels et de la topologie ; `pocketbase *` retiré des permissions.
+
+### Modifié — Front : React → **SvelteKit**
+- `BLUEPRINT.md`, `stack-table.md`, `README.md`, `docker-compose.dev.yml` alignés sur SvelteKit + TypeScript strict + Zod.
+- `adapter-node` retenu : runtime Node réel, npm complet (pdf-lib, sharp, R2, Brevo).
+
+### Ajouté
+- **Matrice d'autorisation** dans `SPEC-XXX.md` (section 5) et `DATABASE.md` — la contrepartie obligatoire de l'absence de RLS.
+- **Jobs planifiés via tâche planifiée Coolify** (SvelteKit n'a pas de scheduler natif) pour la réconciliation GeniusPay.
+
+### Corrigé
+- `lead-dev` : `npx`/`node`/`bun`/`curl`/`psql`/`docker`/`coolify`/`gh`/`kill` ne passent plus sans validation ; `ops-quality` passe `edit`/`write` en `deny`.
+- `git push --force*` ne couvrait pas `git push origin main --force` → motif élargi.
+
+### Infrastructure
+- **Dépôt `agents-skills` rendu public** et **protection de branche `main` activée** : PR obligatoire, force-push et suppression bloqués, admins soumis. Vérifié — le serveur refuse `"Changes must be made through a pull request. Cannot force-push to this branch"`.
+- `gitleaks` retenu comme outil de détection de secrets (0 fuite sur 22 commits).
+
 ## [1.10.0] — 2026-09-16
 
 ### Sécurité

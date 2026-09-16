@@ -36,6 +36,14 @@
         "Authorization:Bearer {file:/Users/silveremeya/.config/opencode/.tokens/brevo}"
       ],
       "enabled": true
+    },
+    "geniuspay": {
+      "type": "remote",
+      "url": "https://geniuspay.ci/api/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/geniuspay}"
+      }
     }
   },
   "plugin": [

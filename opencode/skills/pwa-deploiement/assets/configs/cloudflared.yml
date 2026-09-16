@@ -1,23 +1,18 @@
 # cloudflared.yml — Tunnel Cloudflare Zero Trust pour consoles d'admin
 # Usage : cloudflared tunnel --config cloudflared.yml run <tunnel-id>
-# Documente l'exposition sécurisée de Coolify / PocketBase sans ports ouverts.
+# Expose les interfaces d'administration sans ouvrir de ports.
 
 tunnel: <TUNNEL_ID>
 credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
 
 ingress:
-  # Console d'admin PocketBase — accès restreint
-  - hostname: db.<domaine>
-    service: http://localhost:8090
-    originRequest:
-      noTLSVerify: true
-
-  # Console Coolify (optionnel)
+  # Console Coolify — accès restreint
   - hostname: coolify.<domaine>
     service: http://localhost:8000
 
   # Fallback : tout rejeter
   - service: http_status:404
 
-# Rappel : le trafic vers l'app elle-même passe par le proxy DNS Cloudflare (nuage orange),
-# pas par le tunnel. Le tunnel ne sert QUE les interfaces d'administration.
+# Rappel : l'app elle-même passe par le proxy DNS Cloudflare (nuage orange), pas par le tunnel.
+# Le tunnel ne sert QUE les interfaces d'administration.
+# Turso étant un service cloud, il n'y a plus de console de base à exposer.

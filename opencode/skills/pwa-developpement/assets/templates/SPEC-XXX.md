@@ -40,11 +40,11 @@ En tant que **[Rôle]**, je veux **[action]**, afin de **[valeur]**.
 |-----------|------|-------|----------|-----------|
 | [collection] | [qui] | [qui] | [qui] | [qui] |
 
-- **Règles d'accès PocketBase (API rules)** : [règle par collection → reporter dans `docs/DATABASE.md`]
+- **Implémentation de l'autorisation** : [module/fonction — Turso n'a pas de RLS, tout est applicatif → reporter la ligne dans `docs/DATABASE.md`]
 - **Données personnelles collectées** : [champs — justifier la minimisation]
 
 ## 6. Fichiers impactés
-- `backend/pb_hooks/...` [NEW/MODIFY]
+- `src/lib/server/...` [NEW/MODIFY]
 - `backoffice/src/components/...` [NEW/MODIFY]
 - `backoffice/src/services/...` [NEW/MODIFY]
 

@@ -36,8 +36,8 @@ metadata:
 
 ### 4. Blueprint (docs/BLUEPRINT.md)
 - Contexte & problème → proposition de valeur → stack justifiée → architecture (flux de données, modules) → user stories MoSCoW → exigences PWA → plan de développement (jalons) → perspectives d'évolution → monétisation → hébergement.
-- Stack : suivre `assets/data/stack-table.md` (PocketBase par défaut ; Turso option ; Coolify + Docker ; Cloudflare proxy/R2/Turnstile).
-- Architecture PocketBase : conteneur sidecar, API REST publique, admin UI sur `db.<domaine>`, hooks `pb_hooks`.
+- Stack : suivre `assets/data/stack-table.md` (SvelteKit + Turso par défaut ; Coolify + Docker ; Cloudflare proxy/R2/Turnstile).
+- ⚠️ **Turso n'a pas de row-level security** → l'autorisation est **applicative**, concentrée dans les server routes SvelteKit (voir `DATABASE.md`).
 - Template : `assets/templates/BLUEPRINT.md`.
 
 ### 5. Cadrage produit (docs/CADRAGE.md)
@@ -48,7 +48,7 @@ metadata:
 - Est-ce monétisable ? (gagne du temps/argent ou en fait perdre s'il s'arrête)
 - Modèles : freemium, abonnement mensuel/annuel, paiement unique, quotas.
 - Paliers : Gratuit / Pro / Équipe (repère CI : 2 000–15 000 FCFA/mois, 1 € ≈ 655 FCFA).
-- Passerelles : **Jèko** principale (Mobile Money), **CinetPay** secours + cartes. Abonnements, webhooks, dunning, factures PDF.
+- Paiements : **GeniusPay** (passerelle unique — Wave, Orange Money, MTN, Moov, cartes ; **sandbox réelle**). Abonnements, webhooks, dunning, factures PDF.
 
 ### 7. Copywriting landing
 - Hero (promesse + sous-titre + 1 CTA) → bénéfices (résultats, pas fonctionnalités) → preuve (véridique uniquement) → fonctionnement (3 étapes) → tarifs → CTA final + « Conçu par Agence Bulles ».

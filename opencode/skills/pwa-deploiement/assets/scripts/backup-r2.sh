@@ -1,32 +1,52 @@
 #!/usr/bin/env bash
-# backup-r2.sh — Sauvegarde quotidienne PocketBase + médias vers Cloudflare R2
-# Usage : ./backup-r2.sh [bucket] [source_dir]
-# Prérequis : AWS CLI v2 configuré pour R2 (aws configure sso / credentials), rclone ou aws cli
+# backup-r2.sh — Sauvegarde quotidienne Turso + médias vers Cloudflare R2
+#
+# Usage : ./backup-r2.sh <nom-base-turso> [dossier-medias]
+# Cron  : 0 2 * * *  /chemin/backup-r2.sh <db> /chemin/medias
+#
+# Prérequis : turso CLI authentifié · rclone configuré (remote « r2 ») ou aws CLI
+#
+# ⚠️ Turso est managé : la sauvegarde passe par un EXPORT LOGIQUE (.dump),
+#    jamais par une copie de fichier. Les sauvegardes internes de Turso ne
+#    remplacent pas celle-ci — elles ne sont pas exportables hors plateforme.
 
 set -euo pipefail
 
-BUCKET="${1:-${R2_BUCKET_NAME:-sauvegardes}}"
-PB_DATA="${2:-./docker/pocketbase/pb_data}"
-DATE="$(date +%Y-%m-%d)"
-TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
+DB="${1:?Usage: backup-r2.sh <nom-base-turso> [dossier-medias]}"
+MEDIA_DIR="${2:-}"
+BUCKET="${R2_BUCKET:?Set R2_BUCKET}"
+DATE="$(date +%F)"
 
-echo "==> Sauvegarde $DATE"
+echo "==> Sauvegarde Turso « ${DB} » → r2:${BUCKET}/turso/${DATE}/dump.sql"
+turso db shell "$DB" .dump > "/tmp/${DB}-${DATE}.sql"
+gzip -f "/tmp/${DB}-${DATE}.sql"
 
-# 1. Copie de la base PocketBase (SQLite) — copie du fichier pour éviter un dump corrompu
-#    (Utiliser pb backup si disponible : ./pocketbase backup create)
 if command -v rclone >/dev/null 2>&1; then
-  rclone copy "$PB_DATA" "r2:${BUCKET}/$(basename "$PB_DATA")/${DATE}/data" --transfers 1
-  echo "==> Base copiée (rclone)"
+  rclone copy "/tmp/${DB}-${DATE}.sql.gz" "r2:${BUCKET}/turso/${DATE}/" --transfers 1
 else
-  aws s3 sync "$PB_DATA" "s3://${BUCKET}/$(basename "$PB_DATA")/${DATE}/data" --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
-  echo "==> Base copiée (aws s3)"
+  aws s3 cp "/tmp/${DB}-${DATE}.sql.gz" "s3://${BUCKET}/turso/${DATE}/" \
+    --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+fi
+rm -f "/tmp/${DB}-${DATE}.sql.gz"
+
+# Médias utilisateurs — normalement déjà sur R2 (source de vérité).
+# Ce bloc ne sert qu'en secours si une copie locale existe.
+if [[ -n "$MEDIA_DIR" && -d "$MEDIA_DIR" ]]; then
+  echo "==> Médias ${MEDIA_DIR} → r2:${BUCKET}/media/${DATE}"
+  if command -v rclone >/dev/null 2>&1; then
+    rclone copy "$MEDIA_DIR" "r2:${BUCKET}/media/${DATE}" --transfers 4
+  else
+    aws s3 sync "$MEDIA_DIR" "s3://${BUCKET}/media/${DATE}" \
+      --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+  fi
 fi
 
-# 2. Médias / uploads
-# aws s3 sync ./docker/pocketbase/pb_data/storage "s3://${BUCKET}/storage/${DATE}" --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+echo "==> Vérifier la sauvegarde (taille non nulle) :"
+if command -v rclone >/dev/null 2>&1; then
+  rclone ls "r2:${BUCKET}/turso/${DATE}/"
+fi
 
-# 3. Nettoyage : rétention 30 jours
-# aws s3 ls "s3://${BUCKET}/$(basename "$PB_DATA")/" --recursive --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+echo "==> OK. Penser au TEST DE RESTAURATION périodique (voir restore-r2.sh)."
 
-echo "==> Sauvegarde terminée : ${BUCKET}/${DATE}"
+# Rétention : appliquer une politique de cycle de vie sur le bucket R2
+# (ex. suppression des dumps de plus de 30 jours) plutôt qu'un nettoyage manuel.

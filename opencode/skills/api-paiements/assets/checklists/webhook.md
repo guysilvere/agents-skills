@@ -1,41 +1,53 @@
-# Checklist — Webhook de paiement
+# Checklist — Webhook GeniusPay
 
-> À appliquer pour Jèko ET CinetPay. Un webhook mal vérifié = fraude possible.
+> Un webhook mal vérifié = fraude possible. À appliquer à chaque événement.
 
 ## Réception
 - [ ] Endpoint HTTPS uniquement
-- [ ] Signature vérifiée sur le **corps BRUT** de la requête (avant tout parsing JSON)
-- [ ] Comparaison à **temps constant** (`crypto.timingSafeEqual`) — jamais `===`
+- [ ] Signature `X-GeniusPay-Signature` vérifiée sur le **corps BRUT** de la requête (avant tout parsing JSON)
+- [ ] Comparaison à **temps constant** (`crypto.timingSafeEqual` / `hash_equals`) — jamais `===`
 - [ ] Signature invalide → **4xx** : aucun traitement, aucun crédit
 - [ ] Ne pas loguer le payload complet (données personnelles)
 
 ## Anti-rejeu
-- [ ] Si le fournisseur fournit un **horodatage signé** : rejeter les événements trop anciens (fenêtre ~5 min) — **à vérifier auprès de Jèko/CinetPay**
-- [ ] Contrainte d'unicité **EN BASE** sur l'id de transaction du fournisseur — pas un simple test applicatif (conditions de course)
+- [ ] `X-GeniusPay-Timestamp` contrôlé (fenêtre ~5 min) — ⚠️ **à vérifier auprès du support** : le timestamp est-il inclus dans le HMAC ? Sinon il est falsifiable et ne protège de rien
+- [ ] Contrainte d'unicité **EN BASE** sur `data.transaction.reference` — pas un simple test applicatif (conditions de course)
+- [ ] Événement `environment: "sandbox"` reçu en production → **ignoré** et logué
 
 ## Traitement (ordre impératif)
 - [ ] 1. Persister l'événement brut (statut « reçu ») — **avant** toute logique métier
 - [ ] 2. Répondre **2xx** dès que la persistance durable est confirmée
 - [ ] 3. Traiter le métier ensuite (asynchrone si long)
-- [ ] **Jamais créditer sur la seule foi du webhook** : re-vérifier le statut via l'API du fournisseur
-- [ ] Contrôler montant reçu == montant attendu, **devise** et **référence de commande**
-- [ ] Machine à états explicite (en attente / réussi / échoué / remboursé) — toute transition interdite est refusée
+- [ ] **Jamais créditer sur la seule foi du webhook** : re-vérifier via `GET /payments/{reference}`
+- [ ] Contrôler montant (entier XOF), devise et `metadata.order_id`
+- [ ] Machine à états explicite — `pending` → `processing` → `completed` / `failed` / `cancelled` / `refunded` ; toute transition arrière refusée
+- [ ] **Ordre de livraison non garanti** : trier par `timestamp` du payload, ne pas supposer la chronologie
 - [ ] Événement inconnu → **2xx + log** (ne pas faire échouer le fournisseur)
 
+## Événements à gérer
+| Événement | Traitement |
+| --- | --- |
+| `payment.initiated` | Marquer la transaction `pending` (ne rien créditer) |
+| `payment.success` | Vérifier puis créditer, une seule fois |
+| `payment.failed` | Marquer `failed` + déclencher le dunning |
+| `payment.cancelled` | Marquer `cancelled` |
+| `payment.refunded` | Marquer `refunded` + révoquer l'accès |
+
 ## Fiabilité
-- [ ] Retry client : backoff exponentiel + jitter, max 3-5 tentatives
-- [ ] Reconstitution : pouvoir interroger le statut d'une transaction (API GET) si un webhook est manqué
-- [ ] Journalisation : id, statut, montant, méthode, horodatage — **numéros Mobile Money masqués**
+- [ ] Retry : ⚠️ **politique non documentée** — à clarifier avec le support ; prévoir un backoff exponentiel côté sortant
+- [ ] Reconstitution : pouvoir interroger le statut via `GET /payments/{reference}` si un webhook est manqué
+- [ ] Journalisation : référence, statut, montant, gateway, horodatage — **téléphones masqués**
 - [ ] **Réconciliation périodique** fournisseur ↔ base + alerte sur écarts → `reconciliation.md`
+- [ ] Abonnement webhook testable via `POST /webhooks/{id}/test`
 
 ## Dunning (échec d'abonnement)
-- [ ] ⚠️ Vérifier que le **prélèvement récurrent automatique existe réellement** (en Mobile Money, le paiement exige en général une confirmation utilisateur) — **à vérifier auprès de Jèko**
-- [ ] Si non : le dunning = **relances + lien de paiement**, pas des retries de débit
-- [ ] Calendrier défini : J+1, J+3, J+7 (exemple)
+- [ ] Le prélèvement récurrent automatique n'existe pas en Mobile Money → dunning = **relances + lien de paiement**, pas des retries de débit
+- [ ] Calendrier défini (ex. J+1, J+3, J+7)
 - [ ] Emails de relance via Brevo avec lien de paiement actualisé
 - [ ] Suspension progressive (dégradé → bloqué) documentée
 
 ## Facture
-- [ ] Facture/reçu PDF généré après succès — numérotation séquentielle **sans trou**, facture immuable
+- [ ] Facture/reçu PDF généré après `payment.success` — numérotation séquentielle **sans trou**, facture immuable
+- [ ] Génération **côté serveur SvelteKit** (runtime Node), pas de contrainte de moteur embarqué
 - [ ] Envoi par email (Brevo) + conservation dans le compte utilisateur
-- [ ] ⚠️ **Pas de génération dans les `pb_hooks`** (moteur JS embarqué, pas Node.js) → service séparé ou workflow n8n
+- [ ] Mentions obligatoires (fisc. ivoirienne) à valider avec un comptable

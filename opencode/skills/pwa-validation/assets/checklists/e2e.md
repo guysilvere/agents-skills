@@ -5,7 +5,7 @@
 
 ## Scénarios types SaaS (adapter par projet)
 - [ ] **Auth** : inscription → vérification email → login → logout (capture screenshot chaque étape)
-- [ ] **Paiement Jèko/CinetPay** : sélection montant → redirection passerelle → retour succès → état commande mis à jour (mock réseau si sandbox indisponible)
+- [ ] **Paiement GeniusPay** : sélection montant → redirection checkout → retour succès → état commande mis à jour. Tester aussi **l'échec** et **l'annulation**. Toujours en sandbox (`pk_sandbox_…`)
 - [ ] **CRUD principal** : créer → lister → éditer → supprimer (vérifier les empty states)
 - [ ] **Navigation** : bottom nav 3-5 onglets, retour en sous-page, FAB
 - [ ] **Hors-ligne** : page de repli + fonctionnalités de base (Service Worker)

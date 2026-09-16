@@ -11,11 +11,11 @@
 ## Monétisation
 - [ ] Le produit fait gagner du temps/argent, ou en fait perdre s'il s'arrête ?
 - [ ] Modèle retenu (freemium / abonnement / unique / quotas) ?
-- [ ] Paliers définis en FCFA ? Passerelles Jèko + CinetPay prévues ?
+- [ ] Paliers définis en FCFA ? Intégration GeniusPay prévue (sandbox `pk_sandbox_…`) ?
 
 ## Stack & contraintes
 - [ ] Contraintes (délai, budget, stack imposée, intégrations) explicites ?
-- [ ] Choix dans le cadre recommandé (PocketBase/Turso, Coolify, Cloudflare) ?
+- [ ] Choix dans le cadre recommandé (SvelteKit + Turso, Coolify, Cloudflare) ?
 - [ ] Tout choix hors cadre argumenté et validé ?
 
 ## Scope
