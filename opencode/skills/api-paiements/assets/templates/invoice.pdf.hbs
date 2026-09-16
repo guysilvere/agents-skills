@@ -1,7 +1,6 @@
 {{! invoice.pdf.hbs — Template de facture/reçu PDF (Handlebars) }}
-{{! ⚠️ NE PAS exécuter dans les pb_hooks : PocketBase embarque un moteur JS sans Node.js,
-       donc Handlebars et les libs npm PDF n'y sont pas disponibles.
-       Compiler depuis un service séparé ou un workflow n8n (puppeteer, wkhtmltopdf, pdf-lib). }}
+{{! Rendu côté serveur SvelteKit (runtime Node) → pdf-lib ou équivalent disponible.
+       Éviter puppeteer/Chromium dans le même conteneur (+300 Mo) ; préférer une lib pure JS. }}
 {{! ⚠️ Conformité : numérotation séquentielle sans trou, facture immuable.
        Mentions obligatoires (fisc. ivoirienne / facture normalisée) à valider avec un comptable. }}
 

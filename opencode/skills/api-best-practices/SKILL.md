@@ -1,6 +1,6 @@
 ---
 name: api-best-practices
-description: Guide de conception et d'intégration d'API RESTful — principes REST, sécurité, gestion d'erreur, webhooks, retry, idempotency, pagination, review checklist. À utiliser pour toute conception, intégration ou revue d'API (y compris Jèko/CinetPay via api-paiements).
+description: Guide de conception et d'intégration d'API RESTful — principes REST, sécurité, gestion d'erreur, webhooks, retry, idempotency, pagination, review checklist. À utiliser pour toute conception, intégration ou revue d'API (y compris GeniusPay via api-paiements).
 license: MIT
 compatibility: opencode
 metadata:

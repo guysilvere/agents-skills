@@ -1,6 +1,6 @@
 ---
 name: api-paiements
-description: Référence d'intégration des passerelles de paiement Agence Bulles — Jèko (principale, Mobile Money) et CinetPay (secours + cartes). Authentification, endpoints, webhooks signés, idempotence, réconciliation, factures PDF. Charger (via integrations) dès qu'un paiement, un webhook de paiement ou une facture est en jeu.
+description: Référence d'intégration de la passerelle de paiement Agence Bulles — GeniusPay (Wave, Orange Money, MTN, Moov, cartes). Authentification, endpoints, sandbox, webhooks signés, idempotence, réconciliation, factures PDF. Charger (via integrations) dès qu'un paiement, un webhook de paiement ou une facture est en jeu.
 license: MIT
 compatibility: opencode
 metadata:
@@ -11,46 +11,41 @@ metadata:
 # api-paiements
 
 ## Ce que je fais
-- Référence d'intégration des 2 passerelles retenues : **Jèko** (principale) + **CinetPay** (secours/cartes).
-- Rappelle les règles de sécurité des paiements (signature, idempotence, réconciliation, retry).
+- Référence d'intégration de la passerelle unique : **GeniusPay**.
+- Rappelle les règles de sécurité des paiements (signature, idempotence, réconciliation).
+- Complète le MCP GeniusPay, qui interroge la documentation officielle à jour.
 
-## À VÉRIFIER auprès du fournisseur AVANT de coder
-> Ne rien présumer — ces points ne sont pas confirmés par la documentation disponible.
-- Support du header `Idempotency-Key` sur les écritures (Jèko / CinetPay)
-- Présence d'un **horodatage signé** dans les webhooks (protection anti-rejeu)
-- Existence d'un **prélèvement récurrent automatique** — en Mobile Money, le paiement exige en général une confirmation de l'utilisateur
-- Statuts exacts des notifications CinetPay (`success` / `failed` / `pending` — à confirmer)
-- Runtime réel des `pb_hooks` selon la version de PocketBase (voir factures PDF ci-dessous)
+## MCP GeniusPay (source de vérité)
+- Serveur : `https://geniuspay.ci/api/mcp` — configuré dans `opencode.jsonc` (auth `Authorization: Bearer <clé>`).
+- **L'utiliser en priorité** : il donne la documentation à jour plutôt que la recopie de cette skill, qui peut vieillir.
+- La skill reste utile hors-ligne et pour les règles maison (les contraintes de sécurité ci-dessous ne sont pas dans la doc fournisseur).
 
-## Jèko (principale — Mobile Money)
-- Auth : headers `X-API-KEY` + `X-API-KEY-ID` (clés via cockpit.jeko.africa → Paramètres > API & Webhooks).
-- Base URL : `https://api.jeko.africa/partner_api`.
-- Endpoints : stores, devices (soundbox), payment_requests (redirect/soundbox), payment_links, transactions, banks.
-- Montant minimum : 100 centimes (1 XOF).
-- Webhooks : header `Jeko-Signature` (HMAC-SHA256, secret webhook) ; retry ×3 backoff exponentiel.
-- Modèles : Soundbox (QR terminal) / E-commerce (lien) / In-app (redirect).
-- Référence complète : `assets/reference/jeko.md`.
+## Environnements
+- **Sandbox** (`pk_sandbox_…` / `sk_sandbox_…`) : transactions simulées, sans frais. **Toute intégration et tout test passe par là.**
+- **Production** (`pk_live_…` / `sk_live_…`) : argent réel. **Jalon humain.**
+- Le champ `environment` est renvoyé dans les réponses et les webhooks → ignorer un événement `sandbox` reçu en production.
 
-## CinetPay (secours + cartes)
-- Auth : `apikey` + `site_id` ; `secret_key` pour vérifier les notifications.
-- Endpoints : checkouts (Mobile Money + cartes bancaires), notifications de statut.
-- Référence complète : `assets/reference/cinetpay.md`.
+## À VÉRIFIER auprès du support AVANT de coder
+> Ces points ne sont pas documentés — ne rien présumer.
+- **Périmètre exact de la signature** : l'exemple officiel signe le corps seul, alors qu'un en-tête `X-GeniusPay-Timestamp` existe. Si le timestamp n'est pas signé, il ne protège pas du rejeu.
+- **Politique de retry des webhooks** : aucun délai, nombre de tentatives ni timeout publiés.
+- **Limites de débit** : non documentées.
+- **`payment_url` vs `checkout_url`** : le nom du champ d'URL diffère entre la réponse 201 documentée et les exemples.
+- **`paystack`** : listé dans les paramètres de `payment_method` mais absent du tableau des méthodes.
 
-## Règles d'intégration (les 2 passerelles)
-- **Secrets** : variables d'environnement Coolify (prod), `.env.local` (dev). `{file:...}` est une syntaxe de **config OpenCode** (secrets d'agent) — pas un mécanisme applicatif.
+## Règles d'intégration (non négociables)
+- **Montants** : `amount` est un **entier en XOF, minimum 200** — pas des centimes. Ne jamais convertir en centimes (piège classique : d'autres passerelles de la région le font).
 - **Signature vérifiée sur le corps BRUT** de la requête, comparaison à **temps constant**.
-- **Idempotence par contrainte d'unicité EN BASE** sur l'id de transaction fournisseur — pas un simple test applicatif.
-- **Jamais créditer sur la seule foi du webhook** : re-vérifier le statut via l'API fournisseur + contrôler montant, devise et référence de commande.
-- **2xx seulement après persistance durable** de l'événement. Signature invalide → 4xx. Événement inconnu → 2xx + log.
-- **Machine à états explicite** (en attente / réussi / échoué / remboursé) ; transitions interdites refusées.
+- **Idempotence par contrainte d'unicité EN BASE** sur `data.transaction.reference` (format `MTX-…`) — pas un simple test applicatif.
+- **Ne jamais créditer sur la seule foi du webhook** : re-vérifier via `GET /payments/{reference}` + contrôler montant, devise et `metadata.order_id`.
+- **Persister l'événement brut AVANT toute logique métier**, puis répondre 2xx. Signature invalide → 4xx. Événement inconnu → 2xx + log.
+- **Machine à états explicite** : `pending` → `processing` → `completed` / `failed` / `cancelled` / `refunded`. Toute transition arrière est refusée.
+- **Ne jamais faire confiance à l'ordre de livraison** : trier par `timestamp` du payload.
 - **Réconciliation périodique** fournisseur ↔ base : `assets/checklists/reconciliation.md`.
-- **Montants** : entiers dans l'unité de la devise, devise explicite (XOF sans décimales).
-- **Bascule Jèko → CinetPay** : jamais automatique en cours de transaction (double paiement). Sur panne détectée, choix utilisateur, ou carte.
-- **Dunning** : relances + lien de paiement (voir la réserve sur le prélèvement récurrent).
-- **Factures PDF** : ⚠️ les `pb_hooks` tournent dans un moteur JS embarqué, **pas Node.js** → Handlebars et les libs npm PDF n'y sont pas utilisables. Prévoir un service séparé ou un workflow n8n. Numérotation séquentielle sans trou, factures immuables.
 - **Erreurs** : structure `{ "id", "message", "extras" }` ; `extras` ne contient jamais de détail interne.
-- **Logs** : numéros Mobile Money **masqués** (données personnelles).
-- Un **timeout** sur une création de paiement n'est **pas** un échec : vérifier le statut avant tout retry (risque de double débit).
+- **Logs** : numéros de téléphone Mobile Money **masqués** (données personnelles).
+- Un **timeout** sur un `POST /payments` n'est **pas** un échec : la transaction a peut-être été créée. Re-vérifier via `GET /payments` avant tout retry (risque de double paiement).
+- **Factures PDF** : numérotation séquentielle sans trou, factures immuables. Générées **côté SvelteKit serveur** (runtime Node, cf. choix de stack) — pas de contrainte de moteur embarqué.
 - Checklist webhook : `assets/checklists/webhook.md`.
 
 ## Tests (obligatoires — sandbox uniquement)
@@ -59,12 +54,11 @@ metadata:
 - Montant incohérent, devise divergente
 - Transition d'état interdite
 - Fournisseur indisponible / timeout
-- **Jamais de clés de production** dans l'environnement de test.
+- **Jamais de clés `live` dans l'environnement de test.**
 
 ## Assets
-- `assets/reference/jeko.md`
-- `assets/reference/cinetpay.md`
+- `assets/reference/geniuspay.md`
 - `assets/checklists/webhook.md`
 - `assets/checklists/reconciliation.md`
-- `assets/scripts/curl-jeko.sh`
+- `assets/scripts/curl-geniuspay.sh`
 - `assets/templates/invoice.pdf.hbs`
