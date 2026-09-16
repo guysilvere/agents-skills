@@ -1,5 +1,5 @@
 ---
-description: Enregistre une version : commit → merge testing→main → tag SemVer → release GitHub (via ops-quality).
+description: Enregistre une version — commit, merge testing→main, tag SemVer, release GitHub (via ops-quality).
 agent: ops-quality
 ---
 

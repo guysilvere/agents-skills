@@ -1,5 +1,5 @@
 ---
-description: Déploie la PWA (staging/prod) via ops-quality : Coolify + Cloudflare, sauvegardes R2, RUNBOOK.
+description: Déploie la PWA (staging/prod) via ops-quality — Coolify + Cloudflare, sauvegardes R2, RUNBOOK.
 agent: ops-quality
 ---
 
