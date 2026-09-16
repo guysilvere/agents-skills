@@ -19,7 +19,7 @@ metadata:
 - Créer `AGENTS.md` à la racine (point d'entrée unique IA) si absent — template avec section « Compatibilité Antigravity » incluse.
 - 🟩 Antigravity : dupliquer les règles projet dans `.agents/rules/*.md` (AGENTS.md n'y est pas lu) — template `~/.config/opencode/skills/opencode-admin/assets/antigravity/rule.md`.
 - Créer `README.md` depuis l'ébauche du blueprint ; mise à jour à chaque feature.
-- Créer `.env.example` listant TOUTES les clés (Jeko, CinetPay, Brevo/Mailtrap, Turnstile, R2, VAPID, PocketBase/Turso).
+- Créer `.env.example` listant TOUTES les clés (GeniusPay, Brevo/Mailtrap, Turnstile, R2, VAPID, Turso).
 - Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build).
 - Template : `assets/templates/AGENTS.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
 
@@ -77,8 +77,8 @@ metadata:
   ```bash
   docker compose -f docker-compose.dev.yml up
   ```
-  - Volumes montés pour le hot-reloading automatique (`src/`, `backend/`, `pb_hooks/`).
-  - PocketBase / DB locale et micro-services isolés dans leur réseau Docker.
+  - Volumes montés pour le hot-reloading automatique (`src/`, `static/`, `migrations/`).
+  - Base locale (`file:local.db` ou `turso dev`) et micro-services isolés dans leur réseau Docker.
   - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs.
 
 ```
@@ -86,10 +86,10 @@ projet/
 ├── src/                       # Code source frontend (SvelteKit / PWA)
 ├── src/lib/services/          # Logique métier — hors composants
 ├── backend/                   # Micro-services Python / Hono (optionnel)
-├── docker/pocketbase/
-│   ├── pb_hooks/              # Logique métier serveur (⚠️ moteur JS embarqué, pas Node.js)
-│   ├── pb_migrations/         # Migrations versionnées
-│   └── pb_data/               # Données locales (volume Docker)
+├── src/lib/server/            # ⚠️ SEUL endroit qui touche la base et l'autorisation
+│   ├── auth/authorize.ts      # Module unique d'autorisation (Turso n'a pas de RLS)
+│   └── db/                    # Client Drizzle + requêtes scopées
+├── src/routes/api/            # Server routes : endpoints, webhooks, jobs
 ├── .github/workflows/ci.yml   # CI : secrets → lint → typecheck → tests → build
 ├── Dockerfile                 # Multi-stage production (Coolify)
 ├── docker-compose.dev.yml     # Dev local avec hot-reload (Docker Desktop)
@@ -99,7 +99,7 @@ projet/
 ```
 
 ## 7. Base de données (DATABASE.md)
-- Schéma relationnel succinct, règles d'accès (RLS / règles PocketBase), stratégie de migration, dictionnaire de données.
+- Schéma relationnel succinct, **matrice d'autorisation** (obligatoire : Turso n'a pas de RLS), stratégie de migration, dictionnaire de données.
 - Migration de la doc : toute modification de champs/tables/règles → mise à jour immédiate de `docs/DATABASE.md`.
 - Template : `assets/templates/DATABASE.md`.
 

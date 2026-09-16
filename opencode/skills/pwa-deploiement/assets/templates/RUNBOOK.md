@@ -4,10 +4,10 @@
 
 ## Topologie
 - App prod : `https://<domaine>` (Coolify, port 80)
-- Admin PocketBase : `https://db.<domaine>` (tunnel Zero Trust)
+- Console Coolify : `https://coolify.<domaine>` (tunnel Zero Trust)
 - Staging : `https://staging.<domaine>` + `db.staging.<domaine>`
 - Stockage : Cloudflare R2 (bucket `<nom>`) — médias + sauvegardes
-- Base : [PocketBase (SQLite) / Turso (libSQL)]
+- Base : **Turso (libSQL)** — `libsql://<db>.turso.io` (managé, aucun conteneur)
 - n8n : [absent du MVP / hébergé] — si présent, webhooks entrants authentifiés
 
 ## Déploiement (Coolify)
@@ -17,8 +17,9 @@
 4. Mettre à jour `docs/RUNBOOK.md` + `CHANGELOG.md` si la procédure change
 
 ## Migrations de schéma — ordre impératif
+> Migrations SQL versionnées dans `migrations/` (Drizzle), **jamais modifiées après application**.
 1. **Backup** et **vérifier** que la sauvegarde est lisible
-2. Appliquer la migration sur une **copie de staging** et tester
+2. Appliquer la migration sur la **base Turso de staging** et tester
 3. Déployer le code
 4. Appliquer la migration en production
 5. **Vérifier** (healthcheck + requêtes de contrôle)
@@ -33,7 +34,7 @@
 
 ## Sauvegardes (quotidiennes, R2)
 - Commande : `scripts/backup-r2.sh` (cron 02:00)
-- **Cohérence obligatoire** : utiliser le mécanisme de backup de PocketBase (snapshot à chaud / `.backup`), **jamais** une copie brute d'un fichier SQLite en cours d'écriture
+- **Cohérence** : export logique `turso db shell <db> .dump` — jamais de copie de fichier. Les sauvegardes internes de Turso ne remplacent pas cette sauvegarde applicative (elles ne sont pas exportables hors plateforme)
 - Contenu : sauvegarde de la base + dossier médias
 - Rétention : [7 jours / 30 jours]
 
@@ -57,7 +58,8 @@
 - ...
 
 ## Rotation des clés (planifiée)
-- Jèko / CinetPay / Brevo / Mailtrap : [fréquence]
+- GeniusPay / Brevo / Mailtrap / Turso : [fréquence]
+- ⚠️ Séparer strictement les jetons `sandbox` et `live` — ne jamais mettre une clé `live` dans un environnement de test
 - VAPID / JWT secret : [fréquence]
 - R2 Access Keys : [fréquence]
 

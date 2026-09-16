@@ -1,32 +1,42 @@
 #!/usr/bin/env bash
-# restore-r2.sh — Restauration d'une sauvegarde R2 vers PocketBase
-# Usage : ./restore-r2.sh [bucket] [date_YYYY-MM-DD] [target_dir]
-# ⚠️ À exécuter app à l'arrêt. Tester régulièrement cette procédure.
+# restore-r2.sh — Restauration d'un dump Turso depuis Cloudflare R2
+#
+# Usage : ./restore-r2.sh <date AAAA-MM-JJ> <nom-base-turso-cible>
+#
+# ⚠️ NE JAMAIS exécuter directement sur la production.
+#    Restaurer d'abord sur une base jetable, vérifier l'intégrité, puis décider.
+#    Un test de restauration périodique est obligatoire (voir RUNBOOK.md) :
+#    une sauvegarde jamais restaurée n'est pas une sauvegarde.
 
 set -euo pipefail
 
-BUCKET="${1:-${R2_BUCKET_NAME:-sauvegardes}}"
-DATE="${2:?Usage: restore-r2.sh <bucket> <date> [target] — ex: restore-r2.sh sauvegardes 2026-08-19}"
-TARGET="${3:-./docker/pocketbase/pb_data}"
+DATE="${1:?Usage: restore-r2.sh <date AAAA-MM-JJ> <nom-base-turso-cible>}"
+DB="${2:?Nom de la base Turso cible requis}"
+BUCKET="${R2_BUCKET:?Set R2_BUCKET}"
 
-echo "==> Restauration de $DATE vers $TARGET"
-echo "    (Assurez-vous que l'application et PocketBase sont arrêtés.)"
+echo "==> Restauration de turso/${DATE}/dump.sql.gz → base « ${DB} »"
+echo "    Vérifiez que la cible est bien une base JETABLE ou de staging."
 
-read -r -p "Confirmer la restauration ? (oui/non) " confirm
-[[ "$confirm" == "oui" ]] || { echo "Annulé."; exit 1; }
-
-# Sauvegarde de sécurité de l'état actuel avant écrasement
-mv "$TARGET" "$TARGET.before-$DATE" 2>/dev/null || true
-mkdir -p "$TARGET"
+read -r -p "Confirmer ? (oui/non) " CONFIRM
+[[ "$CONFIRM" == "oui" ]] || { echo "Annulé."; exit 1; }
 
 if command -v rclone >/dev/null 2>&1; then
-  rclone copy "r2:${BUCKET}/pb_data/${DATE}/data" "$TARGET" --transfers 1
+  rclone copy "r2:${BUCKET}/turso/${DATE}/" "/tmp/restore-${DATE}/" --transfers 1
 else
-  aws s3 sync "s3://${BUCKET}/pb_data/${DATE}/data" "$TARGET" --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+  aws s3 sync "s3://${BUCKET}/turso/${DATE}/" "/tmp/restore-${DATE}/" \
+    --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 fi
 
-echo "==> Restauration terminée. Redémarrez PocketBase puis vérifiez :"
-echo "    - Healthcheck OK"
-echo "    - Nombre d'utilisateurs/enregistrements cohérent"
-echo "    - Dernier fichier médias accessible"
-echo "    Ancien état conservé dans : $TARGET.before-$DATE"
+gunzip -f "/tmp/restore-${DATE}/dump.sql.gz"
+
+echo "==> Application du dump sur « ${DB} »"
+turso db shell "$DB" < "/tmp/restore-${DATE}/dump.sql"
+
+echo "==> Vérifications (à adapter au schéma) :"
+# turso db shell "$DB" "SELECT COUNT(*) FROM users;"
+# turso db shell "$DB" "SELECT COUNT(*) FROM payments WHERE status='completed';"
+
+echo "==> Restauration terminée."
+echo "    - Comparer les volumes avec l'attendu"
+echo "    - Tracer la date du test dans docs/RUNBOOK.md"
+echo "    - Détruire la base jetable si c'était un test"

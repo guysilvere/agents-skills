@@ -54,7 +54,6 @@ permission:
     "gh release create*": allow
     "caddy *": allow
     "docker compose *": allow
-    "pocketbase *": allow
   skill: allow
   webfetch: allow
   task: deny
@@ -71,7 +70,7 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 ## Lancement des serveurs locaux (à la demande)
 - Si l'utilisateur demande de **lancer les serveurs locaux** :
   1. Lire `AGENTS.md` du projet (PORT, DEV_CMD, KILL_CMD, services, mapping des fichiers).
-  2. Démarrer les services nécessaires en arrière-plan : serveur dev (ex. `npm run dev`), base de données (PocketBase / Turso), et services annexes décrits dans l'AGENTS.md.
+  2. Démarrer les services nécessaires en arrière-plan : serveur dev (ex. `npm run dev`), base de données (Turso — cloud ou `turso dev` en local), et services annexes décrits dans l'AGENTS.md.
   3. **Activer Caddy** pour utiliser les URLs `.test` : ajouter/recharger le bloc `<projet>.test` dans `~/.config/caddy/Caddyfile` (`caddy reload --config ~/.config/caddy/Caddyfile`), démarrer Caddy si arrêté (`caddy run --config ~/.config/caddy/Caddyfile`).
   4. Vérifier que chaque service répond (port ouvert / URL `.test` accessible en HTTPS local).
   5. **Afficher un tableau récapitulatif** avec : services ouverts, liens à utiliser, accès (login + mot de passe), description.
@@ -82,8 +81,8 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 | Service | Lien à utiliser | Accès (login / mdp) | Description |
 | --- | --- | --- | --- |
 | App (front) | `https://<projet>.test` | — | Application PWA locale |
-| Admin (back-office) | `https://<projet>.test/_/` | admin / `xxx` | Administration PocketBase |
-| API / DB | `https://<projet>.test/api/` | — | API + base de données |
+| API (server routes) | `https://<projet>.test/api/` | — | Endpoints SvelteKit |
+| Base Turso | (cloud — pas d'UI locale) | token de dev | `turso db shell <db>` pour inspecter |
 | Caddy | `caddy run --config ~/.config/caddy/Caddyfile` | — | Reverse proxy HTTPS `.test` |
 
 ## Workflow de validation (dans l'ordre)
@@ -112,7 +111,7 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 ## Déploiement
 - Coolify : déploiement depuis GitHub, SSL auto, variables d'env dans l'UI.
 - Cloudflare : proxy DNS orange (masquage IP), SSL Full (Strict), règles de cache, R2 pour médias/backups.
-- Staging séparé (`staging.<domaine>` + instance PocketBase dédiée) avant prod.
+- Staging séparé (`staging.<domaine>` + base Turso de staging) avant prod.
 - Documenter toute procédure dans `docs/RUNBOOK.md` (déploiement, sauvegardes quotidiennes R2, restauration, monitoring).
 
 ## Règles

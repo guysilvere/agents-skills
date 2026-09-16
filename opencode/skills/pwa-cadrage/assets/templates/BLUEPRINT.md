@@ -13,19 +13,20 @@
 |--------|-------|---------------|
 | Front | PWA mobile-first — **SvelteKit par défaut** (justifier tout autre choix) + **TypeScript strict** | |
 | Validation | [Zod] — nommer explicitement, pas de validation implicite | |
-| Back API | [API légère (Hono / Fastify / PocketBase)] | |
+| Back API | **Server routes SvelteKit** (`+server.ts`) — défaut. Hono / Fastify seulement si les jobs deviennent lourds | |
 | Cerveau Data/IA (option) | [Python (FastAPI / Celery / Scripts)] | Calculs financiers, OCR, pipelines IA, scraping, nesting |
-| Base | **PocketBase** (SQLite) — défaut. Turso / PostgreSQL **seulement si un backend est réellement écrit** (à justifier : ce ne sont pas des alternatives équivalentes) | |
+| Base | **Turso** (libSQL) + Drizzle ORM — ⚠️ **pas de row-level security** → autorisation applicative | |
 | Auth | [Google par défaut + email/magic link ; Turnstile anti-bot] | |
 | Emails | Brevo / Mailtrap | |
-| Paiements | Jèko + CinetPay | |
+| Paiements | **GeniusPay** (sandbox `pk_sandbox_…`) | |
 | Stockage | Cloudflare R2 (URLs présignées, AVIF/WebP) | |
 | Déploiement | Coolify + Cloudflare (proxy orange, tunnels Zero Trust) | |
 
 ## 4. Architecture
 - Modules : [liste]
 - Flux de données : [schéma texte]
-- PocketBase : conteneur sidecar, API REST, admin `db.<domaine>`, hooks `pb_hooks`
+- **Autorisation** : applicative, concentrée dans les server routes (Turso n'a pas de RLS) → matrice dans `docs/DATABASE.md`
+- Jobs planifiés : tâche planifiée Coolify appelant un endpoint protégé (pas de scheduler natif dans SvelteKit)
 - Points d'extension prévus : [API publique, exports, multi-comptes, intégrations, i18n]
 
 ## 5. User stories (MoSCoW)
@@ -58,19 +59,18 @@
 
 ## 9. Monétisation
 - Modèle + paliers (cf. CADRAGE.md)
-- Webhooks Jèko/CinetPay, dunning, factures PDF
+- Webhooks GeniusPay (`X-GeniusPay-Signature`), dunning, factures PDF
 
 ## 10. Hébergement & domaines
 | Usage | Sous-domaine | Cible |
 |-------|--------------|-------|
 | App prod | `<domaine>` | app (port 80) |
-| Admin PocketBase | `db.<domaine>` | PocketBase (port personnalisé) |
-| Staging app | `staging.<domaine>` | app staging |
-| Staging PocketBase | `db.staging.<domaine>` | PocketBase staging |
+| Staging app | `staging.<domaine>` | app staging + base Turso de staging |
+| Console Coolify | `coolify.<domaine>` | tunnel Zero Trust |
 
 ## Routes API & webhooks (ajouts à chaque évolution)
 - `POST /api/...` : [payload / usage]
-- Webhook `Jeko-Signature` / CinetPay : [gestion]
+- Webhook `X-GeniusPay-Signature` : [signature, idempotence, machine à états]
 
 ## Questions ouvertes
 - [ ] [question]

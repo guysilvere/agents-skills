@@ -9,7 +9,7 @@
 - [ ] `.env.example` à jour ; secrets configurés dans Coolify (jamais commités)
 
 ## Staging
-- [ ] Déploiement staging OK (`staging.<domaine>` + PocketBase dédiée)
+- [ ] Déploiement staging OK (`staging.<domaine>` + base Turso de staging)
 - [ ] Validation fonctionnelle sur l'environnement miroir
 - [ ] Démo client possible sans impacter la prod
 
@@ -28,7 +28,8 @@
 - [ ] Aucun port d'admin exposé publiquement
 
 ## Données & sauvegardes
-- [ ] PocketBase déployé avec volume persistant
+- [ ] Base Turso joignable (`DATABASE_URL` + `TURSO_AUTH_TOKEN` validés depuis le conteneur)
+- [ ] Webhook GeniusPay joignable en HTTPS et abonné (`POST /webhooks/{id}/test` en sandbox)
 - [ ] Backup quotidien R2 configuré (cron) et exécuté
 - [ ] Test de restauration effectué récemment (date : ___)
 - [ ] Médias compressés AVIF/WebP avant upload

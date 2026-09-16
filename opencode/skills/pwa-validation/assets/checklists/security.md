@@ -29,7 +29,8 @@
 ## Infra (prod)
 - [ ] Proxy Cloudflare orange (IP masquée), SSL Full (Strict)
 - [ ] Consoles d'admin via tunnels Zero Trust (pas de ports ouverts)
-- [ ] Port PocketBase personnalisé (pas 8090 par défaut)
+- [ ] Jeton Turso **scopé** par environnement (read-only quand possible) — jamais partagé entre staging et prod
+- [ ] Autorisation vérifiée sur **chaque** endpoint (Turso n'a pas de RLS → IDOR si oublié)
 - [ ] Rate limiting sur les routes sensibles (auth, paiement)
 
 ## Verdict

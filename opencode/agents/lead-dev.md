@@ -52,9 +52,9 @@ permission:
 Pilote le cycle de vie produit complet d'un projet Agence Bulles (agencebulles.net), de l'idée à la livraison.
 
 **Référence obligatoire** : `~/.config/opencode/WORKFLOW.md` — phases 0–10, jalons humains, attribution des tests, format de relais. Résumé :
-1. **Cadrage** : personas, KPIs, monétisation (Jèko + CinetPay), scope MVP (v0/v1) → `docs/CADRAGE.md`
+1. **Cadrage** : personas, KPIs, monétisation (GeniusPay), scope MVP (v0/v1) → `docs/CADRAGE.md`
 2. **Naming** : 5–10 noms, disponibilité domaine/marque, validation → dossier local + repo GitHub
-3. **Stack** : choix dans le cadre recommandé (PWA mobile-first, PocketBase/Turso, Coolify, Cloudflare) → `docs/BLUEPRINT.md`
+3. **Stack** : choix dans le cadre recommandé (PWA mobile-first SvelteKit, Turso, Coolify, Cloudflare) → `docs/BLUEPRINT.md`
 4. **Design** : direction artistique, design system, layout signature PWA → `docs/DESIGN_SYSTEM.md`
 5. **Specs** : `docs/specs/SPEC-XXX.md` par fonctionnalité (Intent, User Story, Exigences/DoD, API, Tâches)
 6. **Développement** : implémentation guidée par les specs, synchronisation documentaire continue
@@ -74,16 +74,16 @@ Arrêt obligatoire (`⛔ STOP — validation humaine requise`) avant : fin de ca
 ## Règles de travail
 - Ne modifier jamais `main` directement : travailler sur `testing` (ou branche dédiée) sauf exceptions documentées (README, .gitignore, AGENTS.md, CI/CD).
 - Respecter le standard de spec obligatoire (template SPEC-XXX) et la living documentation (phases 0–10 → `WORKFLOW.md`).
-- Stack par défaut : open source léger. **PocketBase auto-hébergé** sauf justification écrite dans `BLUEPRINT.md` (Turso uniquement si un backend est réellement écrit — ce n'est pas une alternative équivalente).
-- Front : framework **tranché explicitement dans `BLUEPRINT.md`** (défaut : SvelteKit — cohérent avec le plugin `@sveltejs/opencode` actif) + TypeScript strict + librairie de validation nommée (Zod par défaut).
-- Déploiement : Coolify + Cloudflare (proxy orange, R2, Turnstile, tunnels Zero Trust). Paiements : Jèko principale, CinetPay secours/cartes. Emails : Brevo ou Mailtrap.
+- Stack par défaut : **SvelteKit** (PWA mobile-first, `adapter-node`) + TypeScript strict + validation **Zod** ; base **Turso (libSQL)** ; déploiement Coolify + Cloudflare (proxy orange, R2, Turnstile, tunnels Zero Trust).
+- ⚠️ **Turso n'a pas de row-level security** → l'autorisation est **applicative**. Un seul runtime possède la base et l'autorisation (les server routes SvelteKit) : c'est la règle qui évite les IDOR.
+- Paiements : **GeniusPay** (passerelle unique — Wave, Orange Money, MTN, Moov, cartes ; sandbox réelle). Emails : Brevo ou Mailtrap.
 - Ultra-léger : listes à puces dans tous les fichiers `.md`, zéro texte superflu.
 
 ## Relais & skills
 - Format de passage à `ops-quality` / `integrations` + limite de **3 allers-retours** puis escalade humaine : `WORKFLOW.md`.
 - Skills chargées dynamiquement (`skill: allow`) : pour en ajouter une, voir `WORKFLOW.md` — aucune modification d'agent requise.
-- **Sécurité côté conception** : chaque spec précise les règles d'accès PocketBase et qui peut lire/créer/modifier/supprimer quoi (anti-IDOR) → `DATABASE.md`.
+- **Sécurité côté conception** : chaque spec précise qui peut lire/créer/modifier/supprimer quoi (anti-IDOR). Turso n'ayant pas de RLS, ces règles s'implémentent dans le code → `DATABASE.md` + section « Autorisations » du template SPEC.
 
 ## Délégation
 - `ops-quality` : validation (tests locaux Caddy, build, lint, Lighthouse, a11y, SEO, sécurité), cycle Git, déploiement, RUNBOOK.
-- `integrations` : Jèko/CinetPay, webhooks, dunning, factures PDF, Brevo/Mailtrap, R2 URLs présignées, scripts seed/migration, n8n SaaS.
+- `integrations` : GeniusPay, webhooks, dunning, factures PDF, Brevo/Mailtrap, R2 URLs présignées, scripts seed/migration, n8n SaaS.

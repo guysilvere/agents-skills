@@ -15,25 +15,25 @@ metadata:
 - Fournit les procédures opérationnelles condensées (RUNBOOK).
 
 ## 1. Environnement de staging
-- Déploiement totalement séparé de la production : `staging.<domaine>` + instance PocketBase dédiée (`db.staging.<domaine>`).
+- Déploiement totalement séparé de la production : `staging.<domaine>` + **base Turso de staging** distincte (et jeton distinct).
 - Backups isolés ; validation fonctionnelle avant mise en ligne.
 
 ## 2. Déploiement Coolify
 - Déploiement depuis GitHub (branche `main` après merge), SSL auto via Caddy, variables d'env dans l'UI Coolify.
-- PocketBase : déploiement conteneurisé sur Coolify (volume pour `pb_data`). Turso : cloud libSQL managé.
+- Base : **Turso** (cloud libSQL managé) — aucun conteneur de base à héberger, sauvegarder ou mettre à jour côté serveur.
 - Micro-services Python (FastAPI) : conteneur Docker multi-stage (`python:3.12-slim` + Uvicorn), healthcheck sur `/health`.
 - Vérifier : Dockerfile multi-stage présent, port correct, healthcheck.
 - Checklist : `assets/checklists/deploy.md`.
 
 ## 3. Configuration Cloudflare
 - **Proxy DNS orange** : masquer l'IP réelle du VPS, SSL Full (Strict).
-- **Tunnels Zero Trust** : exposer les consoles d'admin (Coolify, PocketBase) sans ports ouverts → `assets/configs/cloudflared.yml`.
+- **Tunnels Zero Trust** : exposer les consoles d'admin (Coolify) sans ports ouverts → `assets/configs/cloudflared.yml`.
 - **Turnstile** sur tous les formulaires ; WAF/DDoS ; règles de cache edge.
 - **R2** : stockage médias/uploads/sauvegardes (0 egress).
 
 ## 4. Sauvegardes R2 (quotidiennes)
 - Backup automatique : base de données + fichiers médias → bucket R2.
-- **Cohérence obligatoire** : pour SQLite / PocketBase, utiliser le **mécanisme de backup de PocketBase** (snapshot à chaud / `.backup`). **Jamais** une copie brute du fichier `data.db` en cours d'écriture — le résultat serait corrompu.
+- **Cohérence** : Turso étant managé, la sauvegarde se fait par **export logique** (`turso db shell <db> .dump`) — jamais par copie de fichier. Turso gère par ailleurs ses propres sauvegardes internes, à ne pas confondre avec la sauvegarde applicative.
 - Scripts : `assets/scripts/backup-r2.sh` (sauvegarde), `assets/scripts/restore-r2.sh` (restauration).
 - **Test de restauration obligatoire et périodique** : restaurer sur un environnement jetable, vérifier l'intégrité, détruire. Tracer la date du dernier test dans `RUNBOOK.md`. Une sauvegarde jamais restaurée n'est pas une sauvegarde.
 
@@ -47,13 +47,13 @@ metadata:
 - ⛔ Aucune migration sur une base non locale sans validation humaine explicite.
 
 ## 6. Monitoring (minimum)
-- **Disponibilité** : check uptime sur l'app et la console PocketBase — alertes vers email/slack.
+- **Disponibilité** : check uptime sur l'app — alertes vers email/slack.
 - **Erreurs applicatives** : remontée et suivi (Sentry / logs Coolify) — alerte sur pic.
 - **Jobs critiques** : alerte si la réconciliation des paiements ou les backups ne s'exécutent pas.
 
 ## 7. Compression des médias (obligatoire avant upload)
 - Toutes les images/médias utilisateurs compressés en **AVIF ou WebP** avant envoi vers R2.
-- ⚠️ **Pas dans les `pb_hooks`** (moteur JS embarqué, sans Node.js → pas de libs npm d'image) : côté client ou service dédié.
+- Traitement via `sharp` **côté serveur** (runtime Node de SvelteKit), ou côté client avant upload.
 - Script : `assets/scripts/compress-avif.sh` (conversion batch).
 
 ## 8. RUNBOOK (docs/RUNBOOK.md)
@@ -62,7 +62,7 @@ metadata:
 - Template : `assets/templates/RUNBOOK.md`.
 
 ## 9. docker-compose.yml (prod/staging)
-- Services : app (image build), PocketBase sidecar (volume `pb_data`).
+- Services : app SvelteKit uniquement (`adapter-node`). Aucun sidecar de base — Turso est managé.
 - **n8n : hors MVP sauf besoin avéré** — c'est un composant d'infra supplémentaire à héberger, sécuriser et sauvegarder. Si présent : webhooks entrants authentifiés.
 - Template : `assets/configs/docker-compose.yml`.
 
