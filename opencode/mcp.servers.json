@@ -45,6 +45,17 @@
       },
       "oc": {},
       "ag": {}
+    },
+    {
+      "name": "geniuspay",
+      "transport": "remote",
+      "url": "https://geniuspay.ci/api/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {{TOKEN:geniuspay}}"
+      },
+      "oc": {},
+      "ag": {}
     }
   ]
 }
