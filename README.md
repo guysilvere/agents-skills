@@ -1,7 +1,7 @@
 # agents-skills — Écosystème IA Agence Bulles (OpenCode + Antigravity)
 
-> Source de vérité du setup IA de l'agence : agents, skills, assets, commandes, workflows et documentation de migration.
-> Synchronise automatiquement vers 🟦 OpenCode (`~/.config/opencode/`) et 🟩 Antigravity (`~/.gemini/`).
+> Source de vérité du setup IA de l'agence : agents, skills, assets, commandes, workflows et documentation.
+> Synchronise automatiquement vers 🟦 OpenCode (`~/.config/opencode/`), 🟩 Antigravity Desktop (`~/.gemini/`) et 🟩 Antigravity CLI (`~/.gemini/antigravity-cli/`).
 
 ## Contenu
 

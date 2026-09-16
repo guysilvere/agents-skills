@@ -14,13 +14,14 @@ metadata:
 - Exécute la séquence complète de validation d'une PWA avant commit.
 - Centralise l'ancienne skill pwa-tests-locaux + audits a11y/SEO/sécurité.
 
-## 1. Preview locale — Caddy (pas localhost)
+## 1. Preview locale — Caddy + Docker Desktop (pas localhost)
 - Caddy installé : `/opt/homebrew/bin/caddy`, config unique `~/.config/caddy/Caddyfile` (lancé via `caddy run --config ~/.config/caddy/Caddyfile`).
-- Ajouter un bloc par projet :
+- App lancée via Docker Desktop (`docker compose -f docker-compose.dev.yml up`).
+- Ajouter un bloc par projet dans Caddyfile (mappage vers le port exposé par le conteneur Docker) :
 ```caddy
 mon-projet.test, mon-projet.localhost {
     tls internal
-    reverse_proxy localhost:4173
+    reverse_proxy localhost:5173
 }
 ```
 - Recharger après modification : `caddy reload --config ~/.config/caddy/Caddyfile`.
@@ -29,13 +30,13 @@ mon-projet.test, mon-projet.localhost {
 - Config de référence : `assets/configs/Caddyfile.test`.
 
 ## 2. Séquence de validation (dans l'ordre, chaque étape doit passer)
-1. **Lint** : `npm run lint` (ESLint / Biome)
-2. **Typecheck** : `npm run typecheck` (si applicable)
-3. **Tests unitaires** : `npm test` (+ `test:coverage` si configuré)
+1. **Lint** : `npm run lint` (ESLint / Biome) + `ruff check .` (si backend Python)
+2. **Typecheck** : `npm run typecheck` (TS) + `mypy .` / `pyright` (Python si configuré)
+3. **Tests unitaires** : `npm test` + `pytest` (si micro-services Python)
 4. **Build** : `npm run build` sans erreur ni warning bloquant
 5. **Preview** : `npm run preview` + domaine Caddy (`http://mon-projet.test`)
 6. **Tests E2E** : playwright-cli — parcours réels (auth, paiement, CRUD, hors-ligne), screenshots succès/échec. Checklist : `assets/checklists/e2e.md`
-7. **Audit design automatisé** : `npx impeccable detect <src>` — 59 règles déterministes anti-slop (typo surutilisées, dégradés violet, cartes imbriquées, contraste) ; sortie `--json` CI-friendly ; ignorer cas légitimes via `impeccable ignores add-value`
+7. **Audit design automatisé** : `npx impeccable detect <src>` — 59 règles déterministes anti-slop (typo surutilisées, dégradés violet, cartes indivisibles, contraste) ; sortie `--json` CI-friendly ; ignorer cas légitimes via `impeccable ignores add-value`
 8. **Lighthouse** : `npx lighthouse http://mon-projet.test --view` — cibles : Performance ≥ 80 (LCP < 2.5 s), Accessibilité ≥ 90, PWA installable, CLS < 0.1, INP < 200 ms
 9. **Test hors-ligne** : DevTools → Application → Service Workers → Offline → page de repli + fonctions de base
 

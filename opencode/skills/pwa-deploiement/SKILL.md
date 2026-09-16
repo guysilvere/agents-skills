@@ -20,7 +20,8 @@ metadata:
 
 ## 2. Déploiement Coolify
 - Déploiement depuis GitHub (branche `main` après merge), SSL auto via Caddy, variables d'env dans l'UI Coolify.
-- PocketBase : déploiement conteneurisé sur Coolify (volume pour `pb_data`). Turso : aucun déploiement DB nécessaire (cloud libSQL managé).
+- PocketBase : déploiement conteneurisé sur Coolify (volume pour `pb_data`). Turso : cloud libSQL managé.
+- Micro-services Python (FastAPI) : conteneur Docker multi-stage (`python:3.12-slim` + Uvicorn), healthcheck sur `/health`.
 - Vérifier : Dockerfile multi-stage présent, port correct, healthcheck.
 - Checklist : `assets/checklists/deploy.md`.
 

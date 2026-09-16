@@ -55,6 +55,13 @@ metadata:
 - TypeScript strict, types explicites sur les APIs/contrats de données.
 - Pas d'`any` silencieux, pas de logique métier dans les composants.
 
+### Python (FastAPI / Micro-services / Workers / IA)
+- **Typage strict & validation** : Python 3.12+, `typing` systématique, modèles **Pydantic v2** pour tous les schemas d'entrée/sortie.
+- **Framework & Asynchronisme** : **FastAPI** avec handlers `async def` non bloquants ; dépendances injectées via `Depends()`.
+- **Outillage** : **Ruff** pour le linting/formatage (`ruff check .`, `ruff format .`) ; gestionnaire de paquets **uv** ou `pyproject.toml`.
+- **Architecture** : Séparation stricte : `routers/`, `services/` (logique métier), `models/` (Pydantic / DB), `workers/` (tâches de fond).
+- **Sécurité & secrets** : Variables d'environnement validées via `pydantic-settings` (`SettingsConfigDict`).
+
 ### PWA
 - Manifest complet, service worker offline-first, IndexedDB pour les données locales.
 
@@ -64,16 +71,26 @@ metadata:
 3. Ne PAS toucher aux fichiers générés, config ou code tiers.
 4. Recharger `pwa-validation` après nettoyage (lint + typecheck + build).
 
-## 6. Structure de projet type (Docker + PocketBase)
+## 6. Environnement & Structure de projet (Docker en 1er choix)
+- **Dev local conteneurisé (défaut)** : Lancement systématique via Docker Desktop :
+  ```bash
+  docker compose -f docker-compose.dev.yml up
+  ```
+  - Volumes montés pour le hot-reloading automatique (`src/`, `backend/`, `pb_hooks/`).
+  - PocketBase / DB locale et micro-services isolés dans leur réseau Docker.
+  - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs.
+
 ```
 projet/
-├── src/                       # Code source app
+├── src/                       # Code source frontend (React / PWA)
+├── backend/                   # Micro-services Python / Hono (optionnel)
 ├── docker/pocketbase/
 │   ├── pb_hooks/              # Logique métier serveur
 │   ├── pb_migrations/         # Migrations versionnées
-│   └── pb_data/               # Données (volume Docker)
-├── Dockerfile                 # Multi-stage : build app + PocketBase
-├── docker-compose.yml         # Dev local
+│   └── pb_data/               # Données locales (volume Docker)
+├── Dockerfile                 # Multi-stage production (Coolify)
+├── docker-compose.dev.yml     # Dev local avec hot-reload (Docker Desktop)
+├── docker-compose.yml         # Prod / Staging
 ├── .env.example
 └── docs/ (CADRAGE, BLUEPRINT, DATABASE, DESIGN_SYSTEM, specs/, RUNBOOK)
 ```
@@ -95,4 +112,5 @@ projet/
 - `assets/templates/DATABASE.md`
 - `assets/templates/README.md`
 - `assets/configs/.env.example`
+- `assets/configs/docker-compose.dev.yml`
 - `assets/checklists/style-code.md`

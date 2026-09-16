@@ -11,9 +11,10 @@
 ## 3. Stack technique
 | Couche | Choix | Justification |
 |--------|-------|---------------|
-| Front | [PWA mobile-first] | |
-| Back | [API légère] | |
-| Base | **PocketBase** (SQLite) / Turso (libSQL) | |
+| Front | [PWA mobile-first (Vite + React / Vanilla)] | |
+| Back API | [API légère (Hono / Fastify / PocketBase)] | |
+| Cerveau Data/IA (option) | [Python (FastAPI / Celery / Scripts)] | Calculs financiers, OCR, pipelines IA, scraping, nesting |
+| Base | **PocketBase** (SQLite) / Turso (libSQL) / PostgreSQL | |
 | Auth | [Google par défaut + email/magic link ; Turnstile anti-bot] | |
 | Emails | Brevo / Mailtrap | |
 | Paiements | Jèko + CinetPay | |

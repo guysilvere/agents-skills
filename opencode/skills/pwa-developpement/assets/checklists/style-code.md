@@ -40,6 +40,14 @@
 - [ ] TS strict ; pas d'`any` silencieux
 - [ ] Types explicites sur les contrats API/données
 
+## Python (FastAPI / IA / Data)
+- [ ] Type hints stricts partout (`from typing import ...`)
+- [ ] Modèles Pydantic v2 pour toutes les requêtes/réponses d'API
+- [ ] Handlers FastAPI en `async def` avec I/O non bloquantes
+- [ ] Ruff passe sans erreur (`ruff check .` et `ruff format --check .`)
+- [ ] Dépendances déclarées dans `pyproject.toml` (géré par uv ou poetry)
+- [ ] Aucun secret en clair (utilisation de `pydantic-settings` ou `os.environ`)
+
 ## Propreté générale
 - [ ] Pas de console.log laissés en prod
 - [ ] Pas de code mort / fichiers inutilisés

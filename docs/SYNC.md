@@ -10,18 +10,22 @@ GitHub (guysilvere/agents-skills)  ──clone/pull──►  repo local ~/agent
                                                        ▼
                                     scripts/sync-skills.sh
                                                        │
-                    ┌──────────────────────────────────┴──────────────────────────┐
-                    ▼                                                              ▼
-        🟦 OpenCode                                    🟩 Antigravity
-        ~/.config/opencode/skills/                    ~/.gemini/config/skills/
-        ~/.config/opencode/agents/                    ~/.gemini/workflows/
-        ~/.config/opencode/commands/
+            ┌───────────────────────────────────────────┼───────────────────────────────────────────┐
+            ▼                                           ▼                                           ▼
+  🟦 OpenCode                                🟩 Antigravity Desktop                      🟩 Antigravity CLI (agy)
+  ~/.config/opencode/skills/                 ~/.gemini/config/skills/                    ~/.gemini/antigravity-cli/plugins/
+  ~/.config/opencode/agents/                 ~/.gemini/config/agents/                      agence-bulles/
+  ~/.config/opencode/commands/               ~/.gemini/workflows/                          ├── agents/ (3 agents)
+  ~/.config/opencode/opencode.jsonc          ~/.gemini/config/mcp_config.json              ├── skills/ (12 skills)
+                                             ~/.gemini/GEMINI.md                           ├── rules/GEMINI.md
+                                                                                           └── plugin.json
 ```
 
 - **Source de vérité** : `opencode/skills/` (12 skills), `opencode/agents/` (3 agents), `opencode/commands/` (8 commandes), `antigravity/workflows/` (8 workflows), `antigravity/agents/` (3 agents AG).
-- **Cible skills** : le même dossier de skills est copié dans les DEUX outils (format `SKILL.md` compatible — standard agentskills.io).
-- **Cible agents** : `opencode/agents/` → OpenCode ; `antigravity/agents/` → Antigravity (formats différents, deux sources séparées).
-- **Cible workflows** : uniquement Antigravity (les commandes OpenCode n'y fonctionnent pas).
+- **Cible skills** : le même dossier de skills est copié dans OpenCode, Antigravity Desktop ET Antigravity CLI (format standard `SKILL.md`).
+- **Cible agents** : `opencode/agents/` → OpenCode ; `antigravity/agents/` → Antigravity Desktop (`~/.gemini/config/agents/`) ET Antigravity CLI (`~/.gemini/antigravity-cli/plugins/agence-bulles/agents/`).
+- **Cible workflows** : Antigravity Desktop (`~/.gemini/workflows/`).
+- **Parité garantie** : Zéro écart de version ou d'agents entre Antigravity Desktop et CLI.
 
 ## Usage
 

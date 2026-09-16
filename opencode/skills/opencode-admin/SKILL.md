@@ -17,7 +17,7 @@ metadata:
 
 ## 1. Skills (SKILL.md)
 - 🟦 OpenCode : `~/.config/opencode/skills/<name>/SKILL.md` (global) | `.opencode/skills/` ou `.agents/skills/` (projet) | `.claude/skills/`, `~/.claude/skills/`, `.agents/skills/`, `~/.agents/skills/` (compat).
-- 🟩 Antigravity : `~/.gemini/config/skills/<name>/SKILL.md` (global) | `.agents/skills/` (workspace).
+- 🟩 Antigravity : `~/.gemini/config/skills/<name>/SKILL.md` (global Desktop) | `~/.gemini/antigravity-cli/plugins/agence-bulles/skills/<name>/SKILL.md` (CLI agy) | `.agents/skills/` (workspace).
 - ⚪ **`.agents/skills/` (racine projet) = dossier lu par les DEUX outils** → privilégier pour les skills projet partagées.
 - ⚪ Fichier obligatoirement nommé `SKILL.md` (majuscules).
 - Frontmatter : `name` (🟦 obligatoire, regex `^[a-z0-9]+(-[a-z0-9]+)*$`, == nom du dossier ; 🟩 optionnel — défaut dossier), `description` (obligatoire, ≤ 1024 car.), `license`, `compatibility`, `metadata` (optionnels).
@@ -27,7 +27,7 @@ metadata:
 
 ## 2. Agents (agent.md)
 - 🟦 OpenCode : `~/.config/opencode/agents/<nom>.md` (global) | `.opencode/agents/` (projet). Frontmatter : `description` (obligatoire), `mode` (primary/subagent/all), `model`, `temperature`, `steps` (ex-maxSteps), `top_p`, `permission`, `tools`, `hidden`, `color`.
-- 🟩 Antigravity : `~/.gemini/config/agents/<nom>.md` (global) | `.agents/agents/<nom>.md` ou `<nom>/agent.md` (projet) | `plugins/<name>/agents/`. Frontmatter DIFFÉRENT : `name`, `description` (obligatoires), `tools` (string[] — noms EXACTS `view_file`, `run_command`... une faute de frappe fait hanger le subagent), `mainAgent`, `subagent`, `model` (inherit/flash/pro), `commandExecutionPolicy` (off/auto/eager/sandbox), `mcpServers`, `skills`/`plugins`.
+- 🟩 Antigravity : `~/.gemini/config/agents/<nom>.md` (global Desktop) | `~/.gemini/antigravity-cli/plugins/agence-bulles/agents/<nom>.md` (CLI agy) | `.agents/agents/<nom>.md` ou `<nom>/agent.md` (projet). Frontmatter DIFFÉRENT : `name`, `description` (obligatoires), `tools` (string[] — noms EXACTS `view_file`, `run_command`... une faute de frappe fait hanger le subagent), `mainAgent`, `subagent`, `model` (inherit/flash/pro), `commandExecutionPolicy` (off/auto/eager/sandbox), `mcpServers`, `skills`/`plugins`.
 - ⚪ Créer DEUX fichiers pour un même rôle si les deux outils en ont besoin (formats incompatibles).
 - 🟦 Agents système cachés (ne pas recréer) : compaction, title, summary. Agents intégrés : build, plan (primaires) ; general, explore, scout (subagents).
 - Primary = assistant principal (Tab pour basculer) ; subagent = invoqué par description ou `@nom` (OC) / `invoke_subagent` (AG).

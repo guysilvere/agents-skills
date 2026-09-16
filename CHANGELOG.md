@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## [1.9.0] — 2026-09-09
+
+### Ajouté
+- **Dev local conteneurisé par défaut (Docker Desktop / Docker Compose)** :
+  - **Premier choix systématique** : Lancement des projets locaux via `docker compose -f docker-compose.dev.yml up` pour une isolation totale, parité dev/prod et BDD locale prête sans installation manuelle.
+  - **Template `docker-compose.dev.yml`** : Configuration type avec montage de volumes (hot-reload Vite / Hono / Python) et PocketBase local.
+  - **Mise à jour des skills & templates** : `stack-table.md`, `pwa-developpement`, `pwa-validation` (Caddy reverse-proxy vers conteneurs Docker).
+
+## [1.8.0] — 2026-08-23
+
+### Ajouté
+- **Intégration officielle de Python dans la Stack Agence Bulles** :
+  - **Architecture Polyglotte** : PWA/Frontend ultra-léger (Vite, React, Tailwind) + API Web (Hono/PocketBase) + Cerveau Data/IA (Python FastAPI, Celery, scripts d'ingestion).
+  - **Conventions & Qualité Python (`pwa-developpement`, `style-code.md`)** : Python 3.12+, typage strict `typing`, schémas **Pydantic v2**, handlers asynchrones `async def`, outillage **Ruff** + uv/pyproject.toml.
+  - **Validation & Tests (`pwa-validation`)** : Intégration de `pytest`, `ruff check` et `mypy`/`pyright` dans la chaîne de validation.
+  - **Déploiement Coolify (`pwa-deploiement`, `stack-table.md`, `BLUEPRINT.md`)** : Conteneurisation Docker multi-stage (`python:3.12-slim` + Uvicorn) pour micro-services d'IA, OCR, calculs financiers et pipelines de données.
+
+## [1.7.1] — 2026-08-23
+
+### Ajouté
+- **Serveur MCP Coolify (`coolify`)** : ajout de l'instance Coolify (`https://home.agencebulles.net/mcp`) dans `mcp.servers.json` et `mcp-servers.md`. Résolution sécurisée via `~/.config/opencode/.tokens/coolify` (chmod 600) et synchronisation vers OpenCode et Antigravity.
+- **Alignement Antigravity CLI (`agy`)** : synchronisation du plugin `~/.gemini/antigravity-cli/plugins/agence-bulles` avec les 3 agents modernes (`lead-dev`, `ops-quality`, `integrations`), les 12 skills à jour et `GEMINI.md`.
+
+### Corrigé
+- **Suppression référence orpheline `n8n`** : purge de `n8n` dans `mcp.servers.json` et `~/.config/opencode/opencode.jsonc` (qui bloquait le lancement d'OpenCode suite au retrait du fichier de token `~/.config/opencode/.tokens/n8n`).
+- **Purge anciens agents Antigravity CLI** : suppression des 14 agents obsolètes (`maestro`, `chef-pwa`, `architecte`, `brvm-analyste`, etc.) et 34 anciennes skills dans `~/.gemini/antigravity-cli/plugins/agence-bulles` avec backup préalable.
+
 ## [1.7.0] — 2026-08-23
 
 ### Modifié
