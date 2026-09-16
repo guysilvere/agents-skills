@@ -20,13 +20,13 @@ Charge la skill `pwa-deploiement` :
 
 ## Étape 3 — Production
 
-- Déployer en production (app + landing + PocketBase conteneurisé si applicable).
+- Déployer en production (app SvelteKit + landing). Base **Turso** — managée, aucun conteneur de base à héberger.
 - Vérifier le proxy Cloudflare (DNS orange, SSL Full Strict, Turnstile).
-- Vérifier les tunnels Zero Trust (consoles Coolify/PocketBase).
+- Vérifier les tunnels Zero Trust (console Coolify).
 
 ## Étape 4 — Sauvegardes et monitoring
 
-- Vérifier la sauvegarde quotidienne R2 (dump DB + médias).
+- Vérifier la sauvegarde quotidienne R2 (export logique Turso `.dump` + médias).
 - Vérifier le monitoring / alerting.
 - Mettre à jour `docs/RUNBOOK.md` si une procédure a changé.
 
