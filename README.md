@@ -47,7 +47,7 @@ Le script :
 - `design-3d` — visuels 3D procéduraux Three.js depuis une image (héros produits, objets animés)
 - `pwa-validation` — tests locaux, E2E Playwright, audit design automatisé, Lighthouse, a11y, SEO, sécurité
 - `pwa-deploiement` — Coolify, Cloudflare, R2, RUNBOOK
-- `api-paiements` — Jèko + CinetPay, webhooks, dunning, factures
+- `api-paiements` — GeniusPay (sandbox + live), webhooks, dunning, factures
 - `api-best-practices` — design API REST
 - `shared-git-conventions` — git, SemVer, releases
 - `shared-eco-tokens` — optimisation de tokens (toujours chargée)
