@@ -54,7 +54,7 @@
       "oauth": false,
       "note": "NE FONCTIONNE PAS dans OpenCode. Erreur exacte (opencode mcp list) : 'SSE error: Invalid content type, expected text/event-stream'. GeniusPay renvoie Content-Type: application/json sur son flux SSE alors que la spec MCP SSE impose text/event-stream — le SDK rejette. C'est un bug cote GeniusPay, pas de configuration. Le MCP lui-meme est valide : handshake complet reussi en curl (202 + initialize OK) avec Authorization:Bearer comme avec X-API-Key. 'oauth:false' conserve (GeniusPay n'expose aucune metadata OAuth). Solutions : faire corriger le Content-Type par GeniusPay, ou passer par un proxy stdio maison (mcp-remote bloque sur la decouverte OAuth).",
       "headers": {
-        "Authorization": "Bearer {{TOKEN:geniuspay}}"
+        "Authorization": "Bearer {{TOKEN:geniuspay-key}}"
       },
       "oc": {},
       "ag": {}

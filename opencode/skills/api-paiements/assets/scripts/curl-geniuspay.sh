@@ -1,17 +1,34 @@
 #!/usr/bin/env bash
 # curl-geniuspay.sh — Exemples de requêtes API GeniusPay
-# Usage : GP_KEY=... GP_SECRET=... ./curl-geniuspay.sh
-# Ne JAMAIS mettre les clés en clair ici : les passer en variables d'env.
 #
-# SANDBOX : utiliser pk_sandbox_... / sk_sandbox_... (transactions simulées, sans frais)
+# Usage : ./curl-geniuspay.sh
+#   Les clés sont lues depuis ~/.config/opencode/.tokens/geniuspay-key
+#   (et geniuspay-secret si présent). Variables d'env GP_KEY / GP_SECRET prioritaires.
+#
+# ⚠️ pk_live_ / sk_live_ = ARGENT REEL. Tester en sandbox avant.
+# X-API-Key suffit pour POST /payments (vérifié) ; le secret sert aux autres endpoints.
 
 set -euo pipefail
 
 BASE="${GP_BASE_URL:-https://geniuspay.ci/api/v1/merchant}"   # HTTPS obligatoire (http -> 301)
-KEY="${GP_KEY:?Set GP_KEY (pk_sandbox_... ou pk_live_...)}"
-SECRET="${GP_SECRET:?Set GP_SECRET (sk_sandbox_... ou sk_live_...)}"
 
-AUTH=(-H "X-API-Key: ${KEY}" -H "X-API-Secret: ${SECRET}" -H "Content-Type: application/json")
+# Clé : variable d'env prioritaire, sinon fichier de jeton (convention .tokens)
+TDIR="${HOME}/.config/opencode/.tokens"
+KEY="${GP_KEY:-$(cat "$TDIR/geniuspay-key" 2>/dev/null || echo '')}"
+SECRET="${GP_SECRET:-$(cat "$TDIR/geniuspay-secret" 2>/dev/null || echo '')}"
+[ -n "$KEY" ] || { echo "Cle GeniusPay absente (GP_KEY ou $TDIR/geniuspay-key)"; exit 1; }
+
+# ⚠️ Verifier l'environnement AVANT tout appel : pk_live_ = argent reel.
+case "$KEY" in
+  pk_sandbox_*|pk_test_*) echo "==> SANDBOX ($(printf '%s' "$KEY" | cut -c1-11)...)" ;;
+  pk_live_*)              echo "==> !!! PRODUCTION — ARGENT REEL ($(printf '%s' "$KEY" | cut -c1-11)...)" ;;
+  *)                      echo "==> prefixe de cle non reconnu : $(printf '%s' "$KEY" | cut -c1-11)..." ;;
+esac
+
+# X-API-Key suffit pour POST /payments (verifie). Le secret est transmis s'il existe,
+# pour les endpoints qui l'exigent.
+AUTH=(-H "X-API-Key: ${KEY}" -H "Content-Type: application/json")
+[ -n "$SECRET" ] && AUTH+=(-H "X-API-Secret: ${SECRET}")
 
 echo "==> 1. Informations du compte (vérifie aussi que les clés sont valides)"
 curl -s "${AUTH[@]}" "${BASE}/account" | head -c 2000; echo
