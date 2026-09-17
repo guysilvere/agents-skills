@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.1.0] — 2026-09-17
+
+### Ajouté
+- **Cycle de release automatisé avec protection de branche** : formalisation du cycle complet de livraison dans `antigravity/workflows/release.md`, `opencode/commands/release.md` et `opencode/skills/shared-git-conventions/SKILL.md`. La commande et le workflow `/release` enchaînent désormais automatiquement la création de PR (`testing` → `main`), le merge à distance via l'API GitHub, la synchronisation locale, le tag SemVer annoté, la publication de la release GitHub et le réalignement de la branche `testing`.
+
 ## [2.0.1] — 2026-09-17
 
 ### Corrigé
