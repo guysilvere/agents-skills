@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.0.1] — 2026-09-17
+
+### Corrigé
+- **`scripts/sync-skills.sh`** : initialisation automatique des tokens manquants avec `chmod 600` et avertissement console lors de la résolution MCP OpenCode (`resolve_mcp_oc()`). Évite l'erreur bloquante `ConfigInvalidError: bad file reference` au démarrage d'OpenCode lorsqu'un serveur MCP est déclaré dans `mcp.servers.json` avant que son fichier secret ne soit créé.
+
 ## [2.0.0] — 2026-09-16
 
 > **Changement cassant** : la passerelle de paiement, la base de données et le framework front changent. Toute spec ou projet écrit avant cette version doit être relu.
