@@ -71,8 +71,10 @@ Bloquants : <liste priorisée, vide si aucun>
 
 - **Emplacement unique** : tout jeton d'agent va dans `~/.config/opencode/.tokens/<nom>` — jamais ailleurs.
 - **Nommage** :
-  - jeton **global** (sert tous les projets) → nom du service, sans préfixe : `github`, `brevo`, `coolify`, `geniuspay` ;
-  - jeton **par projet** → `turso-<projet>-<env>` (ex. `turso-lodgi-prod`, `turso-brvm-radar-test`).
+  - jeton **global** (sert tous les projets) → nom du service, sans préfixe : `github`, `brevo`, `coolify` ;
+  - jeton **par projet** → `turso-<projet>-<env>` (ex. `turso-lodgi-prod`, `turso-brvm-radar-test`) ;
+  - **service multi-valeurs** → un fichier par valeur, suffixé : `<service>-key` / `<service>-secret` (ex. `geniuspay-key`, `geniuspay-secret`). Jamais de fichier à plusieurs lignes : un jeton = un fichier.
+- **Vérifier l'environnement avant tout appel** : un jeton de paiement `pk_live_`/`sk_live_` manipule de l'argent réel → jalon humain. Tester en `sandbox` d'abord.
 - **Portée** : un jeton global est déclaré une fois dans `opencode/mcp.servers.json` (`{{TOKEN:<nom>}}`) et synchronisé. Un jeton de projet n'y figure **pas** : il se gère à la main.
 - **Permissions** : `chmod 600` sur le fichier, `700` sur le dossier `.tokens/`.
 - **Jamais** de jeton dans un dépôt Git, un `.env.example`, un log ou un commentaire.

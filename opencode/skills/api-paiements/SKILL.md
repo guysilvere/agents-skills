@@ -25,13 +25,20 @@ metadata:
 - **Production** (`pk_live_…` / `sk_live_…`) : argent réel. **Jalon humain.**
 - Le champ `environment` est renvoyé dans les réponses et les webhooks → ignorer un événement `sandbox` reçu en production.
 
+## Vérifié par test direct (2026-09-18)
+
+- **`X-API-Key` SEUL suffit** pour `POST /api/v1/merchant/payments`. La doc montre `X-API-Key` + `X-API-Secret`, mais le secret est **inutile** sur cet endpoint — paiement créé sans lui (HTTP 201).
+- **`checkout_url` ET `payment_url`** sont renvoyés, avec **la même valeur**. L'ambiguïté de la doc est levée : lire l'un ou l'autre.
+- **`environment`** vaut `live` ou `sandbox` selon la clé utilisée. ⚠️ **`pk_live_` = argent réel** : vérifier le préfixe AVANT tout appel de test.
+- **Le MCP GeniusPay ne crée AUCUN paiement.** Il n'expose que les docs (`geniuspay://docs/*`) et l'outil `inspect_recent_errors`. Son échec dans OpenCode (cf. `mcp.servers.json`) n'affecte pas la création de paiements — ce sont deux canaux indépendants.
+
 ## À VÉRIFIER auprès du support AVANT de coder
 > Ces points ne sont pas documentés — ne rien présumer.
-- **Périmètre exact de la signature** : l'exemple officiel signe le corps seul, alors qu'un en-tête `X-GeniusPay-Timestamp` existe. Si le timestamp n'est pas signé, il ne protège pas du rejeu.
+- **Périmètre exact de la signature webhook** : l'exemple officiel signe le corps seul, alors qu'un en-tête `X-GeniusPay-Timestamp` existe. Si le timestamp n'est pas signé, il ne protège pas du rejeu.
 - **Politique de retry des webhooks** : aucun délai, nombre de tentatives ni timeout publiés.
 - **Limites de débit** : non documentées.
-- **`payment_url` vs `checkout_url`** : le nom du champ d'URL diffère entre la réponse 201 documentée et les exemples.
 - **`paystack`** : listé dans les paramètres de `payment_method` mais absent du tableau des méthodes.
+- **Content-Type du flux SSE** : `/api/mcp` renvoie `application/json` au lieu de `text/event-stream` → tout client MCP conforme le rejette (bug confirmé).
 
 ## Règles d'intégration (non négociables)
 - **Montants** : `amount` est un **entier en XOF, minimum 200** — pas des centimes. Ne jamais convertir en centimes (piège classique : d'autres passerelles de la région le font).
