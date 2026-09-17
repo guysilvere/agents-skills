@@ -129,10 +129,24 @@ purge_and_copy() {
 
 # ---- MCP : génération depuis mcp.servers.json (source de vérité) ------------
 resolve_mcp_oc() {
-  python3 - "$SRC_MCP" "$TOKENS_DIR" <<'PY'
-import json, sys, re
-src, tdir = sys.argv[1], sys.argv[2]
+  python3 - "$SRC_MCP" "$TOKENS_DIR" "$DRY_RUN" <<'PY'
+import json, sys, re, pathlib
+src, tdir, dry_run = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
 data = json.load(open(src))
+
+def token_ref(m):
+    tok = m.group(1)
+    tok_path = pathlib.Path(tdir) / tok
+    if not tok_path.exists():
+        if not dry_run:
+            tok_path.parent.mkdir(parents=True, exist_ok=True)
+            tok_path.touch(mode=0o600, exist_ok=True)
+            tok_path.chmod(0o600)
+            sys.stderr.write("WARN: token manquant %s — fichier vide initialisé (chmod 600) pour éviter de bloquer OpenCode\n" % tok_path)
+        else:
+            sys.stderr.write("WARN: [dry-run] token manquant %s\n" % tok_path)
+    return "{file:%s/%s}" % (tdir, tok)
+
 out = {}
 for s in data["servers"]:
     name = s["name"]
@@ -140,12 +154,12 @@ for s in data["servers"]:
     if s["transport"] == "local":
         entry["type"] = "local"
         entry["command"] = [s["command"]] + [
-            re.sub(r"\{\{TOKEN:([^}]+)\}\}", lambda m: "{file:%s/%s}" % (tdir, m.group(1)), a)
+            re.sub(r"\{\{TOKEN:([^}]+)\}\}", token_ref, a)
             for a in s.get("args", [])
         ]
         if s.get("environment"):
             entry["environment"] = {
-                k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", lambda m: "{file:%s/%s}" % (tdir, m.group(1)), v)
+                k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", token_ref, v)
                 for k, v in s["environment"].items()
             }
     else:
@@ -155,7 +169,7 @@ for s in data["servers"]:
             entry["oauth"] = s["oauth"]
     if s.get("headers"):
         entry["headers"] = {
-            k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", lambda m: "{file:%s/%s}" % (tdir, m.group(1)), v)
+            k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", token_ref, v)
             for k, v in s["headers"].items()
         }
     out[name] = entry
