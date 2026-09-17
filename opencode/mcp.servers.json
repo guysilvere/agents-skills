@@ -51,6 +51,8 @@
       "transport": "remote",
       "url": "https://geniuspay.ci/api/mcp",
       "enabled": true,
+      "oauth": false,
+      "note": "oauth:false OBLIGATOIRE. GeniusPay sert du MCP en transport SSE et repond 401 sur le POST /api/mcp/message. Sans ce flag, OpenCode instancie un McpOAuthProvider et tente une detection OAuth au premier 401 ; GeniusPay n'expose aucune metadata OAuth, d'ou un echec en 'server unavailable status=failed' (et non 'needs_auth').",
       "headers": {
         "Authorization": "Bearer {{TOKEN:geniuspay}}"
       },
