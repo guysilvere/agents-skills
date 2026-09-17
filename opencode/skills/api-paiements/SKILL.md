@@ -40,6 +40,20 @@ metadata:
 - **`paystack`** : listé dans les paramètres de `payment_method` mais absent du tableau des méthodes.
 - **Content-Type du flux SSE** : `/api/mcp` renvoie `application/json` au lieu de `text/event-stream` → tout client MCP conforme le rejette (bug confirmé).
 
+## Frais — toujours raisonner en NET
+
+```
+frais = (montant × 1 %) + 100 FCFA fixes + (montant × taux_opérateur)
+net   = montant − frais
+```
+
+- **1 % + 100 FCFA fixes** (commission GeniusPay, sur chaque transaction)
+- **+ taux opérateur** : wave / orange_money / mtn_money / card = **1,5 %** · paystack = **5 %** (mesuré)
+- ⚠️ **`net_amount` renvoyé par l'API n'est PAS le net réel** tant que le client n'a pas choisi sa méthode : il ignore les frais opérateur. Le relire **après** le webhook `payment.success`.
+- ⚠️ **Les 100 FCFA fixes écrasent les petits montants** : à 200 XOF les frais font **52,5 %**, à 1 000 XOF **12,5 %**, le plancher ~2,5 % n'est atteint qu'au-delà de 50 000 XOF. Ne pas proposer de prix proche du minimum.
+- Calcul : `node assets/scripts/frais-calc.mjs <montant> [méthode]` ou `--table`
+- Détail, taux mesurés et services du dashboard : `assets/reference/frais.md`
+
 ## Règles d'intégration (non négociables)
 - **Montants** : `amount` est un **entier en XOF, minimum 200** — pas des centimes. Ne jamais convertir en centimes (piège classique : d'autres passerelles de la région le font).
 - **Signature vérifiée sur le corps BRUT** de la requête, comparaison à **temps constant**.
@@ -65,6 +79,8 @@ metadata:
 
 ## Assets
 - `assets/reference/geniuspay.md`
+- `assets/reference/frais.md`
+- `assets/scripts/frais-calc.mjs`
 - `assets/checklists/webhook.md`
 - `assets/checklists/reconciliation.md`
 - `assets/scripts/curl-geniuspay.sh`

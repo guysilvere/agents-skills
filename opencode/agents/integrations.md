@@ -65,7 +65,8 @@ Argent & intégrations. Toute interaction avec un service externe du SaaS Agence
 - **Persister l'événement brut AVANT la logique métier.** 2xx seulement après persistance durable. Signature invalide → 4xx. Événement inconnu → 2xx + log.
 - **Ordre de livraison non garanti** : trier par `timestamp` du payload.
 - **Réconciliation périodique** fournisseur ↔ base + alerte sur écarts (un webhook perdu = client débité non crédité). Job planifié via **tâche planifiée Coolify** (pas de scheduler natif).
-- **Montants** : `amount` est un **entier en XOF, minimum 200** — **pas des centimes**. Ne pas convertir (piège classique des autres passerelles de la région).
+- **Montants** : `amount` est un **entier en XOF, minimum 200** — **pas des centimes**. Ne pas convertir (piège classique des autres passerelles de la région). ⚠️ Une devise non-XOF est acceptée et **convertie** : toujours forcer `currency: "XOF"`.
+- **Frais — raisonner en NET** : `(montant × 1 %) + 100 FCFA fixes + (montant × taux opérateur)`. Le `net_amount` de l'API **ignore les frais opérateur** tant que le client n'a pas choisi sa méthode — ne jamais comptabiliser dessus. Les 100 FCFA fixes rendent les petits montants ruineux (52,5 % de frais à 200 XOF). Détail et calculateur : skill `api-paiements` (`assets/reference/frais.md`, `scripts/frais-calc.mjs`).
 - **Un timeout sur `POST /payments` n'est pas un échec** : la transaction a peut-être été créée → re-vérifier avant tout retry (double paiement).
 - **Environnement** : ignorer tout événement `sandbox` reçu en production.
 - **Passage en `live` = jalon humain.**
