@@ -58,7 +58,7 @@
       "ag": {}
     },
     {
-      "name": "turso-prod",
+      "name": "turso-lodgi-prod",
       "transport": "local",
       "command": "npx",
       "args": ["-y", "@hinha/libsql-mcp"],
@@ -71,7 +71,7 @@
       "ag": {}
     },
     {
-      "name": "turso-test",
+      "name": "turso-lodgi-test",
       "transport": "local",
       "command": "npx",
       "args": ["-y", "@hinha/libsql-mcp"],
@@ -79,6 +79,32 @@
       "environment": {
         "LIBSQL_URL": "libsql://lodgi-test-guysilvere.aws-us-east-1.turso.io",
         "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-lodgi-test}}"
+      },
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "turso-brvm-radar-prod",
+      "transport": "local",
+      "command": "npx",
+      "args": ["-y", "@hinha/libsql-mcp"],
+      "enabled": true,
+      "environment": {
+        "LIBSQL_URL": "libsql://brvm-radar-prod-guysilvere.aws-us-east-1.turso.io",
+        "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-brvm-radar-prod}}"
+      },
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "turso-brvm-radar-test",
+      "transport": "local",
+      "command": "npx",
+      "args": ["-y", "@hinha/libsql-mcp"],
+      "enabled": true,
+      "environment": {
+        "LIBSQL_URL": "libsql://brvm-radar-test-guysilvere.aws-us-east-1.turso.io",
+        "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-brvm-radar-test}}"
       },
       "oc": {},
       "ag": {}
