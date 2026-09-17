@@ -39,14 +39,21 @@ metadata:
 - MAJOR = changement cassant · MINOR = nouvelle fonctionnalité · PATCH = correctif.
 - Proposer le bump adapté + mettre à jour `CHANGELOG.md` (template `assets/templates/CHANGELOG.md`).
 
-## Merge & pull
-- Toujours `testing` → `main` : `git checkout main && git merge testing` (jamais l'inverse).
-- Squash si historique non pertinent ; pull avant push.
-- Après merge : tagger (`v0.1.0`…) + créer la release GitHub.
+## Merge & pull (PR obligatoire sur `main`)
+- `main` est protégée : **aucun merge ni push direct sur `main`**.
+- Tout merge vers `main` passe obligatoirement par une Pull Request GitHub :
+  1. Push de `testing` : `git push origin testing`
+  2. Création de la PR `testing` → `main` (MCP GitHub `create_pull_request` ou `gh pr create`) avec description (contexte, changements, validation).
+  3. Merge de la PR sur GitHub (MCP GitHub `merge_pull_request` ou `gh pr merge --merge`).
+  4. Récupération sur `main` local : `git checkout main && git pull origin main`.
+  5. Tagger (`git tag -a vX.Y.Z -m "..."`) + pusher le tag (`git push origin vX.Y.Z`).
+  6. Créer la release GitHub (`gh release create` ou MCP GitHub).
+  7. Réaligner `testing` : `git checkout testing && git merge main && git push origin testing`.
 
 ## PR & releases
 - Description de PR : contexte, changements, impact, tests effectués → template `assets/templates/PR-template.md`.
 - Notes de release : regroupées par type, langage orienté utilisateur → template `assets/templates/release-notes.md`.
+- Enchaînement automatique : dès qu'une release ou un merge vers `main` est demandé, exécuter le cycle complet (PR → merge GitHub → pull `main` → tag → release GitHub → réalignement `testing`).
 
 ## GitHub MCP (privilégié sur la CLI gh)
 - Le MCP GitHub est authentifié : créer repos/branches/PR/issues/releases, lister, lire/écrire, commenter.
