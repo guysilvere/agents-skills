@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## [2.2.0] — 2026-09-17
+
+### Ajouté
+- **Modèle de frais GeniusPay mesuré** (`api-paiements/assets/reference/frais.md`) : `(montant × 1 %) + 100 FCFA fixes + (montant × taux opérateur)`. Taux opérateur établis par mesure — wave / orange_money / mtn_money / card = **1,50 %**, paystack = **5 %**. Deux pièges documentés : `net_amount` renvoyé par l'API **ignore les frais opérateur** tant que le client n'a pas choisi sa méthode ; les 100 FCFA fixes portent les frais à **52,5 %** sur un paiement à 200 XOF.
+- **Calculateur de net** (`api-paiements/assets/scripts/frais-calc.mjs`) : CLI (`node frais-calc.mjs 10000 wave`, `--table`) **et** module importable pour les applications. Affiche le **net**, jamais le brut.
+- **Convention des jetons d'agent** (`WORKFLOW.md` + les 6 agents) : emplacement unique `~/.config/opencode/.tokens/`, nommage par portée (service pour un jeton global, `turso-<projet>-<env>` pour un jeton de projet, `<service>-key` / `<service>-secret` pour un service multi-valeurs), permissions 600/700, et vérification de l'environnement avant tout appel de paiement.
+- **Serveurs Turso déclarés dans `mcp.servers.json`** : `turso-lodgi-prod`, `turso-lodgi-test`, `turso-brvm-radar-prod`, `turso-brvm-radar-test` — les jetons sont désormais lus depuis `.tokens`, pour OpenCode **et** Antigravity.
+
+### Modifié
+- **Référence API GeniusPay réécrite depuis les tests** (`api-paiements/assets/reference/geniuspay.md`), plus depuis la documentation fournisseur. Huit erreurs de la doc signalées `❌ DOC`, dont l'authentification (`X-API-Key` seul suffit), le champ d'URL (`checkout_url` et `payment_url` coexistent) et le format des frais.
+- **Serveurs MCP Turso renommés** `turso-prod` → `turso-lodgi-prod`, `turso-test` → `turso-lodgi-test` : l'ancien nom était ambigu aux côtés de `turso-brvm-radar-prod`, et une méprise entre deux bases est un risque réel.
+- **`curl-geniuspay.sh`** lit les jetons depuis `.tokens` et **affiche l'environnement** (`SANDBOX` / `⚠️ PRODUCTION — ARGENT REEL`) avant tout appel.
+
+### Corrigé
+- **GeniusPay MCP — cause racine identifiée** : `SSE error: Invalid content type, expected "text/event-stream"`. GeniusPay renvoie `application/json` sur son flux SSE, ce que le SDK MCP rejette. **Bug côté fournisseur**, sans impact sur l'encaissement (le MCP ne sert qu'à lire la doc et inspecter les erreurs).
+- **Serveurs Turso de test désactivés** : les bases `lodgi-test` et `brvm-radar-test` n'existent plus (Turso répond `502 no route configured for host`). Désactivés avec la raison et la procédure de réactivation dans `mcp.servers.json`.
+- **Détection OAuth désactivée** pour GeniusPay (`oauth: false`) — il n'expose aucune métadonnée OAuth.
+
+### Vérifié en conditions réelles
+- **`success_url` / `error_url`** : redirection confirmée après un paiement effectif (200 XOF, wave). Les URLs sont conservées côté serveur, acceptent des query strings, et ne sont pas exposées dans la page de checkout.
+- **`customer.name` / `.email` / `.phone`** : conservés et relus à l'identique.
+- **`metadata`** : conservé, mais **enrichi par le serveur** (`exchange_rate`, `original_amount`, `original_currency`).
+- **Cloudflare bloque Python** (`403 error 1010 browser_signature_banned`) : `curl` et `fetch` Node passent, un service **Python ne peut pas** appeler GeniusPay directement.
+- **Coût des petits montants** : à 200 XOF les frais représentent 52,5 % ; le plancher ~2,5 % n'est atteint qu'au-delà de 50 000 XOF.
+
 ## [2.1.0] — 2026-09-17
 
 ### Ajouté
