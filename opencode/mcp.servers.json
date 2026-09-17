@@ -56,6 +56,32 @@
       },
       "oc": {},
       "ag": {}
+    },
+    {
+      "name": "turso-prod",
+      "transport": "local",
+      "command": "npx",
+      "args": ["-y", "@hinha/libsql-mcp"],
+      "enabled": true,
+      "environment": {
+        "LIBSQL_URL": "libsql://lodgi-prod-guysilvere.aws-us-east-1.turso.io",
+        "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-lodgi-prod}}"
+      },
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "turso-test",
+      "transport": "local",
+      "command": "npx",
+      "args": ["-y", "@hinha/libsql-mcp"],
+      "enabled": true,
+      "environment": {
+        "LIBSQL_URL": "libsql://lodgi-test-guysilvere.aws-us-east-1.turso.io",
+        "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-lodgi-test}}"
+      },
+      "oc": {},
+      "ag": {}
     }
   ]
 }
