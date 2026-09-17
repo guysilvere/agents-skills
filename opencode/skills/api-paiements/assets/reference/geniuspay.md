@@ -1,8 +1,10 @@
-# Référence API — GeniusPay (passerelle unique)
+# Référence API — GeniusPay (vérifiée par test)
 
-> Agrégateur de paiement : Wave, Orange Money, MTN Money, Moov et cartes bancaires.
+> Passerelle unique Agence Bulles : Wave, Orange Money, MTN, Moov, cartes.
 > Dashboard : `https://geniuspay.ci/dashboard` · Support : `support@geniuspay.ci`
-> MCP : `https://geniuspay.ci/api/mcp` (auth `Authorization: Bearer <clé API>`)
+>
+> ⚠️ **Ce document est issu de tests directs, pas de la doc fournisseur.** La doc officielle
+> comporte plusieurs erreurs ; elles sont signalées « ❌ DOC » ci-dessous.
 
 ## Base URL
 
@@ -10,135 +12,178 @@
 https://geniuspay.ci/api/v1/merchant
 ```
 
-⚠️ La documentation officielle annonce `http://`. **Toujours utiliser HTTPS** — le serveur renvoie un `301` sur HTTP. Vérifié : `https://geniuspay.ci/api/v1/merchant/account` répond `401 MISSING_API_KEY`.
+❌ **DOC** : la documentation écrit `http://`. Toujours HTTPS — HTTP renvoie un `301`.
 
-## Environnements
+## Contrainte réseau — Cloudflare bloque certaines signatures
 
-Il existe **un vrai sandbox** (contrairement à d'autres passerelles de la région) :
+Le domaine est derrière Cloudflare, qui filtre selon la signature du client :
 
-| Env | Clés | Comportement |
-| --- | --- | --- |
-| Sandbox | `pk_sandbox_…` / `sk_sandbox_…` | Transactions simulées, sans frais |
-| Production | `pk_live_…` / `sk_live_…` | Transactions réelles |
+| Client | Résultat |
+| --- | --- |
+| `curl` | ✅ 200 |
+| `fetch` Node / `undici` (SvelteKit, adapter-node) | ✅ 200 |
+| **Python `urllib` / `requests`** | ❌ **403 — Error 1010 `browser_signature_banned`** |
 
-Le champ `environment` (`sandbox` / `live`) est renvoyé dans les réponses et dans les webhooks — **l'utiliser pour ignorer un événement sandbox arrivé en prod**.
+**Conséquence** : l'app SvelteKit fonctionne. Un service **Python** qui appellerait GeniusPay
+serait bloqué — l'appeler via Node, ou passer par l'app.
 
 ## Authentification
 
-| Header | Description |
-| --- | --- |
-| `X-API-Key` | Clé publique `pk_sandbox_…` / `pk_live_…` |
-| `X-API-Secret` | Clé secrète `sk_sandbox_…` / `sk_live_…` |
-| `Content-Type` | `application/json` |
+| En-tête | Requis | Rôle |
+| --- | --- | --- |
+| `X-API-Key` | ✅ | `pk_sandbox_…` / `pk_live_…` |
+| `X-API-Secret` | ❌ **non nécessaire** | `sk_sandbox_…` / `sk_live_…` |
+| `Content-Type` | ✅ | `application/json` |
 
-- Vérifié : l'API accepte aussi `Authorization: Bearer <clé>` (utilisé par le MCP).
-- Les clés sont stockées en variables d'env (Coolify en prod, `.env.local` en dev). Jamais en clair.
+❌ **DOC** : les exemples montrent `X-API-Key` **+** `X-API-Secret`. Vérifié : **`X-API-Key` seul
+suffit** pour `POST /payments` (HTTP 201 sans le secret). Le secret reste utile pour les
+endpoints qui l'exigent.
 
-## Montants
+⚠️ **La clé `pk_` n'est pas inoffensive** : elle suffit à créer des paiements. La traiter comme
+un secret (fichier `600`, jamais dans un dépôt, un nom de fichier ou un log).
 
-⚠️ **`amount` est un entier en XOF, pas en centimes.** `amount: 5000` = 5 000 XOF.
+### Environnement
 
-| Paramètre | Type | Défaut | Contrainte |
+`pk_sandbox_…` → sandbox · `pk_live_…` → **argent réel**.
+Le champ `environment` (`live`/`sandbox`) est renvoyé dans chaque réponse. **Vérifier le préfixe
+avant tout appel** — il n'existe aucun interrupteur côté API.
+
+## POST /payments — créer un paiement
+
+### Arguments
+
+| Argument | Type | Requis | Comportement vérifié |
 | --- | --- | --- | --- |
-| `amount` | number | — | **minimum 200 XOF** |
-| `currency` | string | `XOF` | — |
+| `amount` | number | ✅ | Entier, **minimum 200**. Une **chaîne est acceptée et convertie** (`"5000"` → 5 000) |
+| `currency` | string | ❌ | Défaut `XOF`. ⚠️ **Les devises étrangères sont acceptées et CONVERTIES** — voir ci-dessous |
+| `payment_method` | string | ❌ | `wave`, `orange_money`, `mtn_money`, `card`, `paystack`. Une valeur inconnue → 422 |
+| `description` | string | ❌ | Max 500 caractères |
+| `customer.name` | string | ❌ | Conservé et renvoyé tel quel |
+| `customer.email` | string | ❌ | Conservé et renvoyé tel quel |
+| `customer.phone` | string | ❌ | Conservé ; le serveur **ajoute `country: "CI"`** |
+| `success_url` | string | ❌ | Conservée côté serveur, **non exposée** dans la page de checkout |
+| `error_url` | string | ❌ | Idem |
+| `metadata` | object | ❌ | Conservé, **mais enrichi par le serveur** — voir ci-dessous |
 
-## Endpoints
+**Omettre `payment_method`** = mode checkout : le client choisit son moyen sur la page GeniusPay.
+C'est le mode recommandé par la doc, et celui qui offre le plus de conversions.
 
-### Paiements
+### ⚠️ Le piège des devises
 
-| Méthode | Path | Description |
-| --- | --- | --- |
-| POST | `/payments` | Créer un paiement, retourne une URL |
-| GET | `/payments` | Lister (`status`, `from`, `to`, `per_page` max 100, défaut 20) |
-| GET | `/payments/{reference}` | Détail d'une transaction |
+```json
+{ "amount": 200, "currency": "USD" }
+→ 201 : amount = 104 410 XOF
+```
 
-#### POST /payments — paramètres
+Aucune validation : la devise est acceptée, **convertie au taux du jour**, et le montant
+stocké devient le montant XOF. Le serveur trace la conversion dans `metadata` :
 
-| Paramètre | Requis | Description |
-| --- | --- | --- |
-| `amount` | ✓ | Entier, XOF, min 200 |
-| `currency` | — | Défaut `XOF` |
-| `payment_method` | — | `wave`, `paystack`, `orange_money`, `mtn_money`, `card` |
-| `description` | — | Max 500 caractères |
-| `customer.name` / `.email` / `.phone` | — | Coordonnées client |
-| `success_url` / `error_url` | — | Redirections |
-| `metadata` | — | Objet libre (y mettre `order_id`) |
+```json
+"metadata": { "exchange_rate": 1, "original_amount": 200, "original_currency": "XOF", ... }
+```
 
-**Deux modes :**
+**Toujours envoyer `currency: "XOF"` explicitement** pour éviter une surprise de ce type.
 
-1. **Checkout (recommandé)** — omettre `payment_method` : le client choisit son moyen sur la page GeniusPay hébergée. Meilleure conversion.
-2. **Direct** — `payment_method` renseigné : redirection directe vers le gateway.
+### Validation (bornes testées)
 
-#### Réponse 201
+| Cas | Résultat |
+| --- | --- |
+| `amount` absent, `0`, négatif, ou `< 200` | **422** |
+| `payment_method` inconnu | **422** |
+| `amount` en chaîne de caractères | ⚠️ **201 — accepté** |
+| devise non-XOF | ⚠️ **201 — accepté et converti** |
+
+### Réponse 201
 
 ```json
 {
   "success": true,
   "data": {
-    "id": 456,
-    "reference": "MTX-A1B2C3D4E5",
-    "amount": 15000,
-    "fees": 450,
-    "net_amount": 14550,
+    "id": 191984,
+    "reference": "MTX-7LM3NRSQWJ",
+    "amount": 200,
+    "currency": "XOF",
     "status": "pending",
-    "payment_url": "https://wave.com/...",
-    "gateway": "wave",
-    "environment": "sandbox"
+    "checkout_url": "https://geniuspay.ci/checkout/MTX-7LM3NRSQWJ",
+    "payment_url": "https://geniuspay.ci/checkout/MTX-7LM3NRSQWJ",
+    "customer": { "name": "…", "email": "…", "phone": "…", "country": "CI" },
+    "environment": "live",
+    "expires_at": "2026-09-18T22:20:32Z"
   }
 }
 ```
 
-⚠️ Le champ d'URL diffère selon la doc : la réponse 201 documente `payment_url`, les exemples de code utilisent `checkout_url`. **Lire les deux avec un fallback** et vérifier sur le sandbox avant de figer le code.
+✅ **`checkout_url` ET `payment_url` sont renvoyés, avec la même valeur.**
+❌ **DOC** : la réponse documentée n'affiche que `payment_url`, les exemples utilisent
+`checkout_url`. Les deux existent — lire l'un ou l'autre.
 
-### Compte
+**Le lien est partageable tel quel.** Un paiement `pending` non payé **n'est pas facturé**.
 
-| Méthode | Path | Description |
-| --- | --- | --- |
-| GET | `/account` | Informations marchand |
-| GET | `/account/balance` | `available`, `pending`, `total`, `currency` |
+## GET /payments — lister
 
-## Statuts
-
-| Statut | Signification |
+| Query | Valeurs |
 | --- | --- |
-| `pending` | En attente de paiement |
-| `processing` | En cours de traitement |
-| `completed` | Paiement réussi |
-| `failed` | Échoué |
-| `cancelled` | Annulé |
-| `refunded` | Remboursé |
+| `status` | `pending`, `processing`, `completed`, `failed`, `cancelled`, `refunded` |
+| `from` / `to` | `YYYY-MM-DD` |
+| `per_page` | défaut 20, max 100 |
 
-## Méthodes de paiement
+**Pagination** dans `meta` : `current_page`, `per_page`, `total`, `last_page`.
 
-| Code | Nom | Pays |
-| --- | --- | --- |
-| `wave` | Wave | SN, CI, ML, BF |
-| `orange_money` | Orange Money | SN, CI, ML, BF |
-| `mtn_money` | MTN Mobile Money | CI, BF |
-| `card` | Visa / Mastercard | International |
+⚠️ **Les champs de la liste sont à plat**, ceux du détail sont imbriqués :
 
-⚠️ `paystack` apparaît dans les paramètres de `payment_method` mais **pas** dans ce tableau — incohérence à clarifier auprès du support.
+| Liste (`GET /payments`) | Détail (`GET /payments/{ref}`) |
+| --- | --- |
+| `customer_name`, `customer_email`, `customer_phone` | `customer.name`, `customer.email`, `customer.phone` |
+| `merchant_id`, `payment_method`, `environment` | + `success_url`, `error_url`, `metadata`, `payment_provider` |
+
+## GET /payments/{reference} — détail
+
+```json
+{
+  "success": true,
+  "data": {
+    "reference": "MTX-7LM3NRSQWJ",
+    "amount": 200, "currency": "XOF",
+    "fees": 102, "net_amount": 98,
+    "status": "pending",
+    "payment_method": null, "payment_provider": null,
+    "customer": { "name": "…", "email": "…", "phone": "…" },
+    "success_url": "…", "error_url": "…",
+    "metadata": { "order_id": "…", "exchange_rate": 1, "original_amount": 200, "original_currency": "XOF" },
+    "created_at": "…", "completed_at": null
+  }
+}
+```
+
+- `payment_method` / `payment_provider` restent `null` tant que le client n'a pas choisi sur la page de checkout.
+- `fees`/`net_amount` sont renseignés **dès la création**. ⚠️ Sur 200 XOF : `fees = 102` (51 %). La commission a une **composante fixe** qui écrase les petits montants — ne pas se fier au « 1,5 % » annoncé pour un montant proche du minimum.
+- `metadata` est **enrichi** par le serveur : les clés envoyées sont conservées, et `exchange_rate`, `original_amount`, `original_currency` sont ajoutées.
+
+## GET /account et /account/balance
+
+`/account` renvoie, en plus de la doc : `type`, `environment`, `api_mode`, `balance`, `limits`,
+`commission_rate`, `is_early_adopter`, `pin_enabled`.
+
+`limits` : `{ "monthly": 5000000, "used": 0, "available": 5000000 }`.
 
 ## Webhooks
 
-### Gestion des abonnements
+| Méthode | Endpoint |
+| --- | --- |
+| GET / POST | `/webhooks` |
+| PUT / DELETE | `/webhooks/{id}` |
+| POST | `/webhooks/{id}/test` |
 
-| Méthode | Endpoint | Description |
-| --- | --- | --- |
-| GET | `/webhooks` | Lister |
-| POST | `/webhooks` | Créer |
-| PUT | `/webhooks/{id}` | Modifier |
-| DELETE | `/webhooks/{id}` | Supprimer |
-| POST | `/webhooks/{id}/test` | Tester |
+⚠️ **Aucun webhook n'est configuré par défaut** (`GET /webhooks` → `[]`). Un paiement peut donc
+aboutir **sans qu'aucune notification ne parte** — c'est l'état actuel du compte.
 
 ### Événements
 
 `payment.initiated` · `payment.success` · `payment.failed` · `payment.cancelled` · `payment.refunded`
 
-### Headers
+### En-têtes reçus
 
-| Header | Description |
+| En-tête | Contenu |
 | --- | --- |
 | `X-GeniusPay-Signature` | HMAC-SHA256 |
 | `X-GeniusPay-Timestamp` | Timestamp Unix |
@@ -151,15 +196,9 @@ Le champ `environment` (`sandbox` / `live`) est renvoyé dans les réponses et d
   "event": "payment.success",
   "timestamp": "2025-12-08T10:32:15.000000Z",
   "data": {
-    "transaction": {
-      "id": 456,
-      "reference": "MTX-A1B2C3D4E5",
-      "amount": 15000,
-      "status": "completed",
-      "customer": { "name": "Amadou Diallo", "phone": "+221771234567" },
-      "metadata": { "order_id": "12345" }
-    },
-    "merchant": { "id": "uuid-merchant", "name": "Ma Boutique" },
+    "transaction": { "id": 456, "reference": "MTX-…", "amount": 15000, "status": "completed",
+                     "customer": { "name": "…", "phone": "…" }, "metadata": { "order_id": "…" } },
+    "merchant": { "id": "uuid-merchant", "name": "…" },
     "environment": "sandbox"
   }
 }
@@ -168,36 +207,55 @@ Le champ `environment` (`sandbox` / `live`) est renvoyé dans les réponses et d
 ### Vérification de la signature
 
 ```php
-function verifySignature($payload, $signature, $secret) {
-    $expected = hash_hmac('sha256', $payload, $secret);
-    return hash_equals($expected, $signature); // comparaison à temps constant
-}
-$payload = file_get_contents('php://input'); // CORPS BRUT, pas le JSON reparsé
+$payload = file_get_contents('php://input');            // CORPS BRUT, jamais le JSON reparsé
+$expected = hash_hmac('sha256', $payload, $secret);
+hash_equals($expected, $_SERVER['HTTP_X_GENIUSPAY_SIGNATURE']);  // temps constant
 ```
 
-⚠️ **À vérifier auprès du support** : l'exemple officiel ne signe **que le corps**, alors que l'en-tête `X-GeniusPay-Timestamp` existe. Si le timestamp n'est pas inclus dans le HMAC, il est falsifiable et ne protège pas du rejeu. Demander la formule exacte (corps seul, ou `timestamp + corps`) avant de se reposer dessus.
+⚠️ **À CLARIFIER auprès du support** : l'exemple officiel signe **le corps seul**, alors qu'un
+en-tête `X-GeniusPay-Timestamp` existe. Si le timestamp n'est pas inclus dans le HMAC, il est
+falsifiable et ne protège pas du rejeu.
+
+❌ **DOC** : aucun délai de retry, nombre de tentatives ni timeout publiés.
+❌ **DOC** : aucune limite de débit publiée.
+
+## Statuts
+
+`pending` · `processing` · `completed` · `failed` · `cancelled` · `refunded`
+
+Machine à états attendue : `pending` → `processing` → `completed` / `failed` / `cancelled` / `refunded`.
+Toute transition arrière doit être refusée côté application.
 
 ## Codes d'erreur
 
-| Code | HTTP | Description |
-| --- | --- | --- |
-| `MISSING_API_KEY` | 401 | Clé absente |
-| `INVALID_API_KEY` | 401 | Clé invalide |
-| `MERCHANT_INACTIVE` | 403 | Compte désactivé |
-| `PAYMENT_INIT_FAILED` | 400 | Échec d'initialisation |
-| `TRANSACTION_NOT_FOUND` | 404 | Transaction introuvable |
-| `VALIDATION_ERROR` | 422 | Données invalides |
+| Code | HTTP |
+| --- | --- |
+| `MISSING_API_KEY` | 401 |
+| `INVALID_API_KEY` | 401 |
+| `MERCHANT_INACTIVE` | 403 |
+| `PAYMENT_INIT_FAILED` | 400 |
+| `TRANSACTION_NOT_FOUND` | 404 |
+| `VALIDATION_ERROR` | 422 |
 
-## Points non documentés (à clarifier auprès du support)
+⚠️ **Les erreurs 422 ne renvoient PAS le détail** : la réponse est un message générique
+(`"Une erreur est survenue"`), sans indiquer le champ fautif. Prévoir une validation côté
+application avant l'appel — sinon le débogage est à l'aveugle.
 
-- **Politique de retry des webhooks** : aucun délai, nombre de tentatives ni timeout publiés.
-- **Limites de débit** : non documentées.
-- **Signature** : périmètre exact (corps seul ou timestamp inclus) — voir ci-dessus.
-- **`payment_url` vs `checkout_url`** : nom du champ d'URL.
-- **`paystack`** : méthode réellement disponible ?
+## Redirection après paiement
+
+- `success_url` / `error_url` sont **stockées côté serveur**, jamais renvoyées dans la page de checkout.
+- Elles ne s'utilisent qu'**après un paiement effectif** — impossible à tester sans payer.
+- ⚠️ **Vérifier que l'URL cible répond 200 avant de créer le paiement.** Une URL 404 fait atterrir le client sur une page d'erreur *après* avoir été débité.
+
+## Le MCP GeniusPay n'encaisse pas
+
+Le serveur MCP (`https://geniuspay.ci/api/mcp`) n'expose que la documentation
+(`geniuspay://docs/api`, `/subscription`, `/payout`) et l'outil `inspect_recent_errors`.
+**Aucun outil de création de paiement.** Son échec dans OpenCode (bug `Content-Type`, cf.
+`mcp.servers.json`) n'affecte donc pas l'encaissement — deux canaux indépendants.
 
 ## Voir aussi
 
-- Script curl : `../scripts/curl-geniuspay.sh`
+- Script : `../scripts/curl-geniuspay.sh`
 - Checklist webhooks : `../checklists/webhook.md`
 - Checklist réconciliation : `../checklists/reconciliation.md`
