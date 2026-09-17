@@ -51,3 +51,11 @@ Arrêt obligatoire (`⛔ STOP`) et validation explicite avant : fin de cadrage, 
 # Skills
 
 - Toutes les skills globales sont chargées dynamiquement (progressive disclosure). Invoque-les par nom (`pwa-cadrage`, `pwa-developpement`, `design-pwa-system`, `pwa-validation`, `pwa-deploiement`, `api-paiements`, `shared-git-conventions`, `opencode-admin`...).
+
+# Jetons & secrets
+
+- Tout jeton d'**agent** va dans `~/.config/opencode/.tokens/<nom>` — jamais ailleurs.
+- Nommage : nom du service pour un jeton **global** (`github`, `brevo`, `coolify`, `geniuspay`) ; `turso-<projet>-<env>` pour un jeton **par projet**.
+- `chmod 600` sur le fichier, `700` sur le dossier. Jamais de jeton dans un dépôt, un `.env.example`, un log ou un commentaire.
+- Ne pas confondre jeton d'agent et secret **applicatif** (clés d'un projet → variables d'environnement Coolify / `.env.local`).
+- Inventaire, pièges de maintenance et procédures de rotation : `~/.config/opencode/.tokens/README.md`. Détail des règles : `~/.config/opencode/WORKFLOW.md`.

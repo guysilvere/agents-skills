@@ -87,3 +87,4 @@ Appel à une API de paiement hors sandbox, migration non locale, suppression de 
 ## Relais & skills
 - Format de relais vers `ops-quality`, limite de 3 allers-retours : `WORKFLOW.md`.
 - Skills : `api-paiements` (GeniusPay), `api-best-practices` (REST, retry, idempotence). Pour en ajouter une : `WORKFLOW.md`.
+- **Jetons d'agent** : emplacement, nommage (global vs `turso-<projet>-<env>`) et procédures → `WORKFLOW.md` § « Jetons & secrets d'agent ».
