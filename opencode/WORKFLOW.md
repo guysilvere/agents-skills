@@ -67,6 +67,21 @@ Bloquants : <liste priorisée, vide si aucun>
 | Lighthouse | ✅ ⚠️ ⛔ | scores + TBT |
 | a11y / SEO / sécurité | ✅ ⚠️ ⛔ | points relevés |
 
+## Jetons & secrets d'agent
+
+- **Emplacement unique** : tout jeton d'agent va dans `~/.config/opencode/.tokens/<nom>` — jamais ailleurs.
+- **Nommage** :
+  - jeton **global** (sert tous les projets) → nom du service, sans préfixe : `github`, `brevo`, `coolify`, `geniuspay` ;
+  - jeton **par projet** → `turso-<projet>-<env>` (ex. `turso-lodgi-prod`, `turso-brvm-radar-test`).
+- **Portée** : un jeton global est déclaré une fois dans `opencode/mcp.servers.json` (`{{TOKEN:<nom>}}`) et synchronisé. Un jeton de projet n'y figure **pas** : il se gère à la main.
+- **Permissions** : `chmod 600` sur le fichier, `700` sur le dossier `.tokens/`.
+- **Jamais** de jeton dans un dépôt Git, un `.env.example`, un log ou un commentaire.
+- **Ne pas confondre** : un jeton d'**agent** (ce dossier) n'est pas un secret **applicatif** (clés d'un projet → variables d'environnement Coolify / `.env.local`).
+- **Renommer un jeton global** = renommer le fichier **et** le `{{TOKEN:<nom>}}` de `mcp.servers.json`, puis resynchroniser.
+- Inventaire complet, pièges de maintenance et procédures de rotation : `~/.config/opencode/.tokens/README.md`.
+
+> `.tokens/` est en **`deny` de lecture** pour les agents OpenCode : toute opération dessus est manuelle.
+
 ## Ajouter une nouvelle skill
 
 1. Créer `~/.config/opencode/skills/<nom>/SKILL.md` — frontmatter `name` (= nom du dossier) + `description` (ce que fait la skill **et quand la déclencher)**, section `## Assets`.

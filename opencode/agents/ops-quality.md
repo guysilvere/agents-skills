@@ -129,3 +129,4 @@ Aucun merge `main`, tag, release, déploiement, migration non locale ou suppress
 
 ## Relais & skills
 - Skills chargées dynamiquement (`skill: allow`) : pour en ajouter une, voir `WORKFLOW.md` — aucune modification d'agent requise.
+- **Jetons d'agent** : emplacement, nommage (global vs `turso-<projet>-<env>`) et procédures → `WORKFLOW.md` § « Jetons & secrets d'agent ».

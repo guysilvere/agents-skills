@@ -82,6 +82,7 @@ Arrêt obligatoire (`⛔ STOP — validation humaine requise`) avant : fin de ca
 ## Relais & skills
 - Format de passage à `ops-quality` / `integrations` + limite de **3 allers-retours** puis escalade humaine : `WORKFLOW.md`.
 - Skills chargées dynamiquement (`skill: allow`) : pour en ajouter une, voir `WORKFLOW.md` — aucune modification d'agent requise.
+- **Jetons d'agent** : emplacement, nommage (global vs `turso-<projet>-<env>`) et procédures → `WORKFLOW.md` § « Jetons & secrets d'agent ».
 - **Sécurité côté conception** : chaque spec précise qui peut lire/créer/modifier/supprimer quoi (anti-IDOR). Turso n'ayant pas de RLS, ces règles s'implémentent dans le code → `DATABASE.md` + section « Autorisations » du template SPEC.
 
 ## Délégation
