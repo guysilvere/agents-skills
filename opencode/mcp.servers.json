@@ -75,7 +75,8 @@
       "transport": "local",
       "command": "npx",
       "args": ["-y", "@hinha/libsql-mcp"],
-      "enabled": true,
+      "enabled": false,
+      "note": "DESACTIVE 2026-09-17 : la base lodgi-test-guysilvere n'existe plus (Turso renvoie 502 'no route configured for host'). Recréer la base, régénérer le jeton, puis repasser enabled à true.",
       "environment": {
         "LIBSQL_URL": "libsql://lodgi-test-guysilvere.aws-us-east-1.turso.io",
         "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-lodgi-test}}"
@@ -101,7 +102,8 @@
       "transport": "local",
       "command": "npx",
       "args": ["-y", "@hinha/libsql-mcp"],
-      "enabled": true,
+      "enabled": false,
+      "note": "DESACTIVE 2026-09-17 : la base brvm-radar-test-guysilvere n'existe plus (Turso renvoie 502 'no route configured for host'). Recréer la base, régénérer le jeton, puis repasser enabled à true.",
       "environment": {
         "LIBSQL_URL": "libsql://brvm-radar-test-guysilvere.aws-us-east-1.turso.io",
         "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-brvm-radar-test}}"
