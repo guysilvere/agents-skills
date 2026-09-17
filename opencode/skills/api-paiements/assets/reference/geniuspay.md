@@ -241,11 +241,16 @@ Toute transition arrière doit être refusée côté application.
 (`"Une erreur est survenue"`), sans indiquer le champ fautif. Prévoir une validation côté
 application avant l'appel — sinon le débogage est à l'aveugle.
 
-## Redirection après paiement
+## Redirection après paiement — ✅ VÉRIFIÉ
 
-- `success_url` / `error_url` sont **stockées côté serveur**, jamais renvoyées dans la page de checkout.
-- Elles ne s'utilisent qu'**après un paiement effectif** — impossible à tester sans payer.
+**Test réel effectué** : paiement `MTX-LRBWF0QALW`, 200 XOF, `wave`, `completed`.
+`success_url = https://agencebulles.net/?paiement=succes&source=test-redirect` → **la redirection s'est déclenchée correctement.**
+
+- `success_url` / `error_url` sont **stockées côté serveur** et **conservées** (relues à l'identique via `GET /payments/{reference}`).
+- Elles **ne sont pas exposées** dans la page de checkout (0 occurrence dans le HTML servi).
+- La redirection ne se produit qu'**après un paiement effectif** — un checkout abandonné ne redirige pas.
 - ⚠️ **Vérifier que l'URL cible répond 200 avant de créer le paiement.** Une URL 404 fait atterrir le client sur une page d'erreur *après* avoir été débité.
+- Les URLs acceptent des **query strings** (testé avec `?paiement=succes&source=…`) : pratique pour tracer l'origine sans page dédiée.
 
 ## Le MCP GeniusPay n'encaisse pas
 
