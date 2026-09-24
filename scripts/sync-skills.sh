@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # =============================================================================
 # sync-skills.sh — Synchronise l'écosystème IA Agence Bulles depuis GitHub
-#                 vers OpenCode (~/.config/opencode/) et Antigravity (~/.gemini/)
+#                 vers OpenCode (~/.config/opencode/), Antigravity (~/.gemini/)
+#                 et Claude Code (~/.claude/)
 #
 # Source de vérité : https://github.com/guysilvere/agents-skills
 # Usage :
@@ -10,6 +11,7 @@
 #   ./sync-skills.sh --dry-run       # prévisualiser sans rien modifier
 #   ./sync-skills.sh --opencode-only # ne toucher qu'à ~/.config/opencode
 #   ./sync-skills.sh --antigravity-only # ne toucher qu'à ~/.gemini
+#   ./sync-skills.sh --claude-only   # ne toucher qu'à ~/.claude
 #   ./sync-skills.sh --no-backup     # désactiver le backup (déconseillé)
 #   ./sync-skills.sh --help
 # =============================================================================
@@ -26,17 +28,19 @@ BACKUP_ROOT="${HOME}/.config/opencode-backups"
 DRY_RUN=0
 DO_OPENCODE=1
 DO_ANTIGRAVITY=1
+DO_CLAUDE=1
 DO_BACKUP=1
 USE_LOCAL=0
 
 usage() {
-  sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
   echo ""
   echo "Options :"
   echo "  --local            Utilise le dossier local courant au lieu du clone git distant"
   echo "  --dry-run          Affiche les actions sans rien modifier"
   echo "  --opencode-only    Ne traite que OpenCode (~/.config/opencode)"
   echo "  --antigravity-only Ne traite que Antigravity (~/.gemini)"
+  echo "  --claude-only      Ne traite que Claude Code (~/.claude)"
   echo "  --no-backup        Désactive le backup préalable (déconseillé)"
   echo "  --help             Affiche cette aide"
   echo ""
@@ -48,8 +52,9 @@ for arg in "$@"; do
   case "$arg" in
     --local) USE_LOCAL=1 ;;
     --dry-run) DRY_RUN=1 ;;
-    --opencode-only) DO_ANTIGRAVITY=0 ;;
-    --antigravity-only) DO_OPENCODE=0 ;;
+    --opencode-only) DO_ANTIGRAVITY=0; DO_CLAUDE=0 ;;
+    --antigravity-only) DO_OPENCODE=0; DO_CLAUDE=0 ;;
+    --claude-only) DO_OPENCODE=0; DO_ANTIGRAVITY=0 ;;
     --no-backup) DO_BACKUP=0 ;;
     --help|-h) usage; exit 0 ;;
     *) echo "Option inconnue : $arg" >&2; usage >&2; exit 1 ;;
@@ -90,6 +95,7 @@ SRC_AGENTS="${BASE_SRC}/opencode/agents"
 SRC_COMMANDS="${BASE_SRC}/opencode/commands"
 SRC_WORKFLOWS="${BASE_SRC}/antigravity/workflows"
 SRC_AG_AGENTS="${BASE_SRC}/antigravity/agents"
+SRC_CL_AGENTS="${BASE_SRC}/claude/agents"
 SRC_MCP="${BASE_SRC}/opencode/mcp.servers.json"
 
 # Cibles
@@ -103,6 +109,8 @@ AG_WORKFLOWS="${HOME}/.gemini/workflows"
 AG_MCP="${HOME}/.gemini/config/mcp_config.json"
 AG_RULES="${HOME}/.gemini/GEMINI.md"
 AG_CLI_PLUGIN="${HOME}/.gemini/antigravity-cli/plugins/agence-bulles"
+CL_SKILLS="${HOME}/.claude/skills"
+CL_AGENTS="${HOME}/.claude/agents"
 
 # Tokens locaux (jamais commités)
 TOKENS_DIR="${HOME}/.config/opencode/.tokens"
@@ -209,6 +217,79 @@ print(json.dumps(out, ensure_ascii=False, indent=2))
 PY
 }
 
+# Claude Code n'a pas de syntaxe {file:...} : les secrets doivent venir de vraies
+# variables d'env, résolues par Claude lui-même à l'exécution (${VAR}). On ne
+# génère donc pas un fichier de config ici, mais une liste de commandes
+# `claude mcp add-json ... --scope user` (interface officielle et sûre plutôt
+# que d'éditer ~/.claude.json à la main). Les valeurs ${MCP_..._TOKEN} restent
+# littérales dans le JSON — c'est `scripts/export-mcp-tokens.sh` (sourcé dans
+# le shell rc) qui les peuple avant que `claude` ne démarre un serveur MCP.
+# Sortie : une ligne TSV par serveur — name<TAB>enabled(0/1)<TAB>json-en-base64
+resolve_mcp_claude() {
+  python3 - "$SRC_MCP" <<'PY'
+import base64, json, re, sys
+
+def token_var(tok):
+    return "MCP_" + re.sub(r"[^A-Za-z0-9]+", "_", tok).upper() + "_TOKEN"
+
+def to_placeholder(m):
+    return "${%s}" % token_var(m.group(1))
+
+src = sys.argv[1]
+data = json.load(open(src))
+
+for s in data["servers"]:
+    name = s["name"]
+    enabled = s.get("enabled", True)
+    entry = {}
+    if enabled:
+        if s["transport"] == "local":
+            entry["type"] = "stdio"
+            entry["command"] = s["command"]
+            entry["args"] = [re.sub(r"\{\{TOKEN:([^}]+)\}\}", to_placeholder, a) for a in s.get("args", [])]
+            if s.get("environment"):
+                entry["env"] = {k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", to_placeholder, v) for k, v in s["environment"].items()}
+        else:
+            entry["type"] = "http"
+            entry["url"] = s["url"]
+        if s.get("headers"):
+            entry["headers"] = {k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", to_placeholder, v) for k, v in s["headers"].items()}
+    b64 = base64.b64encode(json.dumps(entry, ensure_ascii=False).encode()).decode() if enabled else ""
+    print("%s\t%s\t%s" % (name, "1" if enabled else "0", b64))
+PY
+}
+
+# Applique resolve_mcp_claude() via `claude mcp add-json --scope user` (idempotent : remove puis add)
+sync_claude_mcp() {
+  if ! command -v claude >/dev/null 2>&1; then
+    warn "commande 'claude' introuvable dans le PATH — MCP Claude Code ignoré"
+    return 0
+  fi
+  local name enabled b64 json_line
+  while IFS=$'\t' read -r name enabled b64; do
+    [[ -z "$name" ]] && continue
+    if [[ "$enabled" == "1" ]]; then
+      json_line="$(printf '%s' "$b64" | base64 -d)"
+      if (( DRY_RUN )); then
+        log "[dry-run] claude mcp add-json ${name} (scope user) : ${json_line}"
+      else
+        claude mcp remove "$name" -s user >/dev/null 2>&1 || true
+        if claude mcp add-json "$name" "$json_line" -s user >/dev/null 2>&1; then
+          ok "MCP Claude : ${name} enregistré (scope user)"
+        else
+          warn "MCP Claude : échec d'enregistrement de ${name}"
+        fi
+      fi
+    else
+      if (( DRY_RUN )); then
+        log "[dry-run] claude mcp remove ${name} (scope user) — désactivé côté source"
+      else
+        claude mcp remove "$name" -s user >/dev/null 2>&1 || true
+      fi
+    fi
+  done < <(resolve_mcp_claude)
+}
+
 # Fusionne la clé "mcp" générée dans opencode.jsonc existant (préserve les MCP existants comme turso)
 merge_oc_mcp() {
   local block="$1" cfg="$2"
@@ -271,6 +352,13 @@ if (( DO_BACKUP )) && (( ! DRY_RUN )); then
     [[ -f "$AG_MCP" ]] && cp -R "$AG_MCP" "$BACKUP_DIR/antigravity-mcp_config.json" 2>/dev/null || true
     [[ -d "$AG_CLI_PLUGIN" ]] && cp -R "$AG_CLI_PLUGIN" "$BACKUP_DIR/antigravity-cli-plugin-agence-bulles" 2>/dev/null || true
   fi
+  if (( DO_CLAUDE )); then
+    [[ -d "$CL_SKILLS" ]] && cp -R "$CL_SKILLS" "$BACKUP_DIR/claude-skills" 2>/dev/null || true
+    [[ -d "$CL_AGENTS" ]] && cp -R "$CL_AGENTS" "$BACKUP_DIR/claude-agents" 2>/dev/null || true
+    if command -v claude >/dev/null 2>&1; then
+      claude mcp list > "$BACKUP_DIR/claude-mcp-list.txt" 2>/dev/null || true
+    fi
+  fi
   log "Backup : $BACKUP_DIR"
 elif (( DRY_RUN )); then
   log "[dry-run] Backup serait créé dans ${BACKUP_DIR}"
@@ -331,6 +419,17 @@ if (( DO_ANTIGRAVITY )); then
 }
 EOF
     ok "Manifest Antigravity CLI : plugin.json à jour"
+  fi
+fi
+
+if (( DO_CLAUDE )); then
+  log "── Claude Code ──────────────────────────────────────"
+  purge_and_copy "$SRC_SKILLS"    "$CL_SKILLS" "Skills Claude Code (12)"
+  purge_and_copy "$SRC_CL_AGENTS" "$CL_AGENTS" "Agents Claude Code (3)"
+  if [[ -f "$SRC_MCP" ]]; then
+    sync_claude_mcp
+  else
+    warn "Source MCP absente : $SRC_MCP — ignorée"
   fi
 fi
 

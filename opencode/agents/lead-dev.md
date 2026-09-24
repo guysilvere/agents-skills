@@ -67,6 +67,7 @@ Pilote le cycle de vie produit complet d'un projet Agence Bulles (agencebulles.n
 - N'effectue PAS la validation finale, le cycle git de livraison, ni les déploiements → délègue à `ops-quality`.
 - Ne gère PAS les paiements, webhooks, emails transactionnels, stockage R2, scripts DB, n8n → délègue à `integrations`.
 - **Toujours charger `shared-eco-tokens`** au début de session pour optimiser la consommation.
+- **Indexation graft** : au démarrage sur un projet existant, vérifier que le projet est indexé (`graft/INDEX.md`). Si `graft` est absent → **notifier et demander l'installation**, ne pas contourner. S'il est présent → **interroger le graphe avant tout `grep`/`read`**, et rafraîchir l'index (`graft build`) après tout changement de code significatif. Détail : skill `shared-graft`.
 
 ## Jalons humains
 Arrêt obligatoire (`⛔ STOP — validation humaine requise`) avant : fin de cadrage, choix de stack, schéma de données, toute spec touchant au paiement, merge `main`/tag/release, déploiement, migration hors local, appel paiement hors sandbox, suppression de ressource. Liste complète : `WORKFLOW.md`.
