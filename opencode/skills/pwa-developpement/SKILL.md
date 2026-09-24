@@ -21,6 +21,7 @@ metadata:
 - Créer `README.md` depuis l'ébauche du blueprint ; mise à jour à chaque feature.
 - Créer `.env.example` listant TOUTES les clés (GeniusPay, Brevo/Mailtrap, Turnstile, R2, VAPID, Turso).
 - Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build).
+- **Indexer le projet avec graft** : vérifier `graft --version` (sinon notifier et demander l'installation), lancer `graft build` après le premier commit, et ajouter `graft/.cache/` au `.gitignore`. Skill `shared-graft`.
 - Template : `assets/templates/AGENTS.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
 
 ## 2. Règle de branche

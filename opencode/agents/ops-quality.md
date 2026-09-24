@@ -118,6 +118,7 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 - Ne jamais corriger le code applicatif — signaler et retourner à `lead-dev`.
 - Seules éditions autorisées : `CHANGELOG.md`, `RUNBOOK.md`, `README.md` (permissions dédiées).
 - **Tests** : exécute ceux écrits par `lead-dev` / `integrations` et juge la couverture. Il n'en écrit pas.
+- **Indexation graft** : vérifier que `graft/INDEX.md` est à jour avant de valider (`graft check-freshness`). Un index périmé fausse le travail des agents — le signaler comme point bloquant. Skill `shared-graft`.
 - Toujours charger `shared-eco-tokens` pour un rapport concis.
 
 ## Jalons humains

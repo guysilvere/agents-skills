@@ -67,6 +67,16 @@ Bloquants : <liste priorisée, vide si aucun>
 | Lighthouse | ✅ ⚠️ ⛔ | scores + TBT |
 | a11y / SEO / sécurité | ✅ ⚠️ ⛔ | points relevés |
 
+## Indexation du code (graft)
+
+- **Au démarrage** sur un projet existant : vérifier `graft --version` et `graft/INDEX.md`.
+- **`graft` absent** → ⛔ notifier l'utilisateur et **demander l'installation** (`npm i -g @nanonets/graft`). Ne jamais installer un paquet global sans accord, ni se rabattre silencieusement sur `grep`.
+- **`graft` présent** → **interroger le graphe avant tout `grep`/`read`** : `graft ask` (comprendre), `graft grep` (exhaustif), `graft skeleton` (surface d'API), `graft callers` (impact), `graft map` (orientation).
+- **Rafraîchir** (`graft build`, déterministe, $0) après tout changement de code significatif — fin de fonctionnalité, avant de déléguer à `ops-quality`, avant un commit structurel.
+- Un index **périmé est trompeur** : il fait répondre le graphe à côté, silencieusement. Le rafraîchir plutôt que s'en méfier.
+- `graft/` est versionné dans les projets ; `graft/.cache/` est ignoré.
+- Détail : skill `shared-graft`.
+
 ## Jetons & secrets d'agent
 
 - **Emplacement unique** : tout jeton d'agent va dans `~/.config/opencode/.tokens/<nom>` — jamais ailleurs.
