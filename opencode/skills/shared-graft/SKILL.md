@@ -63,9 +63,10 @@ graft build          # déterministe, sans clé API, $0
   qui touche la structure du code.
 - **Pourquoi** : un index périmé fait répondre le graphe à côté — pire que pas d'index, parce que
   l'erreur est silencieuse.
-- **Vérifier la fraîcheur** : `graft check-freshness` (ou comparer la date de `graft/INDEX.md`).
-- Le dossier `graft/` est **versionné** dans les projets Agence Bulles (il est petit et utile aux
-  agents). `graft/.cache/` est ignoré.
+- **Vérifier la fraîcheur** : comparer la date de `graft/INDEX.md` (ou `graft check-freshness`).
+- ⚠️ **Depuis graft 0.19, `graft/` est un cache LOCAL** : le CLI l'ajoute lui-même au `.gitignore`.
+  Ne pas le versionner — chaque poste lance `graft build` pour obtenir le sien. (Comportement
+  différent de 0.12, où le dossier était versionné.)
 
 ## 4. Si graft n'est pas installé — notifier, ne pas contourner
 
@@ -88,7 +89,7 @@ Lors de la création d'un projet (`pwa-developpement`, phase de scaffold) :
 
 1. Vérifier la présence de `graft` (§ 1).
 2. Après le premier commit, lancer `graft build`.
-3. Ajouter `graft/.cache/` au `.gitignore` (le reste de `graft/` est versionné).
+3. Rien à ajouter au `.gitignore` : **graft 0.19+ s'y inscrit lui-même** (`graft/` est un cache local).
 
 ## Règles
 - Le graphe **avant** grep/read. Toujours.

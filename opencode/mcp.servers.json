@@ -10,6 +10,16 @@
       "ag": {}
     },
     {
+      "name": "graft",
+      "transport": "local",
+      "command": "graft",
+      "args": ["mcp"],
+      "enabled": true,
+      "note": "Indexation du code. Sans ce serveur, OpenCode ne voit graft que dans les repos portant un .mcp.json local. Requiert le CLI : npm i -g @nanonets/graft",
+      "oc": {},
+      "ag": {}
+    },
+    {
       "name": "github",
       "transport": "remote",
       "url": "https://api.githubcopilot.com/mcp/",
