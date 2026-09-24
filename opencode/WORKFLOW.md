@@ -74,7 +74,7 @@ Bloquants : <liste priorisée, vide si aucun>
 - **`graft` présent** → **interroger le graphe avant tout `grep`/`read`** : `graft ask` (comprendre), `graft grep` (exhaustif), `graft skeleton` (surface d'API), `graft callers` (impact), `graft map` (orientation).
 - **Rafraîchir** (`graft build`, déterministe, $0) après tout changement de code significatif — fin de fonctionnalité, avant de déléguer à `ops-quality`, avant un commit structurel.
 - Un index **périmé est trompeur** : il fait répondre le graphe à côté, silencieusement. Le rafraîchir plutôt que s'en méfier.
-- `graft/` est versionné dans les projets ; `graft/.cache/` est ignoré.
+- ⚠️ Depuis **graft 0.19**, `graft/` est un **cache local** : le CLI l'ajoute lui-même au `.gitignore`. Ne pas le versionner — chaque poste lance `graft build`.
 - Détail : skill `shared-graft`.
 
 ## Jetons & secrets d'agent
