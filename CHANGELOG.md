@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [2.3.0] — 2026-09-26
+
+### Ajouté
+- **Gestion des bugs via GitHub Issues obligatoire** (`shared-git-conventions`, `WORKFLOW.md`, agents `lead-dev` et `ops-quality`) : sur tous les projets GitHub, obligation d'ouvrir une Issue (FR ou EN) avant toute résolution, de consigner le suivi des investigations et itérations en commentaires, et de fermer l'Issue une fois le problème résolu et validé.
+- **Template d'issue GitHub** (`shared-git-conventions/assets/templates/issue-template.md`) : modèle standardisé comprenant description, comportement observé vs attendu, étapes de reproduction, traces d'erreur et pistes d'investigation.
+
 ## [2.2.0] — 2026-09-17
 
 ### Ajouté
