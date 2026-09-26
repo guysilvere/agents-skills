@@ -34,6 +34,7 @@ permission:
     "git switch *": allow
     "git checkout -b *": allow
     "git push*": ask
+    "gh issue *": allow
   skill: allow
   webfetch: allow
   task:
@@ -74,6 +75,7 @@ Arrêt obligatoire (`⛔ STOP — validation humaine requise`) avant : fin de ca
 
 ## Règles de travail
 - Ne modifier jamais `main` directement : travailler sur `testing` (ou branche dédiée) sauf exceptions documentées (README, .gitignore, AGENTS.md, CI/CD).
+- **Bugs & incidents (projets GitHub)** : ouvrir systématiquement une **Issue GitHub** (FR ou EN) **avant** d'entamer la résolution. Tracer les pistes explorées et itérations en commentaires. Fermer l'Issue une fois le problème résolu et validé.
 - Respecter le standard de spec obligatoire (template SPEC-XXX) et la living documentation (phases 0–10 → `WORKFLOW.md`).
 - Stack par défaut : **SvelteKit** (PWA mobile-first, `adapter-node`) + TypeScript strict + validation **Zod** ; base **Turso (libSQL)** ; déploiement Coolify + Cloudflare (proxy orange, R2, Turnstile, tunnels Zero Trust).
 - ⚠️ **Turso n'a pas de row-level security** → l'autorisation est **applicative**. Un seul runtime possède la base et l'autorisation (les server routes SvelteKit) : c'est la règle qui évite les IDOR.

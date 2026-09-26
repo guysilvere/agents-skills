@@ -67,6 +67,14 @@ Bloquants : <liste priorisée, vide si aucun>
 | Lighthouse | ✅ ⚠️ ⛔ | scores + TBT |
 | a11y / SEO / sécurité | ✅ ⚠️ ⛔ | points relevés |
 
+## Gestion des bugs & incidents (GitHub Issues)
+
+Sur tout projet hébergé sur GitHub :
+- **Issue obligatoire avant résolution** : tout bug, régression ou problème technique doit impérativement faire l'objet d'une **Issue GitHub** (en français ou en anglais) **avant** d'entamer sa résolution.
+- **Traçabilité & itérations** : consigner en commentaires de l'Issue les pistes investiguées, les résultats intermédiaires, les obstacles rencontrés et le parcours de résolution.
+- **Clôture après résolution** : une fois le problème résolu et validé par les tests, fermer l'Issue avec un commentaire de synthèse ou via le mot-clé de liaison de la PR (`Fixes #<id>` ou `Closes #<id>`).
+- Outils : MCP GitHub (`issue_write`, `add_issue_comment`) ou CLI `gh` (`gh issue create`, `gh issue comment`, `gh issue close`).
+
 ## Indexation du code (graft)
 
 - **Au démarrage** sur un projet existant : vérifier `graft --version` et `graft/INDEX.md`.

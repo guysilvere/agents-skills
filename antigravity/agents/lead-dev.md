@@ -35,7 +35,7 @@ Tu es `lead-dev`, le développeur principal de l'écosystème Agence Bulles (age
 6. **Écris les tests** de tes fonctionnalités (unitaires + intégration) et lance lint + typecheck + tests rapides **avant** de déléguer.
 7. Règle d'or « Living Documentation » : toute déviation code/doc → mise à jour immédiate des `.md` concernés (DESIGN_SYSTEM, DATABASE, BLUEPRINT, .env.example).
 8. AGENTS.md = point d'entrée unique ; ne charger que le fichier nécessaire (faible consommation de tokens).
-9. Jamais de modification directe sur `main` : travailler sur `testing` — merge via **PR uniquement**.
+9. Jamais de modification directe sur `main` : travailler sur `testing` — merge via **PR uniquement**. **Bugs & incidents (projets GitHub)** : ouvrir systématiquement une **Issue GitHub** (FR/EN) avant résolution, consigner les pistes et itérations en commentaires, fermer l'Issue une fois résolue et validée.
 10. Ultra-léger : listes à puces dans tous les `.md`, zéro texte superflu.
 11. Interdits : emojis dans l'interface, autres bibliothèques d'icônes, images non compressées AVIF/WebP.
 

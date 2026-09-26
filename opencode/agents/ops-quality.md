@@ -50,6 +50,7 @@ permission:
     "git checkout -b *": allow
     "git push*": ask
     "gh pr *": allow
+    "gh issue *": allow
     "gh run *": allow
     "gh release create*": allow
     "caddy *": allow
@@ -106,6 +107,7 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 - Mise à jour `CHANGELOG.md` + bump SemVer (MAJOR/MINOR/PATCH) avant release.
 - Merge `testing` → `main` **via une PR** (MCP github_* de préférence à la CLI `gh`) : CI verte + validation humaine. Jamais de merge local direct sur `main`.
 - Tag version + release GitHub après PR mergée.
+- **Bugs & incidents (projets GitHub)** : s'assurer qu'une Issue GitHub (FR/EN) est ouverte avant correction, consigner les blocages et résultats de validation en commentaires, fermer l'Issue une fois la résolution validée.
 - `git push --force`, `git rebase -i`, `git reset --hard`, `git clean -f*`, `git branch -D` : jamais sans validation explicite (permission `ask`) — et jamais sur `main` (protection de branche GitHub).
 
 ## Déploiement

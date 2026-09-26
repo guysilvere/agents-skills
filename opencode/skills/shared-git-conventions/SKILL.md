@@ -1,6 +1,6 @@
 ---
 name: shared-git-conventions
-description: Conventions Git/GitHub Agence Bulles — branche testing unique, commits Conventional Commits, versioning SemVer, notes de release et descriptions de PR, merge et pull, MCP GitHub. À utiliser pour toute opération de versioning (via ops-quality).
+description: Conventions Git/GitHub Agence Bulles — branche testing unique, commits Conventional Commits, versioning SemVer, gestion des bugs via GitHub Issues (création avant fix, suivi, clôture), notes de release et descriptions de PR, merge et pull, MCP GitHub. À utiliser pour toute opération de versioning (via ops-quality).
 license: MIT
 compatibility: opencode
 metadata:
@@ -55,6 +55,16 @@ metadata:
 - Notes de release : regroupées par type, langage orienté utilisateur → template `assets/templates/release-notes.md`.
 - Enchaînement automatique : dès qu'une release ou un merge vers `main` est demandé, exécuter le cycle complet (PR → merge GitHub → pull `main` → tag → release GitHub → réalignement `testing`).
 
+## Gestion des bugs & incidents (GitHub Issues)
+- **Règle absolue sur les projets GitHub** : tout bug, régression ou problème technique doit être consigné dans une **Issue GitHub** **avant** d'entamer sa résolution.
+- **Langue** : français ou anglais (selon le projet ou la demande utilisateur).
+- **Format initial** : titre clair, description du problème, comportement observé vs attendu, étapes de reproduction et messages d'erreur éventuels (template `assets/templates/issue-template.md`).
+- **Traçabilité & itérations** :
+  - Consigner dans les **commentaires de l'Issue** les pistes explorées, les découvertes au fil de l'investigation, les itérations successives et le parcours de résolution.
+- **Clôture après résolution** :
+  - Dès que le problème est résolu et vérifié (tests au vert), fermer l'Issue avec un commentaire récapitulatif de la solution ou via le mot-clé de liaison dans la PR (`Fixes #<id>` ou `Closes #<id>`).
+  - Outils à privilégier : MCP GitHub (`issue_write`, `add_issue_comment`) ou CLI `gh` (`gh issue create`, `gh issue comment`, `gh issue close`).
+
 ## GitHub MCP (privilégié sur la CLI gh)
 - Le MCP GitHub est authentifié : créer repos/branches/PR/issues/releases, lister, lire/écrire, commenter.
 - Utiliser les outils `github_*` plutôt que `gh` (pas de passes).
@@ -67,3 +77,4 @@ metadata:
 - `assets/templates/PR-template.md`
 - `assets/templates/CHANGELOG.md`
 - `assets/templates/release-notes.md`
+- `assets/templates/issue-template.md`
