@@ -85,6 +85,16 @@ Sur tout projet hébergé sur GitHub :
 - ⚠️ Depuis **graft 0.19**, `graft/` est un **cache local** : le CLI l'ajoute lui-même au `.gitignore`. Ne pas le versionner — chaque poste lance `graft build`.
 - Détail : skill `shared-graft`.
 
+## Serveurs MCP — activer / désactiver
+
+- **Source de vérité unique** : `opencode/mcp.servers.json`. Ne jamais éditer les configs cibles à la main.
+- **Activer un serveur désactivé** : passer `enabled` à `true` dans la source, puis `./scripts/sync-skills.sh --local`.
+- **Un serveur désactivé se déclare différemment selon la cible** — comportement à connaître :
+  - **OpenCode** → déclaré avec `enabled: false` (visible en `opencode mcp list`, non chargé) ;
+  - **Antigravity** → déclaré avec `disabled: true` ;
+  - **Claude** → **absent** : le script le retire (`claude mcp remove`) tant qu'il est désactivé, et le réenregistre à l'activation. Claude n'a pas d'état « désactivé » en scope user.
+- **Pourquoi désactiver plutôt que supprimer** : un serveur `enabled: false` reste déclaré, documenté et réactivable en une ligne — et surtout ses **schémas d'outils ne sont pas chargés** dans le contexte de chaque session. C'est le levier principal d'économie de tokens sur les serveurs verbeux.
+
 ## Jetons & secrets d'agent
 
 - **Emplacement unique** : tout jeton d'agent va dans `~/.config/opencode/.tokens/<nom>` — jamais ailleurs.
