@@ -21,6 +21,8 @@ metadata:
 - Créer `README.md` depuis l'ébauche du blueprint ; mise à jour à chaque feature.
 - Créer `.env.example` listant TOUTES les clés (GeniusPay, Brevo/Mailtrap, Turnstile, R2, VAPID, Turso).
 - Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build).
+- Créer `docs/adr/` (vide, avec un `README.md` d'une ligne) — les décisions structurelles s'y consigneront (cf. § 3bis).
+- Créer `.github/PULL_REQUEST_TEMPLATE.md` et `.github/ISSUE_TEMPLATE/{bug,feature,chore}.md` depuis `shared-git-conventions/assets/templates/`.
 - **Indexer le projet avec graft** : vérifier `graft --version` (sinon notifier et demander l'installation), lancer `graft build` après le premier commit. Rien à ajouter au `.gitignore` : graft 0.19+ s'y inscrit lui-même. Skill `shared-graft`.
 - **`.gitignore` projet** : y ajouter `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
 - Template : `assets/templates/AGENTS.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
@@ -34,6 +36,24 @@ metadata:
   - Intent (Problème/Objectif), User Story, Exigences (table ID/Exigence/DoD), Edge cases, PWA/Offline, Modèle de données & API, Fichiers impactés, Tâches.
 - Statuts : DRAFT → APPROVED → IN_PROGRESS → DONE.
 - Template : `assets/templates/SPEC-XXX.md`.
+
+## 3bis. Décisions d'architecture (ADR)
+
+**Toute décision structurelle produit un ADR** dans `docs/adr/NNNN-titre.md` (template `assets/templates/ADR.md`).
+
+**Déclencheurs — écrire un ADR dès qu'on tranche sur :**
+- le choix de base de données, d'hébergement, de framework, de librairie structurante ;
+- le modèle d'autorisation (RLS vs applicatif, multi-tenant) ;
+- une passerelle ou un service externe (paiement, email, stockage) ;
+- un changement **cassant** : ce qui demande de relire les specs existantes ;
+- la **révision** d'une décision antérieure.
+
+**Règles**
+- Numérotation séquentielle continue, jamais réutilisée : `0001-`, `0002-`…
+- Un ADR est **immuable**. Un changement de décision → **nouvel** ADR qui remplace l'ancien, dont on met à jour le `Statut`.
+- Un ADR se rédige **au moment de la décision**, pas après. Le contexte de l'époque est ce qui a le plus de valeur plus tard.
+- Ultra-léger : une page maximum. Le pourquoi prime sur le comment.
+- Tout ADR accepté qui contredit une doc existante → mettre à jour `BLUEPRINT.md` / `DATABASE.md` dans le même lot.
 
 ## 4. Conventions de code (tous langages)
 - **Nommage** : explicite (jamais `x`, `tmp`, `data`) ; camelCase JS/TS, snake_case Python, PascalCase composants.
@@ -92,12 +112,15 @@ projet/
 │   ├── auth/authorize.ts      # Module unique d'autorisation (Turso n'a pas de RLS)
 │   └── db/                    # Client Drizzle + requêtes scopées
 ├── src/routes/api/            # Server routes : endpoints, webhooks, jobs
-├── .github/workflows/ci.yml   # CI : secrets → lint → typecheck → tests → build
+├── .github/
+│   ├── workflows/ci.yml       # CI : secrets → lint → typecheck → tests → build
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── ISSUE_TEMPLATE/        # bug.md, feature.md, chore.md
 ├── Dockerfile                 # Multi-stage production (Coolify)
 ├── docker-compose.dev.yml     # Dev local avec hot-reload (Docker Desktop)
 ├── docker-compose.yml         # Prod / Staging
 ├── .env.example
-└── docs/ (CADRAGE, BLUEPRINT, DATABASE, DESIGN_SYSTEM, specs/, RUNBOOK)
+└── docs/ (CADRAGE, BLUEPRINT, DATABASE, DESIGN_SYSTEM, specs/, adr/, RUNBOOK)
 ```
 
 ## 7. Base de données (DATABASE.md)

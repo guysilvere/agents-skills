@@ -58,7 +58,7 @@ metadata:
 ## Gestion des bugs & incidents (GitHub Issues)
 - **Règle absolue sur les projets GitHub** : tout bug, régression ou problème technique doit être consigné dans une **Issue GitHub** **avant** d'entamer sa résolution.
 - **Langue** : français ou anglais (selon le projet ou la demande utilisateur).
-- **Format initial** : titre clair, description du problème, comportement observé vs attendu, étapes de reproduction et messages d'erreur éventuels (template `assets/templates/issue-template.md`).
+- **Format initial** : utiliser le template d'issue correspondant au type — `issue-bug.md`, `issue-feature.md` ou `issue-chore.md` (déployés dans `.github/ISSUE_TEMPLATE/`).
 - **Traçabilité & itérations** :
   - Consigner dans les **commentaires de l'Issue** les pistes explorées, les découvertes au fil de l'investigation, les itérations successives et le parcours de résolution.
 - **Clôture après résolution** :
@@ -75,6 +75,8 @@ metadata:
 
 ## Assets
 - `assets/templates/PR-template.md`
+- `assets/templates/issue-bug.md` — à copier vers `.github/ISSUE_TEMPLATE/bug.md`
+- `assets/templates/issue-feature.md` — à copier vers `.github/ISSUE_TEMPLATE/feature.md`
+- `assets/templates/issue-chore.md` — à copier vers `.github/ISSUE_TEMPLATE/chore.md`
 - `assets/templates/CHANGELOG.md`
 - `assets/templates/release-notes.md`
-- `assets/templates/issue-template.md`
