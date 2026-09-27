@@ -98,6 +98,11 @@ Sur tout projet hébergé sur GitHub :
 - **Jamais** de jeton dans un dépôt Git, un `.env.example`, un log ou un commentaire.
 - **Ne pas confondre** : un jeton d'**agent** (ce dossier) n'est pas un secret **applicatif** (clés d'un projet → variables d'environnement Coolify / `.env.local`).
 - **Renommer un jeton global** = renommer le fichier **et** le `{{TOKEN:<nom>}}` de `mcp.servers.json`, puis resynchroniser.
+- **Roter un jeton** ne suffit pas à le mettre en service partout :
+  - **OpenCode** lit `{file:…}` **à chaque appel** → effet immédiat ;
+  - **Claude** lit `${MCP_<NOM>_TOKEN}`, peuplé par `scripts/export-mcp-tokens.sh` **au démarrage du shell** → il faut **re-sourcer le script ou ouvrir un nouveau terminal**, sinon Claude garde l'ancien jeton et échoue en 401 sans que le fichier soit en cause ;
+  - **Antigravity** reçoit le jeton **injecté en clair** → nécessite une resynchronisation.
+  - Symptôme typique : le même jeton fonctionne dans un outil et pas dans l'autre.
 - Inventaire complet, pièges de maintenance et procédures de rotation : `~/.config/opencode/.tokens/README.md`.
 
 > `.tokens/` est en **`deny` de lecture** pour les agents OpenCode : toute opération dessus est manuelle.
