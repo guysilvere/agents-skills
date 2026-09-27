@@ -16,6 +16,9 @@
   - `pwa-deploiement` §6 : **Sentry** serveur **et** client, alerte sur pic, distinction explicite labo / terrain, cibles p75.
   - `ci.yml` + **`lighthouserc.json`** (nouveau) : **Lighthouse en CI** — Perf ≥ 0.8, a11y ≥ 0.9, LCP/CLS/TBT.
   - `pwa-validation` §2 : **zéro avertissement ignoré** — pas de `eslint-disable` / `# noqa` sans justification écrite.
+- **OpenAPI généré depuis les schémas Zod** (`api-best-practices`) : le schéma qui **valide déjà** l'endpoint est enregistré une fois, et la spec en découle — elle ne peut donc pas dériver du code, contrairement à un YAML écrit à la main. Templates `openapi.ts` (registre + génération) et `openapi-route.ts` (`/api/openapi.json`, pré-rendu au build). Rendu sur `/api/docs`, **à protéger en production** : la spec décrit la surface d'attaque.
+- **Guide utilisateur** (`docs/USER_GUIDE.md`, template `pwa-developpement`) : destiné aux **utilisateurs finaux**, alimenté quand une spec DONE change un parcours visible. Nomme les éléments tels qu'ils apparaissent à l'écran, et traite le mode hors ligne et les erreurs courantes — ce que l'utilisateur cherchera en premier. Test de complétude : une personne extérieure doit pouvoir accomplir une tâche avec ce document seul.
+- **§8 « Documentation vivante »** dans `pwa-developpement` : tableau des déclencheurs (token UI → DESIGN_SYSTEM, champ → DATABASE, route → BLUEPRINT, endpoint → registre OpenAPI, parcours utilisateur → USER_GUIDE, décision → ADR). `/docs-sync` étendu pour contrôler `/api/openapi.json` et le guide utilisateur.
 
 ### Modifié
 - **Templates d'issue typés** : `issue-bug.md`, `issue-feature.md`, `issue-chore.md` remplacent le template unique de la 2.3.0. Le `bug` reprend le format éprouvé (observé vs attendu, étapes, logs, pistes d'investigation) ; le `feature` introduit les critères **Étant donné / Quand / Alors** ; le `chore` cadre refactor et dette.

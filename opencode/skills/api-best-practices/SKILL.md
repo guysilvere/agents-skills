@@ -44,9 +44,25 @@ metadata:
 - **Un timeout n'est pas un échec** : sur une opération financière, re-vérifier le statut avant de relancer (risque de double débit).
 - Ne jamais relancer automatiquement une écriture non idempotente.
 
+## Documentation OpenAPI — générée, jamais écrite
+
+**Principe** : le schéma **Zod** d'un endpoint sert déjà à valider son entrée et sa sortie.
+On l'enregistre dans un registre OpenAPI, et la spec en découle. **Elle ne peut donc pas
+dériver du code** — un YAML écrit à la main ment au bout de deux semaines.
+
+- Registre et génération : `assets/templates/openapi.ts`
+- Route qui sert la spec : `assets/templates/openapi-route.ts` (`/api/openapi.json`)
+- Rendu : Scalar ou Swagger UI sur `/api/docs`
+- ⚠️ **Protéger `/api/docs`** en production : la spec décrit la surface d'attaque.
+- ⚠️ La spec se génère **au build** (pré-rendue) : aucune maintenance, aucune dérive.
+
+**Ne jamais** maintenir un `openapi.yaml` à la main en parallèle des schémas.
+
 ## Review d'API (checklist)
 - Passer `assets/checklists/api-review.md` avant chaque mise en production d'un endpoint.
 
 ## Assets
 - `assets/templates/error-response.json`
+- `assets/templates/openapi.ts`
+- `assets/templates/openapi-route.ts`
 - `assets/checklists/api-review.md`
