@@ -16,6 +16,7 @@
 | ROADMAP.md | Racine | Jalons court/moyen/long terme |
 | README.md | Racine | Build, setup Caddy local, variables, lancement |
 | CHANGELOG.md | Racine | Versions sémantiques + notes de release |
+| USER_GUIDE.md | docs/USER_GUIDE.md | Guide **utilisateur final** — tâches, hors ligne, FAQ |
 | RUNBOOK.md | docs/RUNBOOK.md | Déploiement Coolify, proxy Cloudflare, backups R2, migrations, rollback, monitoring |
 | ci.yml | .github/workflows/ci.yml | CI bloquante sur PR (secrets, lint, typecheck, tests, build) |
 
@@ -33,6 +34,8 @@
 - Champs/tables/relations/règles d'accès → mettre à jour `docs/DATABASE.md`
 - Routes API/payloads/webhooks/jobs → mettre à jour `docs/BLUEPRINT.md`
 - Décision structurelle tranchée → écrire un **ADR** dans `docs/adr/` (immuable, jamais réécrit)
+- Endpoint d'API ajouté/modifié → l'enregistrer dans le **registre OpenAPI** (généré depuis les schémas Zod)
+- Parcours **visible par l'utilisateur** modifié → mettre à jour `docs/USER_GUIDE.md`
 - Variable d'environnement ajoutée/modifiée → mettre à jour `.env.example` + ce mapping
 
 ## Directives de style

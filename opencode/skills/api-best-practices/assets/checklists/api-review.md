@@ -28,6 +28,9 @@
 - [ ] Tests d'intégration couvrant les cas d'erreur
 
 ## Docs
-- [ ] Endpoints documentés (OpenAPI/Swagger)
+- [ ] Endpoint **enregistré dans le registre OpenAPI** (schéma Zod) — pas de YAML écrit à la main
+- [ ] `/api/openapi.json` reflète bien le nouvel endpoint (généré au build)
+- [ ] `/api/docs` protégé en production (la spec décrit la surface d'attaque)
 - [ ] `.env.example` à jour (nouvelles clés)
 - [ ] `docs/BLUEPRINT.md` mis à jour (routes, webhooks, jobs)
+- [ ] `docs/USER_GUIDE.md` mis à jour **si le changement est visible par l'utilisateur**

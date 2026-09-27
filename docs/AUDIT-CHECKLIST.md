@@ -7,7 +7,8 @@
 **45 items audités.**
 **Score initial** : 14 couverts · 9 partiels · 16 manquants.
 **Après Lot A** (ADR + GitHub) : 18 · 10 · 11.
-**Après Lot B** (élargissement des templates) : **36 couverts · 5 partiels · 2 manquants · 2 divergences assumées.**
+**Après Lot B** (élargissement des templates) : 36 · 5 · 2 · 2.
+**Après Lot C** (OpenAPI + guide utilisateur) : **38 couverts · 5 partiels · 0 manquant · 2 divergences assumées.**
 
 Légende : ✅ couvert · 🟡 partiel · ❌ manquant · ⚪ divergence assumée
 
@@ -85,8 +86,8 @@ Légende : ✅ couvert · 🟡 partiel · ❌ manquant · ⚪ divergence assumé
 | Génération auto de version + `CHANGELOG.md` | 🟡 | Manuel via `/release`. **Manque** : l'automatisation en CI |
 | Déploiement staging au merge `main` | 🟡 | Documenté (`RUNBOOK`), pas automatisé |
 | Déploiement prod automatisé / approbation | ⚪ | **Divergence assumée** : jalon humain obligatoire (`WORKFLOW.md`) — c'est une protection, pas un manque |
-| OpenAPI / Swagger à jour | ❌ | Une ligne de checklist dans `api-review.md`. **Approche** : générer depuis le code plutôt qu'écrire à la main |
-| Documentation utilisateur synchronisée | ❌ | Hors périmètre technique — prévoir un `docs/USER_GUIDE.md` par projet |
+| OpenAPI / Swagger à jour | ✅ | **Lot C** — spec **générée depuis les schémas Zod** (`api-best-practices` : `openapi.ts` + `openapi-route.ts`), servie sur `/api/openapi.json`, rendue sur `/api/docs`. Ne peut pas dériver du code |
+| Documentation utilisateur synchronisée | ✅ | **Lot C** — `docs/USER_GUIDE.md` (template + §8 de `pwa-developpement`) : mis à jour quand une spec DONE change un parcours visible. Contrôlé par `/docs-sync` |
 | Capture centralisée des erreurs (Sentry) | ✅ | **Lot B** — `pwa-deploiement` §6 : Sentry **serveur ET client**, alerte sur pic, corrélation à la version déployée |
 | Healthchecks & uptime | ✅ | `pwa-deploiement` §6 |
 | Core Web Vitals réels (RUM) | ✅ | **Lot B** — `pwa-deploiement` §6 : distinction labo/terrain explicite, cibles p75 (LCP, INP, CLS) |
@@ -131,14 +132,16 @@ Principe : respecter le pattern existant — **skills = procédures & templates*
 | **Sentry + RUM** (labo vs terrain, cibles p75) | `pwa-deploiement/SKILL.md` §6 |
 | **Lighthouse en CI** + cibles | `assets/configs/ci.yml` + **nouveau** `assets/configs/lighthouserc.json` |
 
-### Lot C — outillage à spécifier
+### ✅ Lot C — fait
 
-| Gap | Approche |
+| Gap comblé | Livrable |
 | --- | --- |
-| OpenAPI | Générer depuis le code (endpoint SvelteKit) → `api-best-practices` |
-| Documentation utilisateur | `docs/USER_GUIDE.md` par projet, alimenté au fil des specs |
-| SemVer + CHANGELOG auto | Étape CI, ou garder `/release` manuel |
-| Déploiement staging auto | Déclencheur Coolify au merge `main` |
+| **OpenAPI généré** | `api-best-practices` : section « Documentation OpenAPI — générée, jamais écrite » + `assets/templates/openapi.ts` (registre Zod → spec) + `openapi-route.ts` (`/api/openapi.json`) |
+| **Documentation utilisateur** | `pwa-developpement/assets/templates/USER_GUIDE.md` + §8 « Documentation vivante » avec le tableau des déclencheurs + `/docs-sync` étendu |
+
+**Reste hors périmètre de ce repo** (à trancher projet par projet) :
+- SemVer + CHANGELOG automatiques en CI — `/release` manuel suffit aujourd'hui
+- Déploiement staging automatique au merge `main` — dépend de Coolify
 
 ---
 

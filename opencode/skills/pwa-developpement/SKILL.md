@@ -23,6 +23,7 @@ metadata:
 - Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build → **Lighthouse**).
 - Créer `lighthouserc.json` à la racine depuis `assets/configs/lighthouserc.json` (cibles Perf/a11y/LCP/CLS/TBT).
 - Créer `docs/adr/` (vide, avec un `README.md` d'une ligne) — les décisions structurelles s'y consigneront (cf. § 3bis).
+- Créer `docs/USER_GUIDE.md` depuis `assets/templates/USER_GUIDE.md` — guide **destiné aux utilisateurs finaux**, alimenté au fil des specs DONE (cf. § 8).
 - Créer `.github/PULL_REQUEST_TEMPLATE.md` et `.github/ISSUE_TEMPLATE/{bug,feature,chore}.md` depuis `shared-git-conventions/assets/templates/`.
 - **Indexer le projet avec graft** : vérifier `graft --version` (sinon notifier et demander l'installation), lancer `graft build` après le premier commit. Rien à ajouter au `.gitignore` : graft 0.19+ s'y inscrit lui-même. Skill `shared-graft`.
 - **`.gitignore` projet** : y ajouter `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
@@ -129,6 +130,27 @@ projet/
 - Migration de la doc : toute modification de champs/tables/règles → mise à jour immédiate de `docs/DATABASE.md`.
 - Template : `assets/templates/DATABASE.md`.
 
+## 8. Documentation vivante — dont le guide utilisateur
+
+**Toute dérive code/doc se corrige dans le même lot**, jamais « plus tard ».
+
+| Déclencheur | Fichier à mettre à jour |
+| --- | --- |
+| Token UI, palette, composant | `docs/DESIGN_SYSTEM.md` |
+| Champ, table, règle d'accès | `docs/DATABASE.md` |
+| Route, payload, webhook, job | `docs/BLUEPRINT.md` |
+| Variable d'environnement | `.env.example` + mapping `AGENTS.md` |
+| Endpoint d'API | registre **OpenAPI** (généré depuis les schémas Zod — skill `api-best-practices`) |
+| **Parcours visible par l'utilisateur** | **`docs/USER_GUIDE.md`** |
+| Décision structurelle | nouvel **ADR** (§ 3bis, immuable) |
+
+**Le guide utilisateur** (`docs/USER_GUIDE.md`, template `assets/templates/USER_GUIDE.md`) :
+- Se met à jour quand une spec passe à DONE **et** qu'elle change un parcours visible.
+- S'écrit pour un utilisateur qui ne connaît ni le code ni le vocabulaire du projet.
+- **Nomme les éléments tels qu'ils apparaissent à l'écran** — « cliquez sur le bouton » ne dit rien.
+- Le mode hors ligne et les erreurs courantes y ont leur place : c'est ce que l'utilisateur cherchera en premier.
+- Test de complétude : une personne extérieure au projet doit pouvoir accomplir une tâche avec ce document seul.
+
 ## Règles
 - Ultra-léger : listes à puces partout ; zéro texte superflu.
 - Aucun emoji dans l'interface sauf demande explicite ; une seule bibliothèque d'icônes.
@@ -140,6 +162,8 @@ projet/
 - `assets/templates/SPEC-XXX.md`
 - `assets/templates/DATABASE.md`
 - `assets/templates/README.md`
+- `assets/templates/USER_GUIDE.md`
+- `assets/templates/ADR.md`
 - `assets/configs/.env.example`
 - `assets/configs/docker-compose.dev.yml`
 - `assets/configs/ci.yml`
