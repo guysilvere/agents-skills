@@ -45,3 +45,11 @@ jobs:
 
       # 6. Build de production
       - run: npm run build
+
+      # 7. Lighthouse — audit sur le BUILD, pas sur le serveur de dev.
+      #    Cibles dans lighthouserc.json (Perf >= 0.8, a11y >= 0.9, LCP/CLS/TBT).
+      #    ⚠️ La categorie « PWA » n'existe plus dans Lighthouse >= 12 : l'installabilite
+      #       se verifie via DevTools > Application, pas ici.
+      #    L'INP n'est pas mesurable en labo (metrique terrain) — le TBT en tient lieu.
+      - name: Lighthouse CI
+        run: npx --yes @lhci/cli@0.15.x autorun

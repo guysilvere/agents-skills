@@ -30,23 +30,51 @@
 - Points d'extension prévus : [API publique, exports, multi-comptes, intégrations, i18n]
 
 ## 5. User stories (MoSCoW)
-- **Must** :
-  - En tant que **[rôle]**, je veux **[action]**, afin de **[valeur]**
-- **Should** :
-  - ...
-- **Could / Won't** : ...
+
+> Découpage : **Epic** (un domaine fonctionnel) → **User Story** (une capacité) → **SPEC-XXX** (l'unité livrable).
+> Une Epic sans aucune story `Must` ne devrait pas figurer dans le MVP.
+
+### Epic 1 — [nom du domaine]
+- **Must** — En tant que **[rôle]**, je veux **[action]**, afin de **[valeur]** → SPEC-XXX
+- **Should** — En tant que **[rôle]**, je veux **[action]**, afin de **[valeur]**
+- **Could** — ...
+- **Won't (cette version)** — ...
+
+### Epic 2 — [nom du domaine]
+- **Must** — ...
 
 ## 6. Exigences PWA
-- Manifest complet (standalone, portrait, icônes 192/512 + maskable)
-- **Stratégie offline (décision explicite)** :
-  - ressources mises en cache (app shell) : [liste]
-  - comportement hors ligne : page de repli `/offline.html` + fonctions restant disponibles : [liste]
-  - synchronisation au retour du réseau : file d'attente + résolution des conflits : [stratégie]
-- **Stratégie de mise à jour du service worker (décision explicite)** : jamais de version figée chez l'utilisateur — [skipWaiting + notification « nouvelle version disponible » / autre]
-- **Budget de performance** : JS initial < [150] KB gzip · images AVIF/WebP · cible réseau lent (3G). Toute régression au-delà du budget bloque la PR.
-- Cibles labo : LCP < 2.5 s · CLS < 0.1 · **TBT < 200 ms**
-  - l'**INP** est une métrique terrain, non mesurable dans un audit Lighthouse
-- Installabilité vérifiée via **DevTools → Application** (Lighthouse ≥ 12 n'audite plus la catégorie PWA)
+
+### Manifest
+- Complet : `display: "standalone"`, `start_url`, `theme_color`, `background_color`, portrait
+- Icônes **192/512 + variante `maskable`**
+- **Raccourcis d'actions rapides** (`shortcuts`) : [2-3 actions les plus utiles, accessibles par appui long sur l'icône]
+
+### Stratégies de cache (décision explicite, par type de ressource)
+| Ressource | Stratégie | Pourquoi |
+| --- | --- | --- |
+| App shell (HTML, JS, CSS) | **Cache First** | l'app doit démarrer sans réseau |
+| Assets immuables (polices, icônes, images versionnées) | **Cache First**, nommés par hash | jamais invalidés |
+| Données d'API (lecture) | **Network First**, repli cache | données fraîches prioritaires |
+| Données peu changeantes (référentiels) | **Stale While Revalidate** | affichage instantané + rafraîchissement |
+| Navigation hors ligne | page de repli `/offline.html` | message clair, pas une erreur navigateur |
+
+> Ne pas laisser les valeurs par défaut décider : chaque type de ressource a une stratégie **choisie**.
+
+### File d'attente hors ligne (mutations)
+- Les écritures (POST/PUT/DELETE) faites hors ligne sont **mises en file** : [IndexedDB / autre]
+- **Rejeu au retour du réseau** : Background Sync si supporté, sinon rejeu sur l'événement `online`
+- **Résolution des conflits** : [dernière écriture gagne / versionnage / rejet]
+- L'utilisateur **voit l'état** de sa file : en attente / envoyé / échoué
+
+### Mise à jour du service worker
+- Jamais de version figée chez l'utilisateur : `skipWaiting` + notification « nouvelle version disponible »
+
+### Performance
+- **Budget** : JS initial < [150] KB gzip · images AVIF/WebP · cible réseau lent (3G). Toute régression au-delà bloque la PR.
+- **Labo** : LCP < 2.5 s · CLS < 0.1 · **TBT < 200 ms** — l'**INP** est une métrique terrain, non mesurable en audit Lighthouse
+- **Terrain (RUM)** : cibles p75 — LCP < 2.5 s · INP < 200 ms · CLS < 0.1
+- **Installabilité** : vérifiée via **DevTools → Application** (Lighthouse ≥ 12 n'audite plus la catégorie PWA)
 
 ## 7. Plan de développement
 - Jalon 1 : [livrable] → dépend de : [rien]

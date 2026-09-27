@@ -20,7 +20,8 @@ metadata:
 - 🟩 Antigravity : dupliquer les règles projet dans `.agents/rules/*.md` (AGENTS.md n'y est pas lu) — template `~/.config/opencode/skills/opencode-admin/assets/antigravity/rule.md`.
 - Créer `README.md` depuis l'ébauche du blueprint ; mise à jour à chaque feature.
 - Créer `.env.example` listant TOUTES les clés (GeniusPay, Brevo/Mailtrap, Turnstile, R2, VAPID, Turso).
-- Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build).
+- Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build → **Lighthouse**).
+- Créer `lighthouserc.json` à la racine depuis `assets/configs/lighthouserc.json` (cibles Perf/a11y/LCP/CLS/TBT).
 - Créer `docs/adr/` (vide, avec un `README.md` d'une ligne) — les décisions structurelles s'y consigneront (cf. § 3bis).
 - Créer `.github/PULL_REQUEST_TEMPLATE.md` et `.github/ISSUE_TEMPLATE/{bug,feature,chore}.md` depuis `shared-git-conventions/assets/templates/`.
 - **Indexer le projet avec graft** : vérifier `graft --version` (sinon notifier et demander l'installation), lancer `graft build` après le premier commit. Rien à ajouter au `.gitignore` : graft 0.19+ s'y inscrit lui-même. Skill `shared-graft`.
@@ -142,4 +143,5 @@ projet/
 - `assets/configs/.env.example`
 - `assets/configs/docker-compose.dev.yml`
 - `assets/configs/ci.yml`
+- `assets/configs/lighthouserc.json`
 - `assets/checklists/style-code.md`

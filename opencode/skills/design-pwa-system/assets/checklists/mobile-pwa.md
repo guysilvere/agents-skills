@@ -14,6 +14,14 @@
 - [ ] Aucune dépendance au survol (hover)
 - [ ] Claviers mobiles adaptés : `inputmode="numeric"`, `inputmode="email"`, `autocomplete`
 
+## États d'interface (à concevoir, pas à subir)
+- [ ] **Les 6 états existent** pour chaque écran de données : initial, chargement, vide, erreur, succès, **partiel**
+- [ ] *Chargement* : squelette à la forme du contenu final (jamais un spinner centré)
+- [ ] *Vide* : message qui **dit quoi faire**, pas un « aucun résultat » sec
+- [ ] *Erreur* : cause compréhensible + **action de reprise** (réessayer, revenir)
+- [ ] *Partiel* : ce qui a chargé s'affiche, ce qui a échoué est signalé **localement** — pas d'écran blanc parce qu'un widget a échoué
+- [ ] *Hors ligne* : état explicité comme tel, pas une erreur générique « une erreur est survenue »
+
 ## Performance / CLS
 - [ ] Images dimensionnées (width/height ou aspect-ratio)
 - [ ] Lazy-loading ; squelettes plutôt que spinners longs

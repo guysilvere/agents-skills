@@ -40,8 +40,20 @@
 ## Relations
 - `users` 1—N `[nom_table]` (via `user_id`)
 
-## Multi-tenant (si applicable)
-- [workspaces / organisations + rôles] — et **comment le `tenant_id` est imposé à chaque requête**
+## Multi-tenant — décision obligatoire
+
+| Modèle | Description | Retenu |
+| --- | --- | --- |
+| **`tenant_id` partagé** | une base, colonne de cloisonnement, filtre obligatoire sur chaque requête | [ ] |
+| **Base dédiée par tenant** | une base Turso par organisation — isolation physique | [ ] |
+| **Mono-tenant** | pas de cloisonnement, un déploiement par client | [ ] |
+
+- **Décision** : [modèle retenu] — [justification]
+- **Où le filtre est appliqué** : [ex. `src/lib/server/auth/authorize.ts` — obligatoire sur **chaque** requête, jamais dans les composants]
+- **Test de non-régression** : [comment on vérifie qu'un utilisateur A ne lit pas les données de B]
+
+⚠️ **Turso n'a pas de RLS.** Le cloisonnement repose **entièrement** sur ce filtre applicatif.
+Une requête qui l'oublie = fuite inter-clients silencieuse. C'est le risque n°1 de cette stack.
 
 ## Paiements (si applicable)
 - Idempotence webhook : **contrainte d'unicité sur `geniuspay_reference`**.

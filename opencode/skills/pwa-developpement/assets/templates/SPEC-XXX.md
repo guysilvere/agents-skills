@@ -20,6 +20,18 @@ En tant que **[Rôle]**, je veux **[action]**, afin de **[valeur]**.
 | REQ-01 | [description] | [ ] [vérifiable] |
 | REQ-02 | [description] | [ ] [vérifiable] |
 
+**Critères d'acceptation (Étant donné / Quand / Alors)** — un par exigence testable.
+> Un critère vérifiable se teste ; une case à cocher se discute.
+
+- **REQ-01**
+  - **Étant donné** [contexte, état initial]
+  - **Quand** [action de l'utilisateur ou événement]
+  - **Alors** [résultat observable, vérifiable]
+- **REQ-02**
+  - **Étant donné** …
+  - **Quand** …
+  - **Alors** …
+
 **Edge cases**
 - **EDGE-01** : [situation] → [comportement attendu]
 - **EDGE-02** : [situation] → [comportement attendu]
@@ -33,12 +45,24 @@ En tant que **[Rôle]**, je veux **[action]**, afin de **[valeur]**.
 - `POST /api/...` : [payload / usage]
 - Webhooks : [événements écoutés/émis, signature, idempotence]
 
-## 5. Autorisations (obligatoire — anti-IDOR)
-> Toute spec doit répondre. « Aucune » est une réponse valide ; un blanc ne l'est pas.
+## 5. Autorisations — RBAC (obligatoire, anti-IDOR)
+
+**Matrice par rôle** — qui a le droit, indépendamment de la ressource :
+
+| Rôle | Périmètre | Peut |
+|------|-----------|------|
+| [anonyme] | | |
+| [utilisateur] | ses propres données | lire, créer, modifier |
+| [admin] | son organisation | + supprimer |
+| [superadmin] | global | tout |
+
+**Matrice par ressource** — le contrôle effectif, endpoint par endpoint :
 
 | Ressource | Lire | Créer | Modifier | Supprimer |
 |-----------|------|-------|----------|-----------|
 | [collection] | [qui] | [qui] | [qui] | [qui] |
+
+> « Aucune » est une réponse valide ; un blanc ne l'est pas.
 
 - **Implémentation de l'autorisation** : [module/fonction — Turso n'a pas de RLS, tout est applicatif → reporter la ligne dans `docs/DATABASE.md`]
 - **Données personnelles collectées** : [champs — justifier la minimisation]
