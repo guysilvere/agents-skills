@@ -20,6 +20,16 @@
       "ag": {}
     },
     {
+      "name": "playwright",
+      "transport": "local",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@0.0.82"],
+      "enabled": false,
+      "note": "Navigateur pilote par l'agent via l'arbre d'accessibilite (pas de vision). DESACTIVE PAR DEFAUT : les 25 outils 'core' sont charges dans CHAQUE session, or playwright-cli couvre deja les tests E2E a moindre cout. Activer a la demande : enabled=true puis ./scripts/sync-skills.sh --local. Plus cher en tokens que le CLI (cf. doc Playwright) — reserver a l'exploration visuelle, au debogage E2E et a browser_annotate.",
+      "oc": {},
+      "ag": {}
+    },
+    {
       "name": "github",
       "transport": "remote",
       "url": "https://api.githubcopilot.com/mcp/",
