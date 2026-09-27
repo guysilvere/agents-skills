@@ -5,6 +5,9 @@ __pycache__/
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
 
+# Artefacts du MCP Playwright (snapshots de pages) — regenerables
+.playwright-mcp/
+
 # Secrets d'application — le dépôt est PUBLIC : jamais de .env versionné
 .env
 .env.*
