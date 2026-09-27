@@ -12,6 +12,7 @@
 | DATABASE.md | docs/DATABASE.md | Schéma, règles d'accès, migrations |
 | DESIGN_SYSTEM.md | docs/DESIGN_SYSTEM.md | Tokens CSS, palette, layout signature PWA |
 | SPEC-XXX.md | docs/specs/SPEC-XXX.md | Spec unitaire par fonctionnalité |
+| ADR-NNNN.md | docs/adr/ | Décisions d'architecture — immuables, une par décision structurelle |
 | ROADMAP.md | Racine | Jalons court/moyen/long terme |
 | README.md | Racine | Build, setup Caddy local, variables, lancement |
 | CHANGELOG.md | Racine | Versions sémantiques + notes de release |
@@ -31,6 +32,7 @@
 - Tokens UI/boutons/inputs/palettes → mettre à jour `docs/DESIGN_SYSTEM.md`
 - Champs/tables/relations/règles d'accès → mettre à jour `docs/DATABASE.md`
 - Routes API/payloads/webhooks/jobs → mettre à jour `docs/BLUEPRINT.md`
+- Décision structurelle tranchée → écrire un **ADR** dans `docs/adr/` (immuable, jamais réécrit)
 - Variable d'environnement ajoutée/modifiée → mettre à jour `.env.example` + ce mapping
 
 ## Directives de style
