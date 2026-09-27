@@ -32,20 +32,6 @@
       "ag": {}
     },
     {
-      "name": "brevo",
-      "transport": "local",
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://mcp.brevo.com/v1/brevo/mcp",
-        "--header",
-        "Authorization:Bearer {{TOKEN:brevo}}"
-      ],
-      "enabled": true,
-      "oc": {},
-      "ag": {}
-    },
-    {
       "name": "coolify",
       "transport": "remote",
       "url": "https://home.agencebulles.net/mcp",

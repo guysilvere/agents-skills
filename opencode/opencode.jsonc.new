@@ -26,17 +26,6 @@
         "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/coolify}"
       }
     },
-    "brevo": {
-      "type": "local",
-      "command": [
-        "npx",
-        "mcp-remote",
-        "https://mcp.brevo.com/v1/brevo/mcp",
-        "--header",
-        "Authorization:Bearer {file:/Users/silveremeya/.config/opencode/.tokens/brevo}"
-      ],
-      "enabled": true
-    },
     "geniuspay": {
       "type": "remote",
       "url": "https://geniuspay.ci/api/mcp",
