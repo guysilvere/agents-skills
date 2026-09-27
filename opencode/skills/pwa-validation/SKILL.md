@@ -35,6 +35,7 @@ mon-projet.test, mon-projet.localhost {
    - Fallback grep : `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN`.
    - `npm audit --audit-level=high` + vérifier que le lockfile est commité.
 1. **Lint** : `npm run lint` (ESLint / Biome) + `ruff check .` (si backend Python)
+   - **Zéro avertissement ignoré** : ni `// eslint-disable`, ni `# noqa`, ni règle désactivée sans justification **écrite à côté de la ligne**. Un `disable` muet est un lint qui ne lint plus.
 2. **Typecheck** : `npm run typecheck` (TS) + `mypy .` / `pyright` (Python si configuré)
 3. **Tests unitaires** : `npm test` + `pytest` (si micro-services Python) — écrits par `lead-dev` / `integrations`, pas par `ops-quality`
 4. **Build** : `npm run build` sans erreur ni warning bloquant

@@ -47,9 +47,25 @@ metadata:
 - ⛔ Aucune migration sur une base non locale sans validation humaine explicite.
 
 ## 6. Monitoring (minimum)
-- **Disponibilité** : check uptime sur l'app — alertes vers email/slack.
-- **Erreurs applicatives** : remontée et suivi (Sentry / logs Coolify) — alerte sur pic.
-- **Jobs critiques** : alerte si la réconciliation des paiements ou les backups ne s'exécutent pas.
+
+**Disponibilité**
+- Check uptime sur l'app → alertes email/slack. Seuil : [X] échecs consécutifs avant alerte.
+
+**Erreurs applicatives — capture centralisée**
+- Outil : **Sentry** (ou équivalent) côté **serveur ET client** — une erreur frontend sans capture est invisible.
+- Alerter sur les **pics**, pas sur l'erreur unitaire.
+- Tracer : route, identifiant utilisateur (anonymisé), **version déployée** (indispensable pour corréler à un déploiement).
+
+**Performance réelle (RUM)**
+- ⚠️ Distinguer **labo** et **terrain** :
+  - *labo* = Lighthouse, sur un run, sur ta machine → LCP / CLS / TBT ;
+  - *terrain* = utilisateurs réels → LCP / INP / CLS au **p75**.
+- L'**INP n'est mesurable qu'au terrain** — Lighthouse ne le fournit pas. Ne pas le confondre avec le TBT.
+- Outil : [Sentry Performance / Cloudflare Web Analytics / autre]
+- Cibles terrain : LCP p75 < 2.5 s · INP p75 < 200 ms · CLS p75 < 0.1
+
+**Jobs critiques**
+- Alerte si la **réconciliation des paiements** ou les **backups** ne s'exécutent pas — une panne silencieuse de job est pire qu'un crash.
 
 ## 7. Compression des médias (obligatoire avant upload)
 - Toutes les images/médias utilisateurs compressés en **AVIF ou WebP** avant envoi vers R2.

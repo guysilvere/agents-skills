@@ -5,13 +5,23 @@
 ### Ajouté
 - **ADR (Architecture Decision Records)** — `pwa-developpement` §3bis définit les **déclencheurs** (choix de base, d'hébergement, de framework, modèle d'autorisation, service externe, changement cassant, révision d'une décision) et les règles : numérotation continue, **immuabilité** (un changement → un nouvel ADR qui remplace l'ancien), rédaction **au moment de la décision**. Template `assets/templates/ADR.md`. Nouvelle commande **`/adr`**. `docs/adr/` ajouté au mapping `AGENTS.md` et à la structure de projet type.
   > Manque comblé : des décisions lourdes (Jèko→GeniusPay, PocketBase→Turso, React→SvelteKit) ne vivaient jusqu'ici que dans des CHANGELOG et des conversations.
-- **`docs/AUDIT-CHECKLIST.md`** — audit du setup agents & skills contre la grille « Workflow Agents & Skills (SaaS PWA) » : 42 items statués (couverts / partiels / manquants / divergences assumées), plan d'intégration en 3 lots, et commande pour relancer l'audit (un compteur qui passe de `0` à `n` = gap comblé).
+- **`docs/AUDIT-CHECKLIST.md`** — audit du setup agents & skills contre la grille « Workflow Agents & Skills (SaaS PWA) » : **45 items** statués (couverts / partiels / manquants / divergences assumées), plan d'intégration en 3 lots, et commande pour relancer l'audit (un compteur qui passe de `0` à `n` = gap comblé).
 - **Scaffold enrichi** : chaque nouveau projet crée désormais `.github/` (workflows CI + PR template + 3 templates d'issue) et `docs/adr/`.
+- **Élargissement des templates — 10 manques comblés (audit, Lot B)** :
+  - `BLUEPRINT.md` : niveau **Epic** → User Story → SPEC ; tableau des **stratégies de cache** par type de ressource (Cache First / Network First / Stale While Revalidate) ; **file d'attente hors ligne** (Background Sync, résolution de conflits, état visible) ; **app shortcuts** ; cibles **RUM p75** en plus du labo.
+  - `SPEC-XXX.md` : critères **Étant donné / Quand / Alors** par exigence testable ; **matrice RBAC par rôle** en plus de la matrice par ressource.
+  - `DATABASE.md` : **décision multi-tenant obligatoire** (tenant_id partagé / base dédiée / mono-tenant) + où s'applique le filtre + test de non-régression.
+  - `mobile-pwa.md` : les **6 états d'interface** exigés — dont *error* (avec action de reprise) et *partiel* (pas d'écran blanc si un widget échoue).
+  - `security.md` : **sessions** — HttpOnly, Secure, SameSite, rotation post-authentification, invalidation côté serveur, pas de jeton en localStorage.
+  - `pwa-deploiement` §6 : **Sentry** serveur **et** client, alerte sur pic, distinction explicite labo / terrain, cibles p75.
+  - `ci.yml` + **`lighthouserc.json`** (nouveau) : **Lighthouse en CI** — Perf ≥ 0.8, a11y ≥ 0.9, LCP/CLS/TBT.
+  - `pwa-validation` §2 : **zéro avertissement ignoré** — pas de `eslint-disable` / `# noqa` sans justification écrite.
 
 ### Modifié
 - **Templates d'issue typés** : `issue-bug.md`, `issue-feature.md`, `issue-chore.md` remplacent le template unique de la 2.3.0. Le `bug` reprend le format éprouvé (observé vs attendu, étapes, logs, pistes d'investigation) ; le `feature` introduit les critères **Étant donné / Quand / Alors** ; le `chore` cadre refactor et dette.
 - **`PULL_REQUEST_TEMPLATE.md`** propre à ce dépôt : checklist adaptée (frontmatters YAML, assets référencés, JSON, `gitleaks`, sync à blanc, répercussion dans les 3 agents).
 - `AGENTS.md` (template projet) : `docs/adr/` ajouté au mapping et aux règles de synchronisation documentaire.
+- `docs/AUDIT-CHECKLIST.md` : statuts mis à jour après le Lot B — **36 couverts · 5 partiels · 2 manquants · 2 divergences assumées** (sur 45 items).
 
 ### Supprimé
 - `assets/templates/issue-template.md` — remplacé par les 3 templates typés. Les 2 références mises à jour, plus aucune occurrence.

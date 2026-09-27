@@ -21,6 +21,15 @@
 - [ ] Headers : `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Strict-Transport-Security`
 - [ ] CORS : origines autorisées explicites
 
+## Sessions
+- [ ] Cookie de session **`HttpOnly`** — inaccessible au JavaScript
+- [ ] Flag **`Secure`** — transmis en HTTPS uniquement
+- [ ] **`SameSite=Lax`** (ou `Strict` sur les routes sensibles) — protection CSRF
+- [ ] Durée de vie bornée + renouvellement à l'activité
+- [ ] **Invalidation côté serveur** à la déconnexion (pas seulement la suppression du cookie client)
+- [ ] **Rotation** de l'identifiant de session après authentification (anti-fixation)
+- [ ] Aucun jeton d'authentification dans `localStorage` (vulnérable au XSS) — préférer un cookie `HttpOnly`
+
 ## Données & vie privée
 - [ ] Pas de données sensibles en clair dans localStorage / IndexedDB
 - [ ] Transmission de données personnelles chiffrée (TLS)
