@@ -38,7 +38,7 @@ Le script :
 - **Supprime** les anciens agents/skills/commandes/workflows des trois outils.
 - **Copie** les nouveaux fichiers à jour.
 - **Génère et fusionne** les configurations MCP OpenCode/Antigravity (sans secrets exposés) et enregistre les serveurs MCP Claude Code via `claude mcp add-json --scope user`.
-- Options : `--local`, `--dry-run`, `--opencode-only`, `--antigravity-only`, `--claude-only`, `--no-backup`, `--help`.
+- Options : `--local`, `--dry-run`, `--opencode-only`, `--antigravity-only`, `--claude-only`, `--mcp-only`, `--mcp-server=NOM`, `--no-backup`, `--help`.
 
 > ⚠️ Les agents OpenCode, Antigravity et Claude Code ont des formats **différents** : le script synchronise les agents OpenCode (`opencode/agents/`), les agents Antigravity (`antigravity/agents/`), les agents Claude Code (`claude/agents/`) et les workflows Antigravity (`antigravity/workflows/`).
 > ⚠️ Claude Code ne supporte pas la syntaxe `{file:...}` d'OpenCode pour les secrets MCP — voir `docs/CLAUDE.md` §3 pour `export-mcp-tokens.sh`.
