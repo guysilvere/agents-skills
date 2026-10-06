@@ -12,6 +12,8 @@
 #   ./sync-skills.sh --opencode-only # ne toucher qu'à ~/.config/opencode
 #   ./sync-skills.sh --antigravity-only # ne toucher qu'à ~/.gemini
 #   ./sync-skills.sh --claude-only   # ne toucher qu'à ~/.claude
+#   ./sync-skills.sh --mcp-only      # ne synchroniser que les serveurs MCP (aucune purge skills/agents)
+#   ./sync-skills.sh --mcp-server=NOM # ne synchroniser que ce serveur MCP (implique --mcp-only)
 #   ./sync-skills.sh --no-backup     # désactiver le backup (déconseillé)
 #   ./sync-skills.sh --help
 # =============================================================================
@@ -31,9 +33,11 @@ DO_ANTIGRAVITY=1
 DO_CLAUDE=1
 DO_BACKUP=1
 USE_LOCAL=0
+MCP_ONLY=0
+MCP_SERVER=""
 
 usage() {
-  sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'
   echo ""
   echo "Options :"
   echo "  --local            Utilise le dossier local courant au lieu du clone git distant"
@@ -41,6 +45,8 @@ usage() {
   echo "  --opencode-only    Ne traite que OpenCode (~/.config/opencode)"
   echo "  --antigravity-only Ne traite que Antigravity (~/.gemini)"
   echo "  --claude-only      Ne traite que Claude Code (~/.claude)"
+  echo "  --mcp-only         Ne synchronise que les serveurs MCP (pas de purge skills/agents/commandes)"
+  echo "  --mcp-server=NOM   Ne synchronise que ce serveur MCP (implique --mcp-only)"
   echo "  --no-backup        Désactive le backup préalable (déconseillé)"
   echo "  --help             Affiche cette aide"
   echo ""
@@ -55,6 +61,8 @@ for arg in "$@"; do
     --opencode-only) DO_ANTIGRAVITY=0; DO_CLAUDE=0 ;;
     --antigravity-only) DO_OPENCODE=0; DO_CLAUDE=0 ;;
     --claude-only) DO_OPENCODE=0; DO_ANTIGRAVITY=0 ;;
+    --mcp-only) MCP_ONLY=1 ;;
+    --mcp-server=*) MCP_ONLY=1; MCP_SERVER="${arg#--mcp-server=}" ;;
     --no-backup) DO_BACKUP=0 ;;
     --help|-h) usage; exit 0 ;;
     *) echo "Option inconnue : $arg" >&2; usage >&2; exit 1 ;;
@@ -117,8 +125,25 @@ TOKENS_DIR="${HOME}/.config/opencode/.tokens"
 
 [[ -d "$SRC_SKILLS" ]] || die "Sources skills introuvables dans $BASE_SRC"
 
+# --mcp-server=NOM : source MCP réduite à un seul serveur (les resolvers restent inchangés)
+if [[ -n "$MCP_SERVER" ]]; then
+  [[ -f "$SRC_MCP" ]] || die "Source MCP absente : $SRC_MCP"
+  SRC_MCP_FILTERED="$(mktemp)"
+  trap 'rm -f "$SRC_MCP_FILTERED"' EXIT
+  python3 - "$SRC_MCP" "$MCP_SERVER" > "$SRC_MCP_FILTERED" <<'PY' || die "Serveur MCP inconnu : ${MCP_SERVER}"
+import json, sys
+data = json.load(open(sys.argv[1]))
+data["servers"] = [s for s in data["servers"] if s["name"] == sys.argv[2]]
+if not data["servers"]:
+    sys.exit(1)
+print(json.dumps(data))
+PY
+  SRC_MCP="$SRC_MCP_FILTERED"
+fi
+
 purge_and_copy() {
   local src="$1" dst="$2" label="$3"
+  (( MCP_ONLY )) && return 0
   [[ -d "$src" ]] || { warn "Source absente ($label) : $src — ignorée"; return 0; }
   [[ -d "$dst" ]] || mkdir -p "$dst"
   if (( DRY_RUN )); then
@@ -224,7 +249,7 @@ PY
 # que d'éditer ~/.claude.json à la main). Les valeurs ${MCP_..._TOKEN} restent
 # littérales dans le JSON — c'est `scripts/export-mcp-tokens.sh` (sourcé dans
 # le shell rc) qui les peuple avant que `claude` ne démarre un serveur MCP.
-# Sortie : une ligne TSV par serveur — name<TAB>enabled(0/1)<TAB>json-en-base64
+# Sortie : une ligne TSV par serveur — name<TAB>enabled(0/1)<TAB>oauth(0/1)<TAB>json-en-base64
 resolve_mcp_claude() {
   python3 - "$SRC_MCP" <<'PY'
 import base64, json, re, sys
@@ -255,7 +280,7 @@ for s in data["servers"]:
         if s.get("headers"):
             entry["headers"] = {k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", to_placeholder, v) for k, v in s["headers"].items()}
     b64 = base64.b64encode(json.dumps(entry, ensure_ascii=False).encode()).decode() if enabled else ""
-    print("%s\t%s\t%s" % (name, "1" if enabled else "0", b64))
+    print("%s\t%s\t%s\t%s" % (name, "1" if enabled else "0", "1" if s.get("auth") == "oauth" else "0", b64))
 PY
 }
 
@@ -265,11 +290,16 @@ sync_claude_mcp() {
     warn "commande 'claude' introuvable dans le PATH — MCP Claude Code ignoré"
     return 0
   fi
-  local name enabled b64 json_line
-  while IFS=$'\t' read -r name enabled b64; do
+  local name enabled oauth b64 json_line
+  while IFS=$'\t' read -r name enabled oauth b64; do
     [[ -z "$name" ]] && continue
     if [[ "$enabled" == "1" ]]; then
       json_line="$(printf '%s' "$b64" | base64 -d)"
+      # Serveur OAuth : un remove effacerait les identifiants — on n'enregistre que s'il est absent
+      if [[ "$oauth" == "1" ]] && claude mcp get "$name" >/dev/null 2>&1; then
+        log "MCP Claude : ${name} (OAuth) déjà enregistré — conservé tel quel (login : claude mcp login ${name})"
+        continue
+      fi
       if (( DRY_RUN )); then
         log "[dry-run] claude mcp add-json ${name} (scope user) : ${json_line}"
       else
@@ -402,7 +432,7 @@ if (( DO_ANTIGRAVITY )); then
   fi
 
   # Alignement Antigravity CLI Plugin (agence-bulles)
-  if [[ -d "$(dirname "$AG_CLI_PLUGIN")" ]]; then
+  if (( ! MCP_ONLY )) && [[ -d "$(dirname "$AG_CLI_PLUGIN")" ]]; then
     log "Alignement du plugin Antigravity CLI (agence-bulles)…"
     mkdir -p "${AG_CLI_PLUGIN}/agents" "${AG_CLI_PLUGIN}/skills" "${AG_CLI_PLUGIN}/rules"
     purge_and_copy "$SRC_AG_AGENTS" "${AG_CLI_PLUGIN}/agents" "Agents Antigravity CLI (3)"

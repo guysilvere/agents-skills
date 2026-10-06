@@ -58,7 +58,7 @@
       "url": "https://geniuspay.ci/api/mcp",
       "enabled": true,
       "oauth": false,
-      "note": "NE FONCTIONNE PAS dans OpenCode. Erreur exacte (opencode mcp list) : 'SSE error: Invalid content type, expected text/event-stream'. GeniusPay renvoie Content-Type: application/json sur son flux SSE alors que la spec MCP SSE impose text/event-stream — le SDK rejette. C'est un bug cote GeniusPay, pas de configuration. Le MCP lui-meme est valide : handshake complet reussi en curl (202 + initialize OK) avec Authorization:Bearer comme avec X-API-Key. 'oauth:false' conserve (GeniusPay n'expose aucune metadata OAuth). Solutions : faire corriger le Content-Type par GeniusPay, ou passer par un proxy stdio maison (mcp-remote bloque sur la decouverte OAuth).",
+      "note": "NE FONCTIONNE PAS dans OpenCode. Erreur exacte (opencode mcp list) : 'SSE error: Invalid content type, expected text/event-stream'. GeniusPay renvoie Content-Type: application/json sur son flux SSE alors que la spec MCP SSE impose text/event-stream — le SDK rejette. C'est un bug cote GeniusPay, pas de configuration. Le MCP lui-meme est valide : handshake complet reussi en curl (202 + initialize OK) avec Authorization:Bearer comme avec X-API-Key. 'oauth:false' conserve (GeniusPay n'expose aucune metadata OAuth). Solutions : faire corriger le Content-Type par GeniusPay, ou passer par un proxy stdio maison (mcp-remote bloque sur la decouverte OAuth). COTE CLAUDE (Code et app de bureau), meme cause, autre symptome : erreur 405 'The POST method is not supported for route api/mcp. Supported methods: GET, HEAD'. Claude se connecte en type http (POST, streamable) alors que GeniusPay parle l'ancien protocole SSE : GET /api/mcp ouvre le flux et annonce l'adresse d'envoi (event: endpoint -> /api/mcp/message?sessionId=...). L'URL est donc correcte, ne pas la modifier. Passer le type en sse ne suffit pas : meme rejet du Content-Type application/json. Verifie le 2026-10-06 en curl. Les jetons ne sont pas en cause (la cle est valide).",
       "headers": {
         "Authorization": "Bearer {{TOKEN:geniuspay-key}}"
       },
@@ -102,6 +102,16 @@
         "LIBSQL_URL": "libsql://brvm-radar-prod-guysilvere.aws-us-east-1.turso.io",
         "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-brvm-radar-prod}}"
       },
+      "oc": {},
+      "ag": {}
+    },
+    {
+      "name": "openrouter",
+      "transport": "remote",
+      "url": "https://mcp.openrouter.ai/mcp",
+      "enabled": true,
+      "auth": "oauth",
+      "note": "OAuth 2.1 avec enregistrement dynamique de client (DCR) — aucun jeton statique. Authentification interactive une seule fois par outil : Claude `claude mcp login openrouter`, OpenCode `opencode mcp auth openrouter`, Antigravity Settings > Customizations > Authenticate. Le sync ne ré-enregistre pas un serveur auth=oauth déjà présent côté Claude (un remove effacerait les identifiants OAuth).",
       "oc": {},
       "ag": {}
     },

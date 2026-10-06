@@ -42,6 +42,16 @@ Claude Code résout `${MA_VARIABLE}` dans `url`, `headers`, `args` et `env` de `
 
 - Les fichiers `.mcp.json` générés/enregistrés par Claude ne contiennent jamais de secret en clair — uniquement des références `${MCP_..._TOKEN}`.
 
+### Serveurs OAuth (sans jeton statique)
+
+Un serveur marqué `"auth": "oauth"` dans `opencode/mcp.servers.json` (ex. `openrouter`, OAuth 2.1 + DCR) n'a aucun secret à injecter : la synchro l'enregistre une seule fois puis le laisse intact (un `claude mcp remove` effacerait les identifiants OAuth). Authentification interactive, une fois par outil :
+
+- Claude Code : `claude mcp login openrouter`
+- OpenCode : `opencode mcp auth openrouter`
+- Antigravity : Settings > Customizations > Authenticate (flux navigateur, DCR automatique)
+
+Pour ajouter ou mettre à jour un seul serveur sur les trois cibles, sans purger skills/agents ni toucher aux autres entrées MCP : `./scripts/sync-skills.sh --local --mcp-server=openrouter`.
+
 ## 4. Règle d'or de synchronisation
 
 Comme pour OpenCode et Antigravity, toute modification des agents ou des skills dans ce repository doit être déployée vers Claude Code via :
