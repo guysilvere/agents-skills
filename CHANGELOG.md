@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [2.5.0] — 2026-10-19
+
+### Ajouté
+- **Skill `apple-design`** : Principes d'interaction fluide et de motion physique Apple issus des talks WWDC traduits pour le web et PWA (latence zéro dès `pointerdown`, manipulation directe 1:1, ressorts physiques *springs* interruptibles, transfert de vélocité, flous et typographie optique).
+- **Stress-test UI (`break-ui`)** : Checklist `opencode/skills/design-pwa-system/assets/checklists/ui-stress-test.md` pour valider la robustesse de l'UI face aux données réelles hostiles (textes très longs, montants FCFA élevés, formats d'écrans étroits, Dynamic Type).
+- **Modélisation des menaces STRIDE (`fabric`)** : Template `opencode/skills/pwa-cadrage/assets/templates/THREAT_MODEL.md` inspiré des patterns Fabric de Daniel Miessler, adapté à l'architecture SvelteKit + Turso (autorisation applicative anti-IDOR) + GeniusPay (signatures HMAC et idempotence) + Cloudflare.
+- **Nouvelles commandes & workflows `/threat-model`** : Commande OpenCode (`opencode/commands/threat-model.md`) et workflow Antigravity (`antigravity/workflows/threat-model.md`) pour formaliser la cartographie des risques et de la surface d'attaque.
+- **Audit de sécurité & motion renforcé (`pwa-validation`)** : Vérification des signatures HMAC temps constant (`crypto.timingSafeEqual`), idempotence des webhooks de paiement, et conformité motion/latence dans les étapes d'audit.
+
 ## [2.4.0] — 2026-09-27
 
 ### Ajouté

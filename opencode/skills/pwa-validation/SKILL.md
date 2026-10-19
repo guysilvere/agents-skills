@@ -50,9 +50,10 @@ mon-projet.test, mon-projet.localhost {
    - ⚠️ **INP** est une métrique terrain, non mesurable dans un audit de navigation : utiliser **TBT** comme proxy en labo.
 9. **Test hors-ligne** : DevTools → Application → Service Workers → Offline → page de repli + fonctions de base
 
-## 3. Audit accessibilité (a11y)
+## 3. Audit accessibilité & Motion (a11y)
 - Contraste ≥ 4.5:1 (WCAG AA) ; focus visible ; navigation clavier et tactile
-- ARIA ; labels sur icônes ; `prefers-reduced-motion` ; safe areas
+- ARIA ; labels sur icônes ; `prefers-reduced-motion` et `prefers-reduced-transparency`
+- Audit motion : réactivité instantanée à 0ms sur `pointerdown`, animations interruptibles, pas de blocage du thread principal (60/120 FPS, GPU-only `transform`/`opacity`), conforme aux règles `apple-design`
 - Checklist : `assets/checklists/a11y.md`
 
 ## 4. Audit SEO
@@ -63,7 +64,8 @@ mon-projet.test, mon-projet.localhost {
 ## 5. Audit sécurité (complète l'étape 0)
 - **Secrets** : `gitleaks` (historique Git inclus) ; `.env` non commité (vérifier .gitignore) ; aucun token dans logs/commentaires
 - **Dépendances** : `npm audit` + lockfile commité
-- **OWASP Top 10** : injection (SQL/shell/NoSQL), XSS (innerHTML non contrôlé), IDOR, stack traces exposées
+- **OWASP Top 10 & STRIDE** : injection (SQL/shell/NoSQL), XSS, IDOR (Turso sans RLS → vérification propriétaire serveur systématique), modélisation des menaces (`pwa-cadrage/assets/templates/THREAT_MODEL.md`)
+- **Paiements & Webhooks** : signature HMAC vérifiée avec `crypto.timingSafeEqual`, idempotence transactionnelle (`processed_events`)
 - **PWA** : SW scope trop large, cache poisoning, permissions manifest excessives, HTTPS obligatoire, CSP restrictive, headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy), CORS explicite
 - **Données** : pas de données sensibles en clair dans localStorage/IndexedDB ; transmission chiffrée
 - Checklist : `assets/checklists/security.md`

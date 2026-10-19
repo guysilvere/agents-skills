@@ -57,11 +57,11 @@ metadata:
 - Tactile : cibles ≥ 44×44px, espacement ≥ 8px, pas de dépendance au survol.
 - CLS : images dimensionnées, lazy-loading, CLS < 0.1, skeletons.
 - Safe areas : notch, Dynamic Island, barre de gestes.
-- Mouvement : 150-300 ms, animer transform/opacity, `prefers-reduced-motion`.
+- Mouvement : 150-300 ms, animer transform/opacity, `prefers-reduced-motion`. Pour les interactions gestuelles avancées, ressorts (springs) et physique tactile, se référer à la skill `apple-design`.
 - Hors-ligne : message d'état + fonctionnalités de base.
 - Icônes : SVG (Lucide/Heroicons), jamais d'emoji structurel, trait cohérent.
 - Mode sombre : variantes conçues ensemble, contraste testé séparément.
-- Checklist : `assets/checklists/mobile-pwa.md`.
+- Checklists : `assets/checklists/mobile-pwa.md` et `assets/checklists/ui-stress-test.md` (stress-test données extrêmes, inspiré de `break-ui`).
 
 ## Règles
 - Toujours charger `shared-eco-tokens` en parallèle.
@@ -73,8 +73,10 @@ metadata:
 - `assets/templates/DESIGN_SYSTEM.md`
 - `assets/configs/layout-signature.css`
 - `assets/checklists/mobile-pwa.md`
+- `assets/checklists/ui-stress-test.md`
 - `assets/data/palettes.json`
 - `assets/data/styles.json`
 - `assets/reference/brief-inference.md`
 - `assets/reference/dials.md`
 - `assets/reference/design-md-library.md`
+

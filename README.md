@@ -10,10 +10,10 @@
 | Agents | `opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) — format OpenCode |
 | Agents AG | `antigravity/agents/` | Les 3 mêmes rôles — format Antigravity |
 | Agents Claude | `claude/agents/` | Les 3 mêmes rôles — format subagent Claude Code (pas de notion de « primary ») |
-| Skills | `opencode/skills/` | 12 skills versionnées (assets séparés 🟦/🟩/⚪), réutilisées telles quelles par Claude Code |
+| Skills | `opencode/skills/` | 14 skills versionnées (assets séparés 🟦/🟩/⚪), réutilisées telles quelles par Claude Code |
 | Assets | `opencode/assets/` | Templates, scripts, checklists, configs par skill |
-| Commandes | `opencode/commands/` | 8 commandes slash OpenCode |
-| Workflows AG | `antigravity/workflows/` | 8 workflows Antigravity équivalents |
+| Commandes | `opencode/commands/` | 10 commandes slash OpenCode (dont `/threat-model`) |
+| Workflows AG | `antigravity/workflows/` | 10 workflows Antigravity équivalents |
 | MCP | `opencode/mcp.servers.json` | Source de vérité serveurs MCP (sans secret en clair) |
 | Migration | `opencode/` | README-MIGRATION, PLAN, ARCHIVAGE, DIFF, opencode.jsonc.new |
 
@@ -43,18 +43,20 @@ Le script :
 > ⚠️ Les agents OpenCode, Antigravity et Claude Code ont des formats **différents** : le script synchronise les agents OpenCode (`opencode/agents/`), les agents Antigravity (`antigravity/agents/`), les agents Claude Code (`claude/agents/`) et les workflows Antigravity (`antigravity/workflows/`).
 > ⚠️ Claude Code ne supporte pas la syntaxe `{file:...}` d'OpenCode pour les secrets MCP — voir `docs/CLAUDE.md` §3 pour `export-mcp-tokens.sh`.
 
-## Skills (12)
+## Skills (14)
 
-- `pwa-cadrage` — cadrage, naming, stack, blueprint, roadmap
+- `apple-design` — design physique & motion Apple appliqué au web (latence zéro, ressorts, direct manipulation, typographie optique)
+- `pwa-cadrage` — cadrage, naming, stack, blueprint, roadmap, modélisation des menaces STRIDE
 - `design-ux-flow` — méthodologie UX 10 étapes, problème chirurgical, micro-victoires, onboarding
 - `pwa-developpement` — scaffolding, AGENTS.md, SPEC-XXX, DATABASE.md, conventions
-- `design-pwa-system` — direction artistique, design system, layout signature, brief inference + dials + bibliothèque DESIGN.md
+- `design-pwa-system` — direction artistique, design system, layout signature, brief inference + dials + bibliothèque DESIGN.md + stress-test UI
 - `design-3d` — visuels 3D procéduraux Three.js depuis une image (héros produits, objets animés)
-- `pwa-validation` — tests locaux, E2E Playwright, audit design automatisé, Lighthouse, a11y, SEO, sécurité
+- `pwa-validation` — tests locaux, E2E Playwright, audit design automatisé, Lighthouse, a11y & motion, SEO, sécurité (OWASP, webhooks HMAC, anti-IDOR)
 - `pwa-deploiement` — Coolify, Cloudflare, R2, RUNBOOK
-- `api-paiements` — GeniusPay (sandbox + live), webhooks, dunning, factures, modèle de frais + calculateur de net
+- `api-paiements` — GeniusPay (sandbox + live), webhooks HMAC, dunning, factures, modèle de frais + calculateur de net
 - `api-best-practices` — design API REST
 - `shared-git-conventions` — git, SemVer, releases
+- `shared-graft` — indexation du code par graft (@nanonets/graft)
 - `shared-eco-tokens` — optimisation de tokens (toujours chargée)
 - `opencode-admin` — administration des outils IA (OC + AG)
 
