@@ -19,7 +19,7 @@ metadata:
 - Créer `AGENTS.md` à la racine (point d'entrée unique IA) si absent — template avec section « Compatibilité Antigravity » incluse.
 - 🟩 Antigravity : dupliquer les règles projet dans `.agents/rules/*.md` (AGENTS.md n'y est pas lu) — template `~/.config/opencode/skills/opencode-admin/assets/antigravity/rule.md`.
 - Créer `README.md` depuis l'ébauche du blueprint ; mise à jour à chaque feature.
-- Créer `.env.example` listant TOUTES les clés (GeniusPay, Brevo/Mailtrap, Turnstile, R2, VAPID, Turso).
+- Créer `.env.example` listant TOUTES les clés (paiement, Brevo/Mailtrap, Turnstile, R2, VAPID, Turso).
 - Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build → **Lighthouse**).
 - Créer `lighthouserc.json` à la racine depuis `assets/configs/lighthouserc.json` (cibles Perf/a11y/LCP/CLS/TBT).
 - Créer `docs/adr/` (vide, avec un `README.md` d'une ligne) — les décisions structurelles s'y consigneront (cf. § 3bis).
@@ -28,6 +28,12 @@ metadata:
 - **Indexer le projet avec graft** : vérifier `graft --version` (sinon notifier et demander l'installation), lancer `graft build` après le premier commit. Rien à ajouter au `.gitignore` : graft 0.19+ s'y inscrit lui-même. Skill `shared-graft`.
 - **`.gitignore` projet** : y ajouter `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
 - Template : `assets/templates/AGENTS.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
+
+## 1bis. Initialisation du Cockpit Specs & Banc de Tests QA
+- **Dès la mise en place du projet** : initialiser les pages de suivi des Specs et de Tests QA (`/admin/specs` et `/admin/test` ou `/admin/harness`).
+- ⚠️ **Si ces pages n'existent pas** : demander explicitement la validation à l'utilisateur avant création (cf. skill `pwa-test-harness`).
+- **Rétro-compatibilité** : si des specs existent déjà sous forme Markdown dans `docs/specs/`, les utiliser pour amorcer la base de données Turso/SQLite.
+- Schéma SQL : charger `pwa-test-harness/assets/schemas/harness.sql`.
 
 ## 2. Règle de branche
 - Vérifier la branche active AVANT toute modification : `git branch --show-current`.
@@ -97,7 +103,7 @@ metadata:
 4. Recharger `pwa-validation` après nettoyage (lint + typecheck + build).
 
 ## 6. Environnement & Structure de projet (Docker en 1er choix)
-- **Dev local conteneurisé (défaut)** : Lancement systématique via Docker Desktop :
+- **Dev local conteneurisé (défaut)** : Lancement systématique via OrbStack :
   ```bash
   docker compose -f docker-compose.dev.yml up
   ```
@@ -119,7 +125,7 @@ projet/
 │   ├── PULL_REQUEST_TEMPLATE.md
 │   └── ISSUE_TEMPLATE/        # bug.md, feature.md, chore.md
 ├── Dockerfile                 # Multi-stage production (Coolify)
-├── docker-compose.dev.yml     # Dev local avec hot-reload (Docker Desktop)
+├── docker-compose.dev.yml     # Dev local avec hot-reload (OrbStack)
 ├── docker-compose.yml         # Prod / Staging
 ├── .env.example
 └── docs/ (CADRAGE, BLUEPRINT, DATABASE, DESIGN_SYSTEM, specs/, adr/, RUNBOOK)

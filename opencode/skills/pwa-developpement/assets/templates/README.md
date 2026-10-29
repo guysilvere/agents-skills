@@ -12,7 +12,7 @@
 | Back | Server routes SvelteKit (`+server.ts`) |
 | Base | Turso (libSQL) + Drizzle ORM |
 | Auth | [Google + email/magic link + Turnstile] |
-| Paiements | GeniusPay (sandbox `pk_sandbox_…`) |
+| Paiements | Passerelle de paiement (sandbox) |
 | Emails | Brevo / Mailtrap |
 | Stockage | Cloudflare R2 |
 | Déploiement | Coolify + Cloudflare |

@@ -35,12 +35,12 @@
 - [ ] Transmission de données personnelles chiffrée (TLS)
 - [ ] Conformité RGPD : bannière cookies, politique de confidentialité
 
-## Paiements & Webhooks (GeniusPay)
+## Paiements & Webhooks (passerelle de paiement)
 - [ ] Signature HMAC vérifiée en temps constant (`crypto.timingSafeEqual`) pour prévenir les attaques temporelles
 - [ ] Secret de webhook stocké en variable d'environnement serveur uniquement
 - [ ] Idempotence transactionnelle : table `processed_events` vérifiée avant tout traitement pour rejeter les doublons
 - [ ] Recalcul du montant côté serveur : jamais de confiance au montant ou statut transmis par le client
-- [ ] Réconciliation d'état : interrogation de l'API GeniusPay pour vérifier le statut réel en cas de doute
+- [ ] Réconciliation d'état : interrogation de l'API passerelle de paiement pour vérifier le statut réel en cas de doute
 
 ## Menaces & Architecture (STRIDE)
 - [ ] Modélisation STRIDE validée (`pwa-cadrage/assets/templates/THREAT_MODEL.md`) pour chaque flux de données critique

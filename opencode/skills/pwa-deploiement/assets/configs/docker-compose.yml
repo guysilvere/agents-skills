@@ -13,9 +13,9 @@ services:
       - ORIGIN=https://<domaine>   # requis par adapter-node
       - DATABASE_URL=${DATABASE_URL}                 # libsql://<db>.turso.io
       - TURSO_AUTH_TOKEN=${TURSO_AUTH_TOKEN}
-      - GENIUSPAY_API_KEY=${GENIUSPAY_API_KEY}
-      - GENIUSPAY_API_SECRET=${GENIUSPAY_API_SECRET}
-      - GENIUSPAY_WEBHOOK_SECRET=${GENIUSPAY_WEBHOOK_SECRET}
+      - passerelle de paiement_API_KEY=${passerelle de paiement_API_KEY}
+      - passerelle de paiement_API_SECRET=${passerelle de paiement_API_SECRET}
+      - passerelle de paiement_WEBHOOK_SECRET=${passerelle de paiement_WEBHOOK_SECRET}
       - BREVO_API_KEY=${BREVO_API_KEY}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]

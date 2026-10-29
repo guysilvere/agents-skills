@@ -48,7 +48,7 @@ metadata:
 - Est-ce monétisable ? (gagne du temps/argent ou en fait perdre s'il s'arrête)
 - Modèles : freemium, abonnement mensuel/annuel, paiement unique, quotas.
 - Paliers : Gratuit / Pro / Équipe (repère CI : 2 000–15 000 FCFA/mois, 1 € ≈ 655 FCFA).
-- Paiements : **GeniusPay** (passerelle unique — Wave, Orange Money, MTN, Moov, cartes ; **sandbox réelle**). Abonnements, webhooks, dunning, factures PDF.
+- Paiements : **paiement** (passerelle unique — Wave, Orange Money, MTN, Moov, cartes ; **sandbox réelle**). Abonnements, webhooks, dunning, factures PDF.
 
 ### 7. Copywriting landing
 - Hero (promesse + sous-titre + 1 CTA) → bénéfices (résultats, pas fonctionnalités) → preuve (véridique uniquement) → fonctionnement (3 étapes) → tarifs → CTA final + « Conçu par Agence Bulles ».

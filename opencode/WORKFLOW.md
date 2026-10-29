@@ -10,10 +10,10 @@
 | 1 | Naming | nom validé + repo GitHub | `lead-dev` |
 | 2 | Stack | `docs/BLUEPRINT.md` | `lead-dev` |
 | 3 | Design | `docs/DESIGN_SYSTEM.md` | `lead-dev` |
-| 4 | Données | `docs/DATABASE.md` | `lead-dev` |
-| 5 | Specs | `docs/specs/SPEC-XXX.md` | `lead-dev` |
-| 6 | Développement | code + tests | `lead-dev` (+ `integrations` si externe) |
-| 7 | Validation | rapport de validation | `ops-quality` |
+| 4 | Données | `docs/DATABASE.md` + schéma harness | `lead-dev` |
+| 5 | Specs & Cockpit QA | `docs/specs/SPEC-XXX.md` + `/admin/specs` & `/admin/test` (Kanban/QA) | `lead-dev` |
+| 6 | Développement | code fonctionnel guidé par tests au vert | `lead-dev` (+ `integrations` si externe) |
+| 7 | Validation | banc `/admin/test` validé + rapport ops | `ops-quality` |
 | 8 | Déploiement | `docs/RUNBOOK.md` | `ops-quality` |
 | 9 | SEO / contenu | landing, métadonnées, JSON-LD | `lead-dev` |
 | 10 | Living doc & release | docs à jour + tag | `lead-dev` → `ops-quality` |
@@ -101,7 +101,7 @@ Sur tout projet hébergé sur GitHub :
 - **Nommage** :
   - jeton **global** (sert tous les projets) → nom du service, sans préfixe : `github`, `brevo`, `coolify` ;
   - jeton **par projet** → `turso-<projet>-<env>` (ex. `turso-lodgi-prod`, `turso-brvm-radar-test`) ;
-  - **service multi-valeurs** → un fichier par valeur, suffixé : `<service>-key` / `<service>-secret` (ex. `geniuspay-key`, `geniuspay-secret`). Jamais de fichier à plusieurs lignes : un jeton = un fichier.
+  - **service multi-valeurs** → un fichier par valeur, suffixé : `<service>-key` / `<service>-secret` (ex. `paiement-key`, `paiement-secret`). Jamais de fichier à plusieurs lignes : un jeton = un fichier.
 - **Vérifier l'environnement avant tout appel** : un jeton de paiement `pk_live_`/`sk_live_` manipule de l'argent réel → jalon humain. Tester en `sandbox` d'abord.
 - **Portée** : un jeton global est déclaré une fois dans `opencode/mcp.servers.json` (`{{TOKEN:<nom>}}`) et synchronisé. Un jeton de projet n'y figure **pas** : il se gère à la main.
 - **Permissions** : `chmod 600` sur le fichier, `700` sur le dossier `.tokens/`.

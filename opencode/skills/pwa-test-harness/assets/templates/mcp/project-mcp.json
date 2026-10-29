@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "project-harness": {
+      "command": "npx",
+      "args": ["-y", "tsx", "scripts/mcp-harness.ts"],
+      "env": {
+        "DATABASE_URL": "file:local.db",
+        "HARNESS_API_URL": "https://localhost:5173/admin/harness"
+      }
+    }
+  }
+}

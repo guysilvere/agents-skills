@@ -1,4 +1,4 @@
-# Checklist — Réconciliation des paiements GeniusPay
+# Checklist — Réconciliation des paiements
 
 > Sans réconciliation, un webhook perdu = un client débité mais non crédité.
 
@@ -9,9 +9,9 @@
 - [ ] Exécution planifiée **via une tâche planifiée Coolify** (SvelteKit n'a pas de scheduler natif)
 
 ## Comparaison fournisseur ↔ base
-- [ ] Lister les transactions GeniusPay sur la période : `GET /payments?from=…&to=…&per_page=100`
+- [ ] Lister les transactions paiement sur la période : `GET /payments?from=…&to=…&per_page=100`
 - [ ] Comparer : montant, devise, statut, `metadata.order_id`
-- [ ] Détecter les 3 écarts : payé côté GeniusPay et non crédité côté app · crédité côté app et absent côté GeniusPay · montant ou devise divergents
+- [ ] Détecter les 3 écarts : payé côté paiement et non crédité côté app · crédité côté app et absent côté paiement · montant ou devise divergents
 
 ## Traitement des écarts
 - [ ] Crédit manquant → régulariser via la **même machine à états**, ou alerter

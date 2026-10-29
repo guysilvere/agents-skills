@@ -1,16 +1,16 @@
-# Checklist — Webhook GeniusPay
+# Checklist — Webhook de paiement
 
 > Un webhook mal vérifié = fraude possible. À appliquer à chaque événement.
 
 ## Réception
 - [ ] Endpoint HTTPS uniquement
-- [ ] Signature `X-GeniusPay-Signature` vérifiée sur le **corps BRUT** de la requête (avant tout parsing JSON)
+- [ ] Signature `X-Payment-Signature` vérifiée sur le **corps BRUT** de la requête (avant tout parsing JSON)
 - [ ] Comparaison à **temps constant** (`crypto.timingSafeEqual` / `hash_equals`) — jamais `===`
 - [ ] Signature invalide → **4xx** : aucun traitement, aucun crédit
 - [ ] Ne pas loguer le payload complet (données personnelles)
 
 ## Anti-rejeu
-- [ ] `X-GeniusPay-Timestamp` contrôlé (fenêtre ~5 min) — ⚠️ **à vérifier auprès du support** : le timestamp est-il inclus dans le HMAC ? Sinon il est falsifiable et ne protège de rien
+- [ ] `X-Payment-Timestamp` contrôlé (fenêtre ~5 min) — ⚠️ **à vérifier auprès du support** : le timestamp est-il inclus dans le HMAC ? Sinon il est falsifiable et ne protège de rien
 - [ ] Contrainte d'unicité **EN BASE** sur `data.transaction.reference` — pas un simple test applicatif (conditions de course)
 - [ ] Événement `environment: "sandbox"` reçu en production → **ignoré** et logué
 

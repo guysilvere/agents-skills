@@ -12,7 +12,7 @@ Lance le cadrage d'un nouveau projet pour l'idée mentionnée.
 Charge la skill `pwa-cadrage` :
 - Poser les questions de cadrage pour combler les zones d'ombre.
 - Stress-tester l'idée (problème, public, différenciation).
-- Identifier personas, KPIs, modèle de monétisation (GeniusPay — sandbox `pk_sandbox_…`).
+- Identifier personas, KPIs, modèle de monétisation (passerelle de paiement — sandbox `pk_sandbox_…`).
 
 ## Étape 2 — Naming et disponibilité
 

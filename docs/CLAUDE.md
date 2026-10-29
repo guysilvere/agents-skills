@@ -33,7 +33,7 @@ Claude Code ne supporte pas la syntaxe `{file:...}` d'OpenCode pour les secrets 
 
 Claude Code résout `${MA_VARIABLE}` dans `url`, `headers`, `args` et `env` de `.mcp.json` / `claude mcp add-json`, à partir de **variables d'environnement réelles** — pas de fichier référencé comme `{file:...}` (OpenCode).
 
-- Convention de nommage : `MCP_<NOM_DU_JETON_EN_MAJUSCULES>_TOKEN` (ex. `github` → `MCP_GITHUB_TOKEN`, `geniuspay-key` → `MCP_GENIUSPAY_KEY_TOKEN`).
+- Convention de nommage : `MCP_<NOM_DU_JETON_EN_MAJUSCULES>_TOKEN` (ex. `github` → `MCP_GITHUB_TOKEN`, `brevo` → `MCP_BREVO_TOKEN`).
 - `scripts/export-mcp-tokens.sh` lit `~/.config/opencode/.tokens/<nom>` (même convention que OC/AG) et exporte ces variables. **À sourcer** dans le profil shell (`~/.zshrc`) — jamais exécuté directement :
 
   ```bash

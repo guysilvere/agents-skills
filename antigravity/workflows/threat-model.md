@@ -14,7 +14,7 @@ Charge la skill `pwa-cadrage` et lis le template `assets/templates/THREAT_MODEL.
 ## Étape 2 — Définition de la surface d'attaque
 
 - Cartographie les routes HTTP et server actions SvelteKit.
-- Identifie les webhooks entrants (GeniusPay, Brevo) et leurs signatures HMAC.
+- Identifie les webhooks entrants (paiement, Brevo) et leurs signatures HMAC.
 - Analyse les accès à la base de données Turso (rappel : absence de RLS native → autorisation serveur obligatoire).
 - Vérifie les flux d'upload Cloudflare R2.
 

@@ -53,7 +53,7 @@ permission:
 Pilote le cycle de vie produit complet d'un projet Agence Bulles (agencebulles.net), de l'idée à la livraison.
 
 **Référence obligatoire** : `~/.config/opencode/WORKFLOW.md` — phases 0–10, jalons humains, attribution des tests, format de relais. Résumé :
-1. **Cadrage** : personas, KPIs, monétisation (GeniusPay), scope MVP (v0/v1) → `docs/CADRAGE.md`
+1. **Cadrage** : personas, KPIs, monétisation (passerelle de paiement), scope MVP (v0/v1) → `docs/CADRAGE.md`
 2. **Naming** : 5–10 noms, disponibilité domaine/marque, validation → dossier local + repo GitHub
 3. **Stack** : choix dans le cadre recommandé (PWA mobile-first SvelteKit, Turso, Coolify, Cloudflare) → `docs/BLUEPRINT.md`
 4. **Design** : direction artistique, design system, layout signature PWA → `docs/DESIGN_SYSTEM.md`
@@ -79,8 +79,9 @@ Arrêt obligatoire (`⛔ STOP — validation humaine requise`) avant : fin de ca
 - Respecter le standard de spec obligatoire (template SPEC-XXX) et la living documentation (phases 0–10 → `WORKFLOW.md`).
 - Stack par défaut : **SvelteKit** (PWA mobile-first, `adapter-node`) + TypeScript strict + validation **Zod** ; base **Turso (libSQL)** ; déploiement Coolify + Cloudflare (proxy orange, R2, Turnstile, tunnels Zero Trust).
 - ⚠️ **Turso n'a pas de row-level security** → l'autorisation est **applicative**. Un seul runtime possède la base et l'autorisation (les server routes SvelteKit) : c'est la règle qui évite les IDOR.
-- Paiements : **GeniusPay** (passerelle unique — Wave, Orange Money, MTN, Moov, cartes ; sandbox réelle). Emails : Brevo ou Mailtrap.
+- Paiements : **Passerelle de paiement** (Wave, Orange Money, MTN, Moov, cartes ; sandbox réelle). Emails : Brevo ou Mailtrap.
 - Ultra-léger : listes à puces dans tous les fichiers `.md`, zéro texte superflu.
+- **Animations** : sur demande d'animation, se référer à la doc officielle **GSAP** (https://gsap.com/docs/v3/) et **Three.js** (https://threejs.org/docs/). Aucune bibliothèque n'est imposée.
 
 ## Relais & skills
 - Format de passage à `ops-quality` / `integrations` + limite de **3 allers-retours** puis escalade humaine : `WORKFLOW.md`.
@@ -90,4 +91,4 @@ Arrêt obligatoire (`⛔ STOP — validation humaine requise`) avant : fin de ca
 
 ## Délégation
 - `ops-quality` : validation (tests locaux Caddy, build, lint, Lighthouse, a11y, SEO, sécurité), cycle Git, déploiement, RUNBOOK.
-- `integrations` : GeniusPay, webhooks, dunning, factures PDF, Brevo/Mailtrap, R2 URLs présignées, scripts seed/migration, n8n SaaS.
+- `integrations` : passerelle de paiement, webhooks, dunning, factures PDF, Brevo/Mailtrap, R2 URLs présignées, scripts seed/migration, n8n SaaS.

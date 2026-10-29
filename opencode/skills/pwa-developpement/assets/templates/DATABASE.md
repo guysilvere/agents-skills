@@ -56,9 +56,14 @@
 Une requête qui l'oublie = fuite inter-clients silencieuse. C'est le risque n°1 de cette stack.
 
 ## Paiements (si applicable)
-- Idempotence webhook : **contrainte d'unicité sur `geniuspay_reference`**.
+- Idempotence webhook : **contrainte d'unicité sur `payment_reference`**.
 - Machine à états des statuts — transitions interdites refusées.
 - Montants stockés en **entiers XOF**.
+
+## Cockpit Specs & Banc QA (si activé)
+- Tables : `project_specs`, `qa_suites`, `qa_scenarios`, `qa_runs`, `qa_results`, `qa_activity_log`.
+- Schéma de référence : `pwa-test-harness/assets/schemas/harness.sql`.
+- Autorisation : accès réservé au rôle `super_admin` ou aux environnements non-production (.test, staging).
 
 ## Stratégie de migration
 - Migrations SQL versionnées dans `migrations/` — numérotées, **jamais modifiées après application**.

@@ -11,7 +11,7 @@
 ## Monétisation
 - [ ] Le produit fait gagner du temps/argent, ou en fait perdre s'il s'arrête ?
 - [ ] Modèle retenu (freemium / abonnement / unique / quotas) ?
-- [ ] Paliers définis en FCFA ? Intégration GeniusPay prévue (sandbox `pk_sandbox_…`) ?
+- [ ] Paliers définis en FCFA ? Intégration paiement prévue (sandbox `pk_sandbox_…`) ?
 
 ## Stack & contraintes
 - [ ] Contraintes (délai, budget, stack imposée, intégrations) explicites ?

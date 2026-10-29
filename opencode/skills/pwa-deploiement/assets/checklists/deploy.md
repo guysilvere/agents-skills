@@ -29,7 +29,7 @@
 
 ## Données & sauvegardes
 - [ ] Base Turso joignable (`DATABASE_URL` + `TURSO_AUTH_TOKEN` validés depuis le conteneur)
-- [ ] Webhook GeniusPay joignable en HTTPS et abonné (`POST /webhooks/{id}/test` en sandbox)
+- [ ] Webhook de paiement joignable en HTTPS et abonné (`POST /webhooks/{id}/test` en sandbox)
 - [ ] Backup quotidien R2 configuré (cron) et exécuté
 - [ ] Test de restauration effectué récemment (date : ___)
 - [ ] Médias compressés AVIF/WebP avant upload

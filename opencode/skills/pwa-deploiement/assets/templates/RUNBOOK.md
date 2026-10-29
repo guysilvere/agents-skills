@@ -58,7 +58,7 @@
 - ...
 
 ## Rotation des clés (planifiée)
-- GeniusPay / Brevo / Mailtrap / Turso : [fréquence]
+- paiement / Brevo / Mailtrap / Turso : [fréquence]
 - ⚠️ Séparer strictement les jetons `sandbox` et `live` — ne jamais mettre une clé `live` dans un environnement de test
 - VAPID / JWT secret : [fréquence]
 - R2 Access Keys : [fréquence]

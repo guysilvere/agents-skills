@@ -18,7 +18,7 @@
 | Base | **Turso** (libSQL) + Drizzle ORM — ⚠️ **pas de row-level security** → autorisation applicative | |
 | Auth | [Google par défaut + email/magic link ; Turnstile anti-bot] | |
 | Emails | Brevo / Mailtrap | |
-| Paiements | **GeniusPay** (sandbox `pk_sandbox_…`) | |
+| Paiements | **paiement** (sandbox `pk_sandbox_…`) | |
 | Stockage | Cloudflare R2 (URLs présignées, AVIF/WebP) | |
 | Déploiement | Coolify + Cloudflare (proxy orange, tunnels Zero Trust) | |
 
@@ -87,7 +87,7 @@
 
 ## 9. Monétisation
 - Modèle + paliers (cf. CADRAGE.md)
-- Webhooks GeniusPay (`X-GeniusPay-Signature`), dunning, factures PDF
+- Webhooks de paiement (`X-Payment-Signature`), dunning, factures PDF
 
 ## 10. Hébergement & domaines
 | Usage | Sous-domaine | Cible |
@@ -98,7 +98,7 @@
 
 ## Routes API & webhooks (ajouts à chaque évolution)
 - `POST /api/...` : [payload / usage]
-- Webhook `X-GeniusPay-Signature` : [signature, idempotence, machine à états]
+- Webhook `X-Payment-Signature` : [signature, idempotence, machine à états]
 
 ## Questions ouvertes
 - [ ] [question]

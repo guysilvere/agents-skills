@@ -14,6 +14,8 @@ Principes issus des talks design WWDC (*Designing Fluid Interfaces*, *The Detail
 
 L'interface prend vie quand le mouvement part de la valeur courante à l'écran, hérite de la vitesse de l'utilisateur, projette son inertie et peut être attrapé ou inversé à tout instant.
 
+Pour des animations riches (timelines, scroll, 3D), se référer à la doc officielle **GSAP** (https://gsap.com/docs/v3/) et **Three.js** (https://threejs.org/docs/) — aucune bibliothèque n'est imposée.
+
 ## 1. Réactivité — Tuer la latence (Kill Latency)
 
 Le sentiment de directness s'effondre à la moindre latence.

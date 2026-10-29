@@ -24,7 +24,7 @@ mon-projet.test {
     }
 }
 
-# --- Exemple : endpoint de jobs (réconciliation GeniusPay) ---
+# --- Exemple : endpoint de jobs (réconciliation paiements) ---
 # Appelé par une tâche planifiée Coolify, jamais exposé publiquement sans secret.
 jobs.mon-projet.test {
     tls internal

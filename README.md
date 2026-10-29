@@ -43,17 +43,18 @@ Le script :
 > ⚠️ Les agents OpenCode, Antigravity et Claude Code ont des formats **différents** : le script synchronise les agents OpenCode (`opencode/agents/`), les agents Antigravity (`antigravity/agents/`), les agents Claude Code (`claude/agents/`) et les workflows Antigravity (`antigravity/workflows/`).
 > ⚠️ Claude Code ne supporte pas la syntaxe `{file:...}` d'OpenCode pour les secrets MCP — voir `docs/CLAUDE.md` §3 pour `export-mcp-tokens.sh`.
 
-## Skills (14)
+## Skills (15)
 
 - `apple-design` — design physique & motion Apple appliqué au web (latence zéro, ressorts, direct manipulation, typographie optique)
 - `pwa-cadrage` — cadrage, naming, stack, blueprint, roadmap, modélisation des menaces STRIDE
 - `design-ux-flow` — méthodologie UX 10 étapes, problème chirurgical, micro-victoires, onboarding
 - `pwa-developpement` — scaffolding, AGENTS.md, SPEC-XXX, DATABASE.md, conventions
+- `pwa-test-harness` — cockpit specs & banc d'essai QA (Kanban/Liste, simulation, persistance Turso, sync Markdown)
 - `design-pwa-system` — direction artistique, design system, layout signature, brief inference + dials + bibliothèque DESIGN.md + stress-test UI
 - `design-3d` — visuels 3D procéduraux Three.js depuis une image (héros produits, objets animés)
 - `pwa-validation` — tests locaux, E2E Playwright, audit design automatisé, Lighthouse, a11y & motion, SEO, sécurité (OWASP, webhooks HMAC, anti-IDOR)
 - `pwa-deploiement` — Coolify, Cloudflare, R2, RUNBOOK
-- `api-paiements` — GeniusPay (sandbox + live), webhooks HMAC, dunning, factures, modèle de frais + calculateur de net
+- `api-paiements` — passerelle de paiement (sandbox + live), webhooks HMAC, dunning, factures, réconciliation
 - `api-best-practices` — design API REST
 - `shared-git-conventions` — git, SemVer, releases
 - `shared-graft` — indexation du code par graft (@nanonets/graft)

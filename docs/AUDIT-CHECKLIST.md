@@ -115,7 +115,7 @@ Principe : respecter le pattern existant — **skills = procédures & templates*
 - **ADR** : `pwa-developpement` §3bis (déclencheurs + règles), template `assets/templates/ADR.md`, commande `/adr`, `docs/adr/` ajouté au mapping `AGENTS.md` et à la structure projet.
 - **`.github/`** : 3 templates d'issue créés côté assets **et** dans le repo, `PULL_REQUEST_TEMPLATE.md` (version repo), copie prévue au scaffold dans `pwa-developpement`.
 
-> Manque comblé : des décisions lourdes (Jèko→GeniusPay, PocketBase→Turso, React→SvelteKit) ne vivaient que dans des CHANGELOG et des conversations.
+> Manque comblé : des décisions lourdes (Jèko→paiement, PocketBase→Turso, React→SvelteKit) ne vivaient que dans des CHANGELOG et des conversations.
 
 ### ✅ Lot B — fait (aucun nouveau fichier sauf la config Lighthouse)
 

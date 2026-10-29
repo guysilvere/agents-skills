@@ -14,9 +14,9 @@ metadata:
 - Exécute la séquence complète de validation d'une PWA avant commit.
 - Centralise l'ancienne skill pwa-tests-locaux + audits a11y/SEO/sécurité.
 
-## 1. Preview locale — Caddy + Docker Desktop (pas localhost)
+## 1. Preview locale — Caddy + OrbStack (pas localhost)
 - Caddy installé : `/opt/homebrew/bin/caddy`, config unique `~/.config/caddy/Caddyfile` (lancé via `caddy run --config ~/.config/caddy/Caddyfile`).
-- App lancée via Docker Desktop (`docker compose -f docker-compose.dev.yml up`).
+- App lancée via OrbStack (`docker compose -f docker-compose.dev.yml up`).
 - Ajouter un bloc par projet dans Caddyfile (mappage vers le port exposé par le conteneur Docker) :
 ```caddy
 mon-projet.test, mon-projet.localhost {
@@ -40,15 +40,16 @@ mon-projet.test, mon-projet.localhost {
 3. **Tests unitaires** : `npm test` + `pytest` (si micro-services Python) — écrits par `lead-dev` / `integrations`, pas par `ops-quality`
 4. **Build** : `npm run build` sans erreur ni warning bloquant
 5. **Preview** : servir le **build de production** (`npm run preview`) via Caddy en **`https://mon-projet.test`** — jamais `localhost`, jamais le serveur de dev (scores non représentatifs).
-6. **Tests E2E** : `playwright-cli` — parcours réels (auth, paiement, CRUD, hors-ligne), screenshots succès/échec. Checklist : `assets/checklists/e2e.md`
-7. **Audit design automatisé** : `impeccable detect <src>` — 59 règles déterministes anti-slop ; sortie `--json` CI-friendly. **Épingler en devDependency** (`npm i -D impeccable`) — pas de `npx` à la volée sur un paquet non épinglé.
-8. **Lighthouse**, sur le build de prod servi en **HTTPS** :
+6. **Banc QA & Validation Scénarios** : exécuter la campagne de tests sur `https://mon-projet.test/admin/test` (ou `/test`) : dérouler les formulaires interactifs, certifier les scénarios au vert (`passed`), consigner les éventuels bugs en base (`failed`).
+7. **Tests E2E** : `playwright-cli` — parcours réels (auth, paiement, CRUD, hors-ligne), screenshots succès/échec. Checklist : `assets/checklists/e2e.md`
+8. **Audit design automatisé** : `impeccable detect <src>` — 59 règles déterministes anti-slop ; sortie `--json` CI-friendly. **Épingler en devDependency** (`npm i -D impeccable`) — pas de `npx` à la volée sur un paquet non épinglé.
+9. **Lighthouse**, sur le build de prod servi en **HTTPS** :
    `npx lighthouse https://mon-projet.test --view --chrome-flags="--ignore-certificate-errors"`
    - Le Chrome lancé par Lighthouse doit accepter le certificat `tls internal` de Caddy, sinon l'audit échoue.
    - Cibles : Performance ≥ 80 (LCP < 2.5 s) · Accessibilité ≥ 90 · CLS < 0.1 · **TBT < 200 ms**.
    - ⚠️ La catégorie **« PWA installable » n'existe plus dans Lighthouse ≥ 12** → vérifier l'installabilité via la checklist PWA et le panneau Application de Chrome DevTools.
    - ⚠️ **INP** est une métrique terrain, non mesurable dans un audit de navigation : utiliser **TBT** comme proxy en labo.
-9. **Test hors-ligne** : DevTools → Application → Service Workers → Offline → page de repli + fonctions de base
+10. **Test hors-ligne** : DevTools → Application → Service Workers → Offline → page de repli + fonctions de base
 
 ## 3. Audit accessibilité & Motion (a11y)
 - Contraste ≥ 4.5:1 (WCAG AA) ; focus visible ; navigation clavier et tactile

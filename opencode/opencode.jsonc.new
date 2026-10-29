@@ -26,12 +26,12 @@
         "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/coolify}"
       }
     },
-    "geniuspay": {
+    "paiement": {
       "type": "remote",
-      "url": "https://geniuspay.ci/api/mcp",
+      "url": "https://paiement.ci/api/mcp",
       "enabled": true,
       "headers": {
-        "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/geniuspay}"
+        "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/paiement}"
       }
     }
   },

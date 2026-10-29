@@ -57,7 +57,7 @@ metadata:
 - Tactile : cibles ≥ 44×44px, espacement ≥ 8px, pas de dépendance au survol.
 - CLS : images dimensionnées, lazy-loading, CLS < 0.1, skeletons.
 - Safe areas : notch, Dynamic Island, barre de gestes.
-- Mouvement : 150-300 ms, animer transform/opacity, `prefers-reduced-motion`. Pour les interactions gestuelles avancées, ressorts (springs) et physique tactile, se référer à la skill `apple-design`.
+- Mouvement : 150-300 ms, animer transform/opacity, `prefers-reduced-motion`. Pour les interactions gestuelles avancées, ressorts (springs) et physique tactile, se référer à la skill `apple-design`. Pour des animations riches (timelines, scroll, 3D), se référer à la doc officielle **GSAP** (https://gsap.com/docs/v3/) et **Three.js** (https://threejs.org/docs/) — aucune bibliothèque n'est imposée.
 - Hors-ligne : message d'état + fonctionnalités de base.
 - Icônes : SVG (Lucide/Heroicons), jamais d'emoji structurel, trait cohérent.
 - Mode sombre : variantes conçues ensemble, contraste testé séparément.

@@ -46,7 +46,7 @@
 ## Tests & outillage
 | Rôle | Outil |
 |------|-------|
-| Dev local (1er choix) | **Docker Compose (Docker Desktop)** — parité dev/prod, hot-reload, isolation |
+| Dev local (1er choix) | **Docker Compose (OrbStack)** — parité dev/prod, hot-reload, isolation |
 | Unitaires / intégration | **Vitest** |
 | Tests Python (IA/Data) | Pytest |
 | Lint & formatage Python | Ruff / uv |
@@ -58,9 +58,9 @@
 ## Paiements
 | Cas | Outil |
 |-----|-------|
-| **Passerelle unique** | **GeniusPay** — Wave, Orange Money, MTN, Moov, cartes bancaires |
+| **Passerelle unique** | **paiement** — Wave, Orange Money, MTN, Moov, cartes bancaires |
 | Sandbox | `pk_sandbox_…` / `sk_sandbox_…` — **toute intégration passe par là** |
-| Doc à jour | MCP `https://geniuspay.ci/api/mcp` |
+| Doc à jour | MCP `https://paiement.ci/api/mcp` |
 
 ## Infrastructure Cloudflare
 - Proxy DNS edge (masquage IP), WAF/DDoS, Turnstile sur tous les formulaires

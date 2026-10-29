@@ -1,11 +1,16 @@
 # CHANGELOG
 
+## [2.5.1] — 2026-10-20
+
+### Modifié
+- **Docker Desktop → OrbStack** (runtime Docker local) dans les 3 emplacements miroir (`~/.config/opencode/skills`, `~/.gemini/config/skills`, dépôt `opencode/skills/`) : `stack-table.md` (Dev local 1er choix), `pwa-developpement/SKILL.md` §6 + template `docker-compose.dev.yml`, `pwa-validation/SKILL.md` §1 (preview Caddy + conteneurs). Tout le reste est inchangé par design : OrbStack est un drop-in — même CLI `docker` / `docker compose`, mêmes permissions agents (`ops-quality` : `docker compose *`).
+
 ## [2.5.0] — 2026-10-19
 
 ### Ajouté
 - **Skill `apple-design`** : Principes d'interaction fluide et de motion physique Apple issus des talks WWDC traduits pour le web et PWA (latence zéro dès `pointerdown`, manipulation directe 1:1, ressorts physiques *springs* interruptibles, transfert de vélocité, flous et typographie optique).
 - **Stress-test UI (`break-ui`)** : Checklist `opencode/skills/design-pwa-system/assets/checklists/ui-stress-test.md` pour valider la robustesse de l'UI face aux données réelles hostiles (textes très longs, montants FCFA élevés, formats d'écrans étroits, Dynamic Type).
-- **Modélisation des menaces STRIDE (`fabric`)** : Template `opencode/skills/pwa-cadrage/assets/templates/THREAT_MODEL.md` inspiré des patterns Fabric de Daniel Miessler, adapté à l'architecture SvelteKit + Turso (autorisation applicative anti-IDOR) + GeniusPay (signatures HMAC et idempotence) + Cloudflare.
+- **Modélisation des menaces STRIDE (`fabric`)** : Template `opencode/skills/pwa-cadrage/assets/templates/THREAT_MODEL.md` inspiré des patterns Fabric de Daniel Miessler, adapté à l'architecture SvelteKit + Turso (autorisation applicative anti-IDOR) + paiement (signatures HMAC et idempotence) + Cloudflare.
 - **Nouvelles commandes & workflows `/threat-model`** : Commande OpenCode (`opencode/commands/threat-model.md`) et workflow Antigravity (`antigravity/workflows/threat-model.md`) pour formaliser la cartographie des risques et de la surface d'attaque.
 - **Audit de sécurité & motion renforcé (`pwa-validation`)** : Vérification des signatures HMAC temps constant (`crypto.timingSafeEqual`), idempotence des webhooks de paiement, et conformité motion/latence dans les étapes d'audit.
 
@@ -13,7 +18,7 @@
 
 ### Ajouté
 - **ADR (Architecture Decision Records)** — `pwa-developpement` §3bis définit les **déclencheurs** (choix de base, d'hébergement, de framework, modèle d'autorisation, service externe, changement cassant, révision d'une décision) et les règles : numérotation continue, **immuabilité** (un changement → un nouvel ADR qui remplace l'ancien), rédaction **au moment de la décision**. Template `assets/templates/ADR.md`. Nouvelle commande **`/adr`**. `docs/adr/` ajouté au mapping `AGENTS.md` et à la structure de projet type.
-  > Manque comblé : des décisions lourdes (Jèko→GeniusPay, PocketBase→Turso, React→SvelteKit) ne vivaient jusqu'ici que dans des CHANGELOG et des conversations.
+  > Manque comblé : des décisions lourdes (Jèko→paiement, PocketBase→Turso, React→SvelteKit) ne vivaient jusqu'ici que dans des CHANGELOG et des conversations.
 - **`docs/AUDIT-CHECKLIST.md`** — audit du setup agents & skills contre la grille « Workflow Agents & Skills (SaaS PWA) » : **45 items** statués (couverts / partiels / manquants / divergences assumées), plan d'intégration en 3 lots, et commande pour relancer l'audit (un compteur qui passe de `0` à `n` = gap comblé).
 - **Scaffold enrichi** : chaque nouveau projet crée désormais `.github/` (workflows CI + PR template + 3 templates d'issue) et `docs/adr/`.
 - **Élargissement des templates — 10 manques comblés (audit, Lot B)** :
@@ -52,26 +57,26 @@
 ## [2.2.0] — 2026-09-17
 
 ### Ajouté
-- **Modèle de frais GeniusPay mesuré** (`api-paiements/assets/reference/frais.md`) : `(montant × 1 %) + 100 FCFA fixes + (montant × taux opérateur)`. Taux opérateur établis par mesure — wave / orange_money / mtn_money / card = **1,50 %**, paystack = **5 %**. Deux pièges documentés : `net_amount` renvoyé par l'API **ignore les frais opérateur** tant que le client n'a pas choisi sa méthode ; les 100 FCFA fixes portent les frais à **52,5 %** sur un paiement à 200 XOF.
+- **Modèle de frais paiement mesuré** (`api-paiements/assets/reference/frais.md`) : `(montant × 1 %) + 100 FCFA fixes + (montant × taux opérateur)`. Taux opérateur établis par mesure — wave / orange_money / mtn_money / card = **1,50 %**, paystack = **5 %**. Deux pièges documentés : `net_amount` renvoyé par l'API **ignore les frais opérateur** tant que le client n'a pas choisi sa méthode ; les 100 FCFA fixes portent les frais à **52,5 %** sur un paiement à 200 XOF.
 - **Calculateur de net** (`api-paiements/assets/scripts/frais-calc.mjs`) : CLI (`node frais-calc.mjs 10000 wave`, `--table`) **et** module importable pour les applications. Affiche le **net**, jamais le brut.
 - **Convention des jetons d'agent** (`WORKFLOW.md` + les 6 agents) : emplacement unique `~/.config/opencode/.tokens/`, nommage par portée (service pour un jeton global, `turso-<projet>-<env>` pour un jeton de projet, `<service>-key` / `<service>-secret` pour un service multi-valeurs), permissions 600/700, et vérification de l'environnement avant tout appel de paiement.
 - **Serveurs Turso déclarés dans `mcp.servers.json`** : `turso-lodgi-prod`, `turso-lodgi-test`, `turso-brvm-radar-prod`, `turso-brvm-radar-test` — les jetons sont désormais lus depuis `.tokens`, pour OpenCode **et** Antigravity.
 
 ### Modifié
-- **Référence API GeniusPay réécrite depuis les tests** (`api-paiements/assets/reference/geniuspay.md`), plus depuis la documentation fournisseur. Huit erreurs de la doc signalées `❌ DOC`, dont l'authentification (`X-API-Key` seul suffit), le champ d'URL (`checkout_url` et `payment_url` coexistent) et le format des frais.
+- **Référence API paiement réécrite depuis les tests** (`api-paiements/assets/reference/paiement.md`), plus depuis la documentation fournisseur. Huit erreurs de la doc signalées `❌ DOC`, dont l'authentification (`X-API-Key` seul suffit), le champ d'URL (`checkout_url` et `payment_url` coexistent) et le format des frais.
 - **Serveurs MCP Turso renommés** `turso-prod` → `turso-lodgi-prod`, `turso-test` → `turso-lodgi-test` : l'ancien nom était ambigu aux côtés de `turso-brvm-radar-prod`, et une méprise entre deux bases est un risque réel.
-- **`curl-geniuspay.sh`** lit les jetons depuis `.tokens` et **affiche l'environnement** (`SANDBOX` / `⚠️ PRODUCTION — ARGENT REEL`) avant tout appel.
+- **`curl-paiement.sh`** lit les jetons depuis `.tokens` et **affiche l'environnement** (`SANDBOX` / `⚠️ PRODUCTION — ARGENT REEL`) avant tout appel.
 
 ### Corrigé
-- **GeniusPay MCP — cause racine identifiée** : `SSE error: Invalid content type, expected "text/event-stream"`. GeniusPay renvoie `application/json` sur son flux SSE, ce que le SDK MCP rejette. **Bug côté fournisseur**, sans impact sur l'encaissement (le MCP ne sert qu'à lire la doc et inspecter les erreurs).
+- **paiement MCP — cause racine identifiée** : `SSE error: Invalid content type, expected "text/event-stream"`. paiement renvoie `application/json` sur son flux SSE, ce que le SDK MCP rejette. **Bug côté fournisseur**, sans impact sur l'encaissement (le MCP ne sert qu'à lire la doc et inspecter les erreurs).
 - **Serveurs Turso de test désactivés** : les bases `lodgi-test` et `brvm-radar-test` n'existent plus (Turso répond `502 no route configured for host`). Désactivés avec la raison et la procédure de réactivation dans `mcp.servers.json`.
-- **Détection OAuth désactivée** pour GeniusPay (`oauth: false`) — il n'expose aucune métadonnée OAuth.
+- **Détection OAuth désactivée** pour paiement (`oauth: false`) — il n'expose aucune métadonnée OAuth.
 
 ### Vérifié en conditions réelles
 - **`success_url` / `error_url`** : redirection confirmée après un paiement effectif (200 XOF, wave). Les URLs sont conservées côté serveur, acceptent des query strings, et ne sont pas exposées dans la page de checkout.
 - **`customer.name` / `.email` / `.phone`** : conservés et relus à l'identique.
 - **`metadata`** : conservé, mais **enrichi par le serveur** (`exchange_rate`, `original_amount`, `original_currency`).
-- **Cloudflare bloque Python** (`403 error 1010 browser_signature_banned`) : `curl` et `fetch` Node passent, un service **Python ne peut pas** appeler GeniusPay directement.
+- **Cloudflare bloque Python** (`403 error 1010 browser_signature_banned`) : `curl` et `fetch` Node passent, un service **Python ne peut pas** appeler paiement directement.
 - **Coût des petits montants** : à 200 XOF les frais représentent 52,5 % ; le plancher ~2,5 % n'est atteint qu'au-delà de 50 000 XOF.
 
 ## [2.1.0] — 2026-09-17
@@ -88,14 +93,14 @@
 
 > **Changement cassant** : la passerelle de paiement, la base de données et le framework front changent. Toute spec ou projet écrit avant cette version doit être relu.
 
-### Modifié — Paiements : Jèko + CinetPay → **GeniusPay** (passerelle unique)
-- **Référence réécrite** (`api-paiements/assets/reference/geniuspay.md`) : endpoints, sandbox, statuts, méthodes, payload webhook.
+### Modifié — Paiements : Jèko + CinetPay → **paiement** (passerelle unique)
+- **Référence réécrite** (`api-paiements/assets/reference/paiement.md`) : endpoints, sandbox, statuts, méthodes, payload webhook.
 - **Sandbox réelle disponible** (`pk_sandbox_…` / `sk_sandbox_…`) — les règles « hors sandbox » redeviennent opérantes.
 - **Piège documenté** : `amount` est un **entier en XOF, minimum 200** — pas des centimes (contrairement à Jèko).
-- **Anti-rejeu** : `X-GeniusPay-Timestamp` existe, mais l'exemple officiel ne signe que le corps → incertitude signalée, à clarifier avec le support.
+- **Anti-rejeu** : `X-Payment-Timestamp` existe, mais l'exemple officiel ne signe que le corps → incertitude signalée, à clarifier avec le support.
 - **5 incohérences de la doc fournisseur** relevées et tracées (signature, retry, rate limits, `payment_url` vs `checkout_url`, `paystack`).
-- **MCP GeniusPay** ajouté à `opencode.jsonc` (`https://geniuspay.ci/api/mcp`) — doc à jour plutôt que recopiée.
-- CinetPay supprimé ; `reference/jeko.md`, `reference/cinetpay.md` et `curl-jeko.sh` supprimés, remplacés par `curl-geniuspay.sh`.
+- **MCP paiement** ajouté à `opencode.jsonc` (`https://paiement.ci/api/mcp`) — doc à jour plutôt que recopiée.
+- CinetPay supprimé ; `reference/jeko.md`, `reference/cinetpay.md` et `curl-jeko.sh` supprimés, remplacés par `curl-paiement.sh`.
 - Factures PDF : plus de contrainte de moteur embarqué (rendu côté serveur Node).
 
 ### Modifié — Base de données : PocketBase → **Turso (libSQL)**
@@ -111,7 +116,7 @@
 
 ### Ajouté
 - **Matrice d'autorisation** dans `SPEC-XXX.md` (section 5) et `DATABASE.md` — la contrepartie obligatoire de l'absence de RLS.
-- **Jobs planifiés via tâche planifiée Coolify** (SvelteKit n'a pas de scheduler natif) pour la réconciliation GeniusPay.
+- **Jobs planifiés via tâche planifiée Coolify** (SvelteKit n'a pas de scheduler natif) pour la réconciliation paiement.
 
 ### Corrigé
 - `lead-dev` : `npx`/`node`/`bun`/`curl`/`psql`/`docker`/`coolify`/`gh`/`kill` ne passent plus sans validation ; `ops-quality` passe `edit`/`write` en `deny`.

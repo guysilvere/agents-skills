@@ -8,7 +8,7 @@ Génère une analyse de menaces STRIDE pour $ARGUMENTS :
 1. Charge la skill `pwa-cadrage` (`skill pwa-cadrage`) et le template `assets/templates/THREAT_MODEL.md`.
 2. Détermine la surface d'attaque :
    - Endpoints publics et privés
-   - Webhooks tiers (GeniusPay, Brevo)
+   - Webhooks tiers (paiement, Brevo)
    - Stockage (Cloudflare R2)
    - Base de données Turso (rappel : zéro RLS native → autorisation applicative stricte)
 3. Remplis la matrice STRIDE :

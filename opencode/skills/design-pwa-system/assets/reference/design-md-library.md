@@ -11,7 +11,7 @@
 ## Sélection utile pour les SaaS Agence Bulles (12-15)
 | Site | Slug | Pourquoi |
 |---|---|---|
-| Stripe | `stripe` | Dégradés signature, élégance, fintech paiements (GeniusPay / fintech africaine) |
+| Stripe | `stripe` | Dégradés signature, élégance, fintech paiements (passerelle locale / mobile money) |
 | Linear | `linear.app` | Minimalisme précis, accent unique, produit SaaS |
 | Supabase | `supabase` | Émeraude sombre, code-first, SaaS developer |
 | Vercel | `vercel` | Noir/blanc précis, Geist, déploiement |
