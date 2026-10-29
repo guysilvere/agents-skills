@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## [2.6.0] — 2026-10-30
+
+### Ajouté
+- **Skill `pwa-test-harness`** : Cockpit de développement, spécifications vivantes et banc de tests QA pour PWA Agence Bulles.
+- **Double affichage Kanban & Liste** : Vue Kanban (5 colonnes de cycle de vie : `DRAFT` → `READY` → `IN_PROGRESS` → `TESTING` → `DONE`) et vue Liste tabulaire filtrable et triable.
+- **Banc d'essai QA interactif** : Formulaires de simulation avec fixtures pré-remplies, marqueurs de statut un-clic (`Succès`, `Échec`, `Reset`), et saisie de notes d'erreur persistantes en base.
+- **Persistance & Historique Turso/SQLite** : Schéma SQL standardisé (`project_specs`, `qa_suites`, `qa_scenarios`, `qa_runs`, `qa_results`, `qa_activity_log`).
+- **Synchronisation Markdown (`docs/specs/`)** : Script d'ingestion automatique (`assets/scripts/sync-specs.ts`) pour transformer les fichiers `SPEC-XXX.md` existants en spécifications actives et scénarios de validation.
+- **Templates de routes et MCP local** : Templates SvelteKit prêts à l'emploi (`+page.svelte`, `+page.server.ts`, `+server.ts`) et configuration MCP de projet local (`project-mcp.json`).
+
+### Modifié
+- **Généralisation de la passerelle de paiement** : Suppression de toute référence et dépendance fournisseur spécifique dans la documentation, les agents, les skills et les templates au profit d'une interface de paiement unifiée (sandbox réelle, webhooks signés, réconciliation).
+- **Mise à jour du WORKFLOW** : Intégration du cockpit Specs & Tests QA dès la phase 5 et certification obligatoire des scénarios par `ops-quality` en phase 7.
+- **Enrichissement des skills** : `pwa-developpement` (scaffold du cockpit) et `pwa-validation` (validation sur banc d'essai local).
+
 ## [2.5.1] — 2026-10-20
 
 ### Modifié
