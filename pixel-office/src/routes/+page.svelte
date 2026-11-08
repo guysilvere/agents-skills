@@ -769,7 +769,7 @@
 		</button>
 	{/if}
 
-	<!-- 1. BARRE LATÉRALE GAUCHE : Cockpit Navigation (Extensible 64px -> 210px) -->
+	<!-- 1. BARRE LATÉRALE GAUCHE : Cockpit Navigation (Refonte 58px -> 200px) -->
 	<aside class="cockpit-sidebar" class:expanded={leftSidebarExpanded} aria-label="Navigation Cockpit">
 		<div class="sidebar-header-dock">
 			<div class="cockpit-logo" title="Agence Bulles">
@@ -787,18 +787,22 @@
 		</div>
 
 		<nav class="cockpit-nav-buttons">
+			<!-- SECTION 1 : ESPACE -->
+			{#if leftSidebarExpanded}
+				<div class="nav-section-title">ESPACE</div>
+			{/if}
 			<button
 				type="button"
 				class="nav-icon-btn active"
 				title="Vue principale du bureau"
 			>
 				<span class="nav-btn-icon">HQ</span>
-				<div class="nav-btn-text">
-					<span class="nav-btn-label">BUREAU</span>
-					{#if leftSidebarExpanded}
+				{#if leftSidebarExpanded}
+					<div class="nav-btn-text">
+						<span class="nav-btn-label">BUREAU</span>
 						<span class="nav-btn-sub">Espace 2D</span>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			</button>
 
 			<button
@@ -808,47 +812,38 @@
 				onclick={() => (showControlDrawer = !showControlDrawer)}
 				title="Ouvrir la console de simulation / actions"
 			>
-				<span class="nav-btn-icon">CMD</span>
-				<div class="nav-btn-text">
-					<span class="nav-btn-label">CONSOLE</span>
-					{#if leftSidebarExpanded}
+				<span class="nav-btn-icon">&gt;_</span>
+				{#if leftSidebarExpanded}
+					<div class="nav-btn-text">
+						<span class="nav-btn-label">CONSOLE</span>
 						<span class="nav-btn-sub">Actions & prompts</span>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			</button>
 
-			<button
-				type="button"
-				class="nav-icon-btn"
-				onclick={() => triggerEvent({ type: 'PET_INTERACT' })}
-				title="Caresser la mascotte GitCat"
-			>
-				<span class="nav-btn-icon">CAT</span>
-				<div class="nav-btn-text">
-					<span class="nav-btn-label">GITCAT</span>
-					{#if leftSidebarExpanded}
-						<span class="nav-btn-sub">Mascotte bureau</span>
-					{/if}
-				</div>
-			</button>
+			<div class="nav-divider"></div>
 
+			<!-- SECTION 2 : AUDIO & AMBIANCE -->
+			{#if leftSidebarExpanded}
+				<div class="nav-section-title">AUDIO</div>
+			{/if}
 			<button
 				type="button"
 				class="nav-icon-btn"
 				class:muted={!audioOn}
+				class:active={audioOn}
 				onclick={toggleAudio}
-				title="Activer ou couper le son WebAudio"
+				title="Activer ou couper les bruitages du bureau"
 			>
-				<span class="nav-btn-icon">{audioOn ? 'VOL' : 'MUT'}</span>
-				<div class="nav-btn-text">
-					<span class="nav-btn-label">{audioOn ? 'SON: ON' : 'SON: OFF'}</span>
-					{#if leftSidebarExpanded}
-						<span class="nav-btn-sub">Bruitages bureau</span>
-					{/if}
-				</div>
+				<span class="nav-btn-icon">{audioOn ? 'FX' : 'OFF'}</span>
+				{#if leftSidebarExpanded}
+					<div class="nav-btn-text">
+						<span class="nav-btn-label">{audioOn ? 'BRUITAGES ON' : 'BRUITAGES OFF'}</span>
+						<span class="nav-btn-sub">Foley 8-bit bureau</span>
+					</div>
+				{/if}
 			</button>
 
-			<!-- BANDE-SON LO-FI CHIPTUNE (Phase 4) -->
 			<button
 				type="button"
 				class="nav-icon-btn"
@@ -856,13 +851,13 @@
 				onclick={toggleLofiMusic}
 				title="Bande-son Chiptune Lo-Fi WebAudio (72 BPM relaxant)"
 			>
-				<span class="nav-btn-icon">{isLofiBgmOn ? '♫♪' : 'BGM'}</span>
-				<div class="nav-btn-text">
-					<span class="nav-btn-label">{isLofiBgmOn ? 'LOFI: ON' : 'LOFI: OFF'}</span>
-					{#if leftSidebarExpanded}
-						<span class="nav-btn-sub">Chiptune 72 BPM</span>
-					{/if}
-				</div>
+				<span class="nav-btn-icon" class:pulse-icon={isLofiBgmOn}>{isLofiBgmOn ? '♫♪' : 'BGM'}</span>
+				{#if leftSidebarExpanded}
+					<div class="nav-btn-text">
+						<span class="nav-btn-label">{isLofiBgmOn ? 'LO-FI ACTIF' : 'LO-FI OFF'}</span>
+						<span class="nav-btn-sub">Musique 72 BPM</span>
+					</div>
+				{/if}
 			</button>
 
 			{#if isLofiBgmOn && leftSidebarExpanded}
@@ -881,7 +876,27 @@
 				</div>
 			{/if}
 
-			<!-- INTERACTION PELOTE DE LAINE GITCAT (Phase 4) -->
+			<div class="nav-divider"></div>
+
+			<!-- SECTION 3 : GITCAT -->
+			{#if leftSidebarExpanded}
+				<div class="nav-section-title">GITCAT</div>
+			{/if}
+			<button
+				type="button"
+				class="nav-icon-btn"
+				onclick={() => triggerEvent({ type: 'PET_INTERACT' })}
+				title="Caresser la mascotte GitCat"
+			>
+				<span class="nav-btn-icon">CAT</span>
+				{#if leftSidebarExpanded}
+					<div class="nav-btn-text">
+						<span class="nav-btn-label">GITCAT</span>
+						<span class="nav-btn-sub">Caresser mascotte</span>
+					</div>
+				{/if}
+			</button>
+
 			<button
 				type="button"
 				class="nav-icon-btn"
@@ -889,14 +904,20 @@
 				title="Lancer la pelote de laine à GitCat dans le salon"
 			>
 				<span class="nav-btn-icon">YRN</span>
-				<div class="nav-btn-text">
-					<span class="nav-btn-label">PELOTE</span>
-					{#if leftSidebarExpanded}
+				{#if leftSidebarExpanded}
+					<div class="nav-btn-text">
+						<span class="nav-btn-label">PELOTE</span>
 						<span class="nav-btn-sub">Jouer avec GitCat</span>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			</button>
 
+			<div class="nav-divider"></div>
+
+			<!-- SECTION 4 : AFFICHAGE -->
+			{#if leftSidebarExpanded}
+				<div class="nav-section-title">VUE</div>
+			{/if}
 			<button
 				type="button"
 				class="nav-icon-btn"
@@ -904,13 +925,13 @@
 				onclick={toggleKioskMode}
 				title="Basculer en Mode Kiosk immersif (auto-hide)"
 			>
-				<span class="nav-btn-icon">KSK</span>
-				<div class="nav-btn-text">
-					<span class="nav-btn-label">{isKioskMode ? 'QUITTER' : 'KIOSK'}</span>
-					{#if leftSidebarExpanded}
-						<span class="nav-btn-sub">Ambiant auto-hide</span>
-					{/if}
-				</div>
+				<span class="nav-btn-icon">[ ]</span>
+				{#if leftSidebarExpanded}
+					<div class="nav-btn-text">
+						<span class="nav-btn-label">{isKioskMode ? 'QUITTER KIOSK' : 'MODE KIOSK'}</span>
+						<span class="nav-btn-sub">Auto-hide immersif</span>
+					</div>
+				{/if}
 			</button>
 
 			<button
@@ -920,17 +941,17 @@
 				title="Basculer en plein écran sur écran secondaire"
 			>
 				<span class="nav-btn-icon">EXP</span>
-				<div class="nav-btn-text">
-					<span class="nav-btn-label">{isFullscreen ? 'FENÊTRE' : 'PLEIN ÉCRAN'}</span>
-					{#if leftSidebarExpanded}
+				{#if leftSidebarExpanded}
+					<div class="nav-btn-text">
+						<span class="nav-btn-label">{isFullscreen ? 'FENÊTRE' : 'PLEIN ÉCRAN'}</span>
 						<span class="nav-btn-sub">Mode projection</span>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			</button>
 		</nav>
 
 		<div class="sidebar-bottom-badge">
-			<span>v0.3</span>
+			<span>v0.4</span>
 		</div>
 	</aside>
 
@@ -1189,6 +1210,11 @@
 											⚙ ACTION
 										{/if}
 									</span>
+									{#if activeDialogueAgent.currentProject}
+										<span class="rpg-project-badge">
+											{activeDialogueAgent.currentProject}
+										</span>
+									{/if}
 								</div>
 								<button
 									type="button"
@@ -1202,6 +1228,18 @@
 									✕
 								</button>
 							</div>
+
+							<!-- VUE DES SKILLS UTILISÉS DANS LA NOTE EN DESSOUS DU BUREAU -->
+							{#if activeDialogueAgent.activeSkills && activeDialogueAgent.activeSkills.length > 0}
+								<div class="rpg-skills-bar" title="Skills d'agent actives chargées dans la mémoire">
+									<span class="rpg-skills-title">SKILLS :</span>
+									<div class="rpg-skills-chips">
+										{#each activeDialogueAgent.activeSkills as skill}
+											<span class="rpg-skill-chip">{skill}</span>
+										{/each}
+									</div>
+								</div>
+							{/if}
 
 							<div class="rpg-text-container">
 								<p class="rpg-typewriter-text">
@@ -2327,40 +2365,44 @@
 		overflow: hidden;
 	}
 
-	/* 2. BARRE LATÉRALE GAUCHE (Extensible 64px -> 210px) */
+	/* 2. BARRE LATÉRALE GAUCHE (Refonte : 56px compact -> 195px étendu) */
 	.cockpit-sidebar {
-		width: 64px;
+		width: 56px;
 		flex-shrink: 0;
 		height: 100dvh;
-		background: #0c121e;
+		background: #090e18;
 		border-right: 2px solid #1e293b;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 12px 0 8px 0;
+		padding: 10px 0 8px 0;
 		box-sizing: border-box;
 		z-index: 30;
-		transition: width 160ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition: width 140ms cubic-bezier(0.4, 0, 0.2, 1);
+		overflow-x: hidden;
+		overflow-y: auto;
 	}
 
 	.cockpit-sidebar.expanded {
-		width: 210px;
+		width: 195px;
 		align-items: stretch;
-		padding: 12px 10px 8px 10px;
+		padding: 10px 8px 8px 8px;
 	}
 
 	.sidebar-header-dock {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		width: 100%;
-		position: relative;
-		margin-bottom: 14px;
+		margin-bottom: 10px;
 		gap: 6px;
 	}
 
 	.cockpit-sidebar.expanded .sidebar-header-dock {
+		flex-direction: row;
 		justify-content: space-between;
+		padding: 0 2px;
 	}
 
 	.cockpit-logo {
@@ -2368,8 +2410,8 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		width: 44px;
-		height: 44px;
+		width: 38px;
+		height: 38px;
 		background: #111827;
 		border: 2px solid #d81b60;
 		box-shadow: 2px 2px 0px #000000;
@@ -2379,17 +2421,17 @@
 
 	.logo-dot {
 		position: absolute;
-		top: 3px;
-		right: 3px;
-		width: 6px;
-		height: 6px;
+		top: 2px;
+		right: 2px;
+		width: 5px;
+		height: 5px;
 		background: #d81b60;
 		box-shadow: 0 0 6px #d81b60;
 	}
 
 	.logo-text {
 		font-family: 'Press Start 2P', monospace;
-		font-size: 11px;
+		font-size: 10px;
 		color: #ffffff;
 		font-weight: bold;
 	}
@@ -2399,12 +2441,21 @@
 		border: 1px solid #334155;
 		color: #94a3b8;
 		font-family: 'Press Start 2P', monospace;
-		font-size: 8px;
-		padding: 4px 6px;
+		font-size: 7px;
+		width: 38px;
+		height: 20px;
+		padding: 0;
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		transition: all 0.15s ease;
+	}
+
+	.cockpit-sidebar.expanded .btn-toggle-expand {
+		width: auto;
+		height: 24px;
+		padding: 0 8px;
 	}
 
 	.btn-toggle-expand:hover {
@@ -2417,41 +2468,62 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 10px;
+		gap: 5px;
 		width: 100%;
-		padding: 0 8px;
+		padding: 0;
 		box-sizing: border-box;
 	}
 
 	.cockpit-sidebar.expanded .cockpit-nav-buttons {
-		padding: 0;
+		align-items: stretch;
+	}
+
+	.nav-section-title {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 6px;
+		color: #475569;
+		letter-spacing: 0.5px;
+		padding: 6px 4px 2px 4px;
+		text-align: left;
+		white-space: nowrap;
+	}
+
+	.nav-divider {
+		width: 26px;
+		height: 1px;
+		background: #1e293b;
+		margin: 3px 0;
+	}
+
+	.cockpit-sidebar.expanded .nav-divider {
+		width: 100%;
+		margin: 4px 0;
 	}
 
 	.nav-icon-btn {
-		width: 48px;
-		height: 48px;
+		width: 38px;
+		height: 38px;
 		background: #111827;
-		border: 2px solid #334155;
+		border: 2px solid #1e293b;
 		box-shadow: 2px 2px 0px #000000;
 		color: #94a3b8;
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
-		padding: 2px;
+		padding: 0;
 		box-sizing: border-box;
-		gap: 3px;
 		transition: all 80ms ease;
+		flex-shrink: 0;
 	}
 
 	.cockpit-sidebar.expanded .nav-icon-btn {
 		width: 100%;
 		height: auto;
-		padding: 8px 10px;
-		flex-direction: row;
+		padding: 6px 8px;
 		justify-content: flex-start;
-		gap: 10px;
+		gap: 8px;
 	}
 
 	.nav-icon-btn:hover {
@@ -2468,8 +2540,9 @@
 	}
 
 	.nav-icon-btn.muted {
-		opacity: 0.6;
-		border-color: #64748b;
+		opacity: 0.5;
+		border-color: #475569;
+		color: #64748b;
 	}
 
 	.nav-btn-icon {
@@ -2477,11 +2550,29 @@
 		font-size: 8px;
 		color: currentColor;
 		flex-shrink: 0;
+		text-align: center;
+		line-height: 1;
 	}
 
 	.cockpit-sidebar.expanded .nav-btn-icon {
-		width: 24px;
+		width: 22px;
 		text-align: center;
+	}
+
+	.pulse-icon {
+		color: #38bdf8;
+		animation: pulseChiptune 0.8s infinite alternate;
+	}
+
+	@keyframes pulseChiptune {
+		0% {
+			transform: scale(1);
+			color: #38bdf8;
+		}
+		100% {
+			transform: scale(1.15);
+			color: #f43f5e;
+		}
 	}
 
 	.nav-btn-text {
@@ -2489,12 +2580,13 @@
 		flex-direction: column;
 		gap: 2px;
 		overflow: hidden;
+		min-width: 0;
 	}
 
 	.nav-btn-label {
 		font-family: 'Press Start 2P', monospace;
 		font-size: 7px;
-		line-height: 1;
+		line-height: 1.2;
 		color: #cbd5e1;
 		white-space: nowrap;
 	}
@@ -2503,7 +2595,7 @@
 		font-family: 'Silkscreen', monospace;
 		font-size: 7px;
 		color: #64748b;
-		line-height: 1;
+		line-height: 1.1;
 		white-space: nowrap;
 	}
 
@@ -4176,6 +4268,55 @@
 	.rpg-close-btn:hover {
 		border-color: #ef4444;
 		color: #ef4444;
+	}
+
+	.rpg-project-badge {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 6px;
+		color: #38bdf8;
+		background: #0c1c38;
+		border: 1px solid #1e3a8a;
+		padding: 2px 6px;
+		letter-spacing: 0.5px;
+	}
+
+	/* VUE DES SKILLS UTILISÉS DANS LA NOTE EN DESSOUS DU BUREAU */
+	.rpg-skills-bar {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		background: #051020;
+		border: 1px dashed #1e3a5f;
+		padding: 3px 8px;
+		margin: 2px 0 4px 0;
+		border-radius: 2px;
+	}
+
+	.rpg-skills-title {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 6px;
+		color: #06b6d4;
+		letter-spacing: 0.5px;
+		flex-shrink: 0;
+	}
+
+	.rpg-skills-chips {
+		display: flex;
+		gap: 4px;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.rpg-skill-chip {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		background: #022c22;
+		border: 1px solid #059669;
+		color: #34d399;
+		padding: 1px 6px;
+		border-radius: 2px;
+		line-height: 1.2;
+		letter-spacing: 0.3px;
 	}
 
 	.rpg-text-container {
