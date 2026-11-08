@@ -96,6 +96,8 @@ export interface OfficeAgent {
 	isTemporary: boolean;
 	state: AgentState;
 	currentProject: string | null;
+	/** Liste des projets récents actifs sur lesquels l'agent est mobilisé */
+	activeProjects: string[];
 	activeSkills: string[];
 	/** Action précise en cours (ex: "Editing +page.svelte", "Running vitest") */
 	activityLabel: string | null;
@@ -210,6 +212,7 @@ export interface OfficeSnapshot {
 	};
 	stats: {
 		activeProject: string | null;
+		activeProjects: string[];
 		totalEventsToday: number;
 		subagentsSpawnedToday: number;
 	};

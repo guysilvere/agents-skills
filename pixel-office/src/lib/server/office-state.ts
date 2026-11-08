@@ -48,6 +48,7 @@ class OfficeStateManager {
 
 	public stats = {
 		activeProject: 'agents-skills' as string | null,
+		activeProjects: ['agents-skills', 'lodgi'] as string[],
 		totalEventsToday: 1,
 		subagentsSpawnedToday: 0
 	};
@@ -68,6 +69,7 @@ class OfficeStateManager {
 				isTemporary: false,
 				state: 'WORKING',
 				currentProject: 'agents-skills',
+				activeProjects: ['agents-skills', 'lodgi'],
 				activeSkills: ['pwa-cadrage', 'shared-eco-tokens'],
 				activityLabel: 'Editing pixel-office/+page.svelte',
 				contextRatio: 0.34,
@@ -103,6 +105,7 @@ class OfficeStateManager {
 				isTemporary: false,
 				state: 'COFFEE',
 				currentProject: 'agents-skills',
+				activeProjects: ['agents-skills'],
 				activeSkills: ['pwa-validation'],
 				activityLabel: 'Prêt pour audit QA & Lighthouse',
 				contextRatio: 0.12,
@@ -138,6 +141,7 @@ class OfficeStateManager {
 				isTemporary: false,
 				state: 'GYM',
 				currentProject: 'lodgi',
+				activeProjects: ['lodgi'],
 				activeSkills: ['api-paiements'],
 				activityLabel: 'Veille Webhooks GeniusPay',
 				contextRatio: 0.18,
@@ -298,6 +302,10 @@ class OfficeStateManager {
 		this.stats.totalEventsToday++;
 		if (event.project) {
 			this.stats.activeProject = event.project;
+			if (!this.stats.activeProjects) this.stats.activeProjects = [];
+			this.stats.activeProjects = Array.from(
+				new Set([event.project, ...this.stats.activeProjects])
+			).slice(0, 6);
 		}
 
 		if (event.type === 'PET_INTERACT') {
@@ -323,13 +331,20 @@ class OfficeStateManager {
 		agent.lastActivityAt = now;
 		this.bumpContextUsage(agent, event.contextRatio);
 
+		if (event.project) {
+			agent.currentProject = event.project;
+			if (!agent.activeProjects) agent.activeProjects = [];
+			agent.activeProjects = Array.from(
+				new Set([event.project, ...agent.activeProjects])
+			).slice(0, 4);
+		}
+
 		switch (event.type) {
 			case 'WORK_START': {
 				agent.state = 'WORKING';
 				agent.targetPosition = { ...agent.deskPosition };
 				agent.targetAgentId = null;
 				agent.callMessage = null;
-				if (event.project) agent.currentProject = event.project;
 				if (event.activityLabel) {
 					agent.activityLabel = event.activityLabel;
 				} else {
@@ -585,6 +600,7 @@ class OfficeStateManager {
 					isTemporary: true,
 					state: 'WORKING',
 					currentProject: event.project ?? this.stats.activeProject ?? 'agents-skills',
+					activeProjects: [event.project ?? this.stats.activeProject ?? 'agents-skills'],
 					activeSkills: event.skills?.length ? event.skills : ['shared-eco-tokens'],
 					activityLabel: event.activityLabel ?? `Mission: ${subTitle}`,
 					contextRatio: 0,

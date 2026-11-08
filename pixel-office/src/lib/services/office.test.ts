@@ -209,4 +209,21 @@ describe('Phase 4 : Audio Chiptune Lo-Fi & Foley 8-bit', () => {
 	});
 });
 
+describe('Surveillance Multi-Projets /Users/silveremeya/Projets', () => {
+	it('enregistre plusieurs projets actifs et suit les projets multiples par agent', () => {
+		const snap = officeState.applyEvent({
+			source: 'antigravity',
+			type: 'TOOL_USE',
+			agentId: 'lead-dev',
+			project: 'lodgi',
+			activityLabel: 'Lecture de schema.ts sur lodgi'
+		});
+
+		expect(snap.stats.activeProjects).toContain('lodgi');
+		const lead = snap.agents.find((a) => a.id === 'lead-dev');
+		expect(lead?.activeProjects).toContain('lodgi');
+		expect(lead?.currentProject).toBe('lodgi');
+	});
+});
+
 

@@ -360,6 +360,17 @@
 		return selectedAgent || leadAgent;
 	});
 
+	function getAgentDisplaySkills(agent: OfficeAgent | null): string[] {
+		if (!agent) return [];
+		if (agent.activeSkills && agent.activeSkills.length > 0) {
+			return agent.activeSkills;
+		}
+		if (agent.id === 'lead-dev') return ['pwa-cadrage', 'pwa-developpement', 'design-pwa-system'];
+		if (agent.id === 'ops-quality') return ['pwa-validation', 'pwa-deploiement', 'shared-git-conventions'];
+		if (agent.id === 'integrations') return ['api-paiements', 'api-best-practices'];
+		return ['shared-eco-tokens'];
+	}
+
 	$effect(() => {
 		const target = activeDialogueAgent?.lastDialogue?.text || '';
 		if (target !== typewriterTargetText) {
@@ -978,9 +989,20 @@
 					<strong class="kpi-val" class:alert={waitingHumanCount > 0}>{waitingHumanCount} STOP</strong>
 				</div>
 
-				<div class="kpi-card">
-					<span class="kpi-label">PROJET ACTIF</span>
-					<strong class="kpi-val project-text">{snapshot?.stats.activeProject ?? 'agents-skills'}</strong>
+				<div class="kpi-card kpi-projects-card" title="Projets surveillés dans /Users/silveremeya/Projets">
+					<span class="kpi-label">PROJETS ACTIFS ({snapshot?.stats.activeProjects?.length ?? 1})</span>
+					<div class="kpi-projects-chips">
+						{#each (snapshot?.stats.activeProjects || [snapshot?.stats.activeProject || 'agents-skills']) as proj}
+							<span
+								class="kpi-project-chip"
+								class:is-active={proj === snapshot?.stats.activeProject}
+								title="Projet: {proj}"
+							>
+								<span class="chip-led"></span>
+								{proj}
+							</span>
+						{/each}
+					</div>
 				</div>
 
 				<div class="kpi-card">
@@ -1096,7 +1118,19 @@
 									<div class="project-row">
 										<span class="project-label">PROJET:</span>
 										<strong class="project-value">{agent.currentProject}</strong>
+										{#if agent.activeProjects && agent.activeProjects.length > 1}
+											<span class="multi-project-badge" title="Actif sur {agent.activeProjects.join(' et ')}">
+												+{agent.activeProjects.length - 1} PROJ
+											</span>
+										{/if}
 									</div>
+									{#if agent.activeProjects && agent.activeProjects.length > 1}
+										<div class="agent-active-projects-bar">
+											{#each agent.activeProjects as p}
+												<span class="agent-active-proj-pill" class:is-current={p === agent.currentProject}>{p}</span>
+											{/each}
+										</div>
+									{/if}
 									{#if agent.activeSkills.length > 0}
 										<div class="skills-list">
 											{#each agent.activeSkills as skill}
@@ -1230,11 +1264,11 @@
 							</div>
 
 							<!-- VUE DES SKILLS UTILISÉS DANS LA NOTE EN DESSOUS DU BUREAU -->
-							{#if activeDialogueAgent.activeSkills && activeDialogueAgent.activeSkills.length > 0}
+							{#if getAgentDisplaySkills(activeDialogueAgent).length > 0}
 								<div class="rpg-skills-bar" title="Skills d'agent actives chargées dans la mémoire">
 									<span class="rpg-skills-title">SKILLS :</span>
 									<div class="rpg-skills-chips">
-										{#each activeDialogueAgent.activeSkills as skill}
+										{#each getAgentDisplaySkills(activeDialogueAgent) as skill}
 											<span class="rpg-skill-chip">{skill}</span>
 										{/each}
 									</div>
@@ -1598,6 +1632,15 @@
 									style="width: {Math.round(leadAgent.contextRatio * 100)}%; background: {getContextGaugeColor(leadAgent.contextRatio)};"
 								></div>
 							</div>
+							{#if leadAgent.activeProjects && leadAgent.activeProjects.length > 0}
+								<div class="roster-projects-row" title="Projets surveillés dans /Users/silveremeya/Projets">
+									{#each leadAgent.activeProjects as proj}
+										<span class="roster-proj-tag" class:is-curr={proj === leadAgent.currentProject}>
+											{proj}
+										</span>
+									{/each}
+								</div>
+							{/if}
 						</div>
 					</button>
 				{/if}
@@ -1646,6 +1689,15 @@
 									style="width: {Math.round(ag.contextRatio * 100)}%; background: {getContextGaugeColor(ag.contextRatio)};"
 								></div>
 							</div>
+							{#if ag.activeProjects && ag.activeProjects.length > 0}
+								<div class="roster-projects-row" title="Projets surveillés dans /Users/silveremeya/Projets">
+									{#each ag.activeProjects as proj}
+										<span class="roster-proj-tag" class:is-curr={proj === ag.currentProject}>
+											{proj}
+										</span>
+									{/each}
+								</div>
+							{/if}
 						</div>
 					</button>
 				{/each}
@@ -1678,6 +1730,15 @@
 								</div>
 								<span class="roster-title">{ag.title}</span>
 								<span class="roster-state-chip state-working">{formatStateLabel(ag.state)}</span>
+								{#if ag.activeProjects && ag.activeProjects.length > 0}
+									<div class="roster-projects-row" title="Projets surveillés dans /Users/silveremeya/Projets">
+										{#each ag.activeProjects as proj}
+											<span class="roster-proj-tag" class:is-curr={proj === ag.currentProject}>
+												{proj}
+											</span>
+										{/each}
+									</div>
+								{/if}
 							</div>
 						</button>
 					{/each}
@@ -1727,10 +1788,23 @@
 							<strong class="meta-value state-label">{formatStateLabel(selectedAgent.state)}</strong>
 						</div>
 						<div class="meta-field">
-							<span class="meta-caption">PROJET</span>
+							<span class="meta-caption">PROJET PRINCIPAL</span>
 							<strong class="meta-value">{selectedAgent.currentProject ?? '—'}</strong>
 						</div>
 					</div>
+
+					{#if selectedAgent.activeProjects && selectedAgent.activeProjects.length > 1}
+						<div class="inspector-multi-proj-box">
+							<span class="meta-caption">PROJETS EN CHARGE SIMULTANÉMENT</span>
+							<div class="inspector-proj-tags">
+								{#each selectedAgent.activeProjects as proj}
+									<span class="inspector-proj-pill" class:is-active={proj === selectedAgent.currentProject}>
+										<span class="pill-dot"></span>{proj}
+									</span>
+								{/each}
+							</div>
+						</div>
+					{/if}
 
 					{#if !selectedAgent.isTemporary}
 						<div class="inspector-gauge-section">
@@ -2478,6 +2552,19 @@
 		align-items: stretch;
 	}
 
+	/* RÈGLE STRICTE ANTI-DÉBORDEMENT : quand le menu est replié, masquer complètement tout texte */
+	.cockpit-sidebar:not(.expanded) .nav-btn-text,
+	.cockpit-sidebar:not(.expanded) .nav-section-title,
+	.cockpit-sidebar:not(.expanded) .lofi-volume-slider-box {
+		display: none !important;
+		visibility: hidden !important;
+		width: 0 !important;
+		height: 0 !important;
+		overflow: hidden !important;
+		pointer-events: none !important;
+		position: absolute !important;
+	}
+
 	.nav-section-title {
 		font-family: 'Press Start 2P', monospace;
 		font-size: 6px;
@@ -2503,12 +2590,15 @@
 	.nav-icon-btn {
 		width: 38px;
 		height: 38px;
+		min-width: 38px;
+		min-height: 38px;
+		max-width: 38px;
+		max-height: 38px;
 		background: #111827;
 		border: 2px solid #1e293b;
 		box-shadow: 2px 2px 0px #000000;
 		color: #94a3b8;
 		display: flex;
-		flex-direction: row;
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
@@ -2516,14 +2606,20 @@
 		box-sizing: border-box;
 		transition: all 80ms ease;
 		flex-shrink: 0;
+		overflow: hidden;
 	}
 
 	.cockpit-sidebar.expanded .nav-icon-btn {
 		width: 100%;
+		min-width: 100%;
+		max-width: 100%;
 		height: auto;
+		min-height: 38px;
+		max-height: none;
 		padding: 6px 8px;
 		justify-content: flex-start;
 		gap: 8px;
+		overflow: visible;
 	}
 
 	.nav-icon-btn:hover {
@@ -2765,26 +2861,26 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
+		justify-content: space-between;
 		position: relative;
 		overflow: hidden;
-		padding: 6px 12px 8px 12px;
-		gap: 8px;
+		padding: 4px 12px 4px 12px;
+		gap: 4px;
 		box-sizing: border-box;
 	}
 
 	.canvas-frame {
 		position: relative;
 		aspect-ratio: 20 / 13;
-		width: min(100%, calc((100dvh - 215px) * (20 / 13)));
-		max-height: calc(100dvh - 215px);
+		width: min(100%, calc((100dvh - 195px) * (20 / 13)));
+		max-height: calc(100dvh - 195px);
 		border: 4px solid #000000;
 		box-shadow:
 			0 0 0 2px #1e293b,
 			0 16px 40px rgba(0, 0, 0, 0.85);
 		background: #18202c;
 		cursor: crosshair;
-		flex-shrink: 0;
+		flex-shrink: 1;
 	}
 
 	canvas {
@@ -3503,6 +3599,80 @@
 		transition: width 200ms ease;
 	}
 
+	.roster-projects-row {
+		display: flex;
+		align-items: center;
+		gap: 3px;
+		flex-wrap: wrap;
+		margin-top: 3px;
+	}
+
+	.roster-proj-tag {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		background: #090e17;
+		border: 1px solid #1e293b;
+		color: #94a3b8;
+		padding: 1px 4px;
+		border-radius: 2px;
+		line-height: 1.1;
+		white-space: nowrap;
+	}
+
+	.roster-proj-tag.is-curr {
+		background: #064e3b;
+		border-color: #10b981;
+		color: #a7f3d0;
+		font-weight: bold;
+	}
+
+	.inspector-multi-proj-box {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		padding: 6px 8px;
+		background: #0d131f;
+		border: 1px solid #1e293b;
+	}
+
+	.inspector-proj-tags {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		flex-wrap: wrap;
+	}
+
+	.inspector-proj-pill {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		background: #1e293b;
+		border: 1px solid #334155;
+		color: #cbd5e1;
+		padding: 2px 6px;
+		border-radius: 2px;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.inspector-proj-pill.is-active {
+		background: #064e3b;
+		border-color: #10b981;
+		color: #6ee7b7;
+	}
+
+	.inspector-proj-pill .pill-dot {
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: #94a3b8;
+	}
+
+	.inspector-proj-pill.is-active .pill-dot {
+		background: #10b981;
+		box-shadow: 0 0 4px #10b981;
+	}
+
 	.empty-subagents-card {
 		font-family: 'Silkscreen', monospace;
 		font-size: 8px;
@@ -4146,14 +4316,16 @@
 	/* BOÎTE DE DIALOGUE RPG RÉTRO (Typewriter Dialogue Box) : POSITIONNÉE SOUS LE CANVAS */
 	.rpg-dialogue-box {
 		position: relative;
-		width: min(100%, calc((100dvh - 215px) * (20 / 13)));
+		width: min(100%, calc((100dvh - 195px) * (20 / 13)));
+		margin-top: auto;
+		margin-bottom: 2px;
 		z-index: 10;
 		background: linear-gradient(180deg, #091122 0%, #030712 100%);
 		border: 3px solid #fbbf24;
 		box-shadow:
 			0 4px 16px rgba(0, 0, 0, 0.95),
 			inset 0 0 0 1px #78350f;
-		padding: 8px 12px;
+		padding: 6px 12px;
 		display: flex;
 		flex-direction: column;
 		cursor: pointer;
