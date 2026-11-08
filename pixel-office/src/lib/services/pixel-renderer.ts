@@ -1,6 +1,6 @@
 import { MAP_COLS, MAP_ROWS, TILE_SIZE } from '$lib/services/pathfinding';
 import type { PixelAssetsBundle } from '$lib/services/sprite-loader';
-import type { OfficeAgent, OfficePet, TimeOfDayMode } from '$lib/types/office';
+import type { OfficeAgent, OfficePet, TimeOfDayMode, YarnBallState } from '$lib/types/office';
 
 export interface AnimatedAgentView extends OfficeAgent {
 	renderX: number;
@@ -85,7 +85,8 @@ export function renderPixelOfficeScene(
 	selectedAgentId: string | null,
 	frameCount: number,
 	assets: PixelAssetsBundle | null,
-	ambientMode: TimeOfDayMode = 'auto'
+	ambientMode: TimeOfDayMode = 'auto',
+	yarnBall: YarnBallState | null = null
 ): void {
 	const width = MAP_COLS * TILE_SIZE;
 	const height = MAP_ROWS * TILE_SIZE;
@@ -106,6 +107,13 @@ export function renderPixelOfficeScene(
 	const entities: RenderableEntity[] = [];
 
 	addOfficeFurnitureEntities(entities, assets.furniture, agents, frameCount);
+
+	if (yarnBall) {
+		entities.push({
+			zY: (yarnBall.y + 0.6) * TILE_SIZE,
+			draw: (c) => drawYarnBall(c, yarnBall, frameCount)
+		});
+	}
 
 	if (pet) {
 		entities.push({
@@ -1110,3 +1118,44 @@ function drawPhoneConnectionBeams(
 		}
 	}
 }
+
+/**
+ * Dessine la pelote de laine 8-bit avec son ombre portée et son fil déroulé
+ */
+function drawYarnBall(
+	ctx: CanvasRenderingContext2D,
+	yarn: YarnBallState,
+	frameCount: number
+): void {
+	const px = Math.round(yarn.x * TILE_SIZE);
+	const py = Math.round(yarn.y * TILE_SIZE);
+	const bounceY = py - Math.round(yarn.z);
+
+	// Ombre au sol douce
+	ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
+	ctx.beginPath();
+	ctx.ellipse(px + 4, py + 6, 5, 2.5, 0, 0, Math.PI * 2);
+	ctx.fill();
+
+	// Fil de laine déroulé traînant derrière la pelote
+	ctx.save();
+	ctx.strokeStyle = '#F43F5E';
+	ctx.lineWidth = 1;
+	ctx.beginPath();
+	ctx.moveTo(px - 4, py + 5);
+	ctx.quadraticCurveTo(px - 1, py + (frameCount % 4 < 2 ? 8 : 7), px + 2, py + 5);
+	ctx.stroke();
+	ctx.restore();
+
+	// Pelote de laine 8-bit rouge/rose vif avec texture enroulée
+	pxRect(ctx, px + 1, bounceY, 6, 6, '#E11D48');
+	pxRect(ctx, px + 2, bounceY - 1, 4, 8, '#E11D48');
+	pxRect(ctx, px, bounceY + 1, 8, 4, '#BE123C');
+
+	// Reflets et spirales de fil
+	pxRect(ctx, px + 2, bounceY + 1, 3, 1, '#FDA4AF');
+	pxRect(ctx, px + 1, bounceY + 3, 2, 2, '#FB7185');
+	pxRect(ctx, px + 4, bounceY + 4, 3, 1, '#FB7185');
+	pxRect(ctx, px + 5, bounceY + 2, 1, 2, '#9F1239'); // Ombre de creux
+}
+

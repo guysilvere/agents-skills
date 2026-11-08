@@ -8,11 +8,21 @@
 		renderPixelOfficeScene
 	} from '$lib/services/pixel-renderer';
 	import {
+		getBgmVolume,
+		isBgmPlaying,
 		isSoundEnabled,
+		playCatMeow,
+		playCatPurr,
+		playCoffeeBrew,
 		playDoneChime,
+		playKeyboardClick,
 		playPermissionChime,
 		playSubagentSpawnChime,
-		setSoundEnabled
+		playYarnBounce,
+		setBgmVolume,
+		setSoundEnabled,
+		toggleBgm,
+		unlockAudio
 	} from '$lib/services/sound-effects';
 	import { loadPixelAssets, type PixelAssetsBundle } from '$lib/services/sprite-loader';
 	import type {
@@ -20,7 +30,8 @@
 		IncomingOfficeEvent,
 		OfficeAgent,
 		OfficeSnapshot,
-		TimeOfDayMode
+		TimeOfDayMode,
+		YarnBallState
 	} from '$lib/types/office';
 
 	const NATIVE_WIDTH = MAP_COLS * TILE_SIZE; // 320px
@@ -70,13 +81,39 @@
 			return;
 		}
 
-		// 2. Clic sur le Tableau Kanban 8-bit mural (bureau QA : cols 11..13, rows 0..2)
+		// 2. Clic sur GitCat ou la pelote de laine ?
+		const petDist = Math.hypot(
+			petRenderCoord.x + 0.5 - clickedTileX,
+			petRenderCoord.y + 0.5 - clickedTileY
+		);
+		const yarnDist = Math.hypot(
+			yarnBall.x + 0.3 - clickedTileX,
+			yarnBall.y + 0.3 - clickedTileY
+		);
+		if (petDist <= 1.3 || yarnDist <= 1.2) {
+			playCatMeow();
+			throwYarnBall();
+			return;
+		}
+
+		// 3. Clic sur le tapis du salon (cols 14.8..19, rows 7..10.5) -> lancer la pelote là où l'utilisateur clique
+		if (
+			clickedTileX >= 14.8 &&
+			clickedTileX <= 19.2 &&
+			clickedTileY >= 7.0 &&
+			clickedTileY <= 10.5
+		) {
+			throwYarnBall(clickedTileX, clickedTileY);
+			return;
+		}
+
+		// 4. Clic sur le Tableau Kanban 8-bit mural (bureau QA : cols 11..13, rows 0..2)
 		if (clickedTileX >= 11 && clickedTileX <= 14 && clickedTileY >= 0 && clickedTileY <= 2.2) {
 			showKanbanModal = true;
 			return;
 		}
 
-		// 3. Clic sur le Rack Serveur Coolify / Infra (bureau QA : cols 17..18, rows 2..4)
+		// 5. Clic sur le Rack Serveur Coolify / Infra (bureau QA : cols 17..18, rows 2..4)
 		if (clickedTileX >= 16.8 && clickedTileX <= 18.8 && clickedTileY >= 2 && clickedTileY <= 4.2) {
 			showServerModal = true;
 			return;
@@ -137,6 +174,57 @@
 			}
 		}, 3500);
 	}
+
+	// Phase 4 : Lo-Fi Chiptune WebAudio & Pelote de laine GitCat
+	let isLofiBgmOn = $state(false);
+	let bgmVol = $state(0.25);
+
+	let yarnBall: YarnBallState = $state({
+		x: 16.5,
+		y: 8.5,
+		z: 0,
+		targetX: 16.5,
+		targetY: 8.5,
+		isMoving: false
+	});
+
+	function toggleLofiMusic(): void {
+		unlockAudio();
+		isLofiBgmOn = toggleBgm();
+	}
+
+	function handleBgmVolumeChange(e: Event): void {
+		const target = e.target as HTMLInputElement;
+		bgmVol = parseFloat(target.value);
+		setBgmVolume(bgmVol);
+	}
+
+	function throwYarnBall(targetTileX?: number, targetTileY?: number): void {
+		unlockAudio();
+		playYarnBounce();
+		const destX =
+			targetTileX !== undefined
+				? Math.max(14.8, Math.min(18.2, targetTileX))
+				: 15.2 + Math.random() * 2.4;
+		const destY =
+			targetTileY !== undefined
+				? Math.max(7.2, Math.min(9.8, targetTileY))
+				: 7.6 + Math.random() * 2.0;
+
+		yarnBall.targetX = destX;
+		yarnBall.targetY = destY;
+		yarnBall.isMoving = true;
+
+		// Faire courir GitCat vers la pelote de laine !
+		if (snapshot?.pet) {
+			const goal = { x: Math.round(destX), y: Math.round(destY) };
+			petPath = findPixelPath(
+				{ x: Math.round(petRenderCoord.x), y: Math.round(petRenderCoord.y) },
+				goal
+			);
+		}
+	}
+
 
 	// Formulaire de simulation rapide (Option C Hybride)
 	let simAgentId = $state('lead-dev');
@@ -393,6 +481,12 @@
 			} else if (newestLog.soundCue === 'spawn' || newestLog.soundCue === 'call') {
 				playSubagentSpawnChime();
 			}
+			if (
+				newestLog.summary.toLowerCase().includes('café') ||
+				newestLog.summary.toLowerCase().includes('expresso')
+			) {
+				playCoffeeBrew();
+			}
 		}
 
 		for (const ag of nextSnap.agents) {
@@ -480,8 +574,9 @@
 
 		animatedAgents = views;
 
+		// 1. Déplacement de GitCat
 		if (snapshot.pet) {
-			const petSpeed = 0.1;
+			const petSpeed = 0.12;
 			let petMoving = false;
 			if (petPath.length > 0) {
 				const nextTile = petPath[0];
@@ -504,6 +599,45 @@
 				renderY: petRenderCoord.y,
 				isMoving: petMoving
 			};
+		}
+
+		// 2. Trajectoire physique et rebonds de la pelote de laine
+		if (yarnBall.isMoving) {
+			const dx = yarnBall.targetX - yarnBall.x;
+			const dy = yarnBall.targetY - yarnBall.y;
+			const dist = Math.hypot(dx, dy);
+			if (dist <= 0.16) {
+				yarnBall.x = yarnBall.targetX;
+				yarnBall.y = yarnBall.targetY;
+				yarnBall.z = 0;
+				yarnBall.isMoving = false;
+				playYarnBounce();
+			} else {
+				yarnBall.x += (dx / dist) * 0.16;
+				yarnBall.y += (dy / dist) * 0.16;
+				yarnBall.z = Math.sin(Math.min(Math.PI, (1 - dist / 3) * Math.PI)) * 8;
+			}
+		}
+
+		// 3. Interaction physique joueur entre GitCat et la pelote de laine
+		const petDistToYarn = Math.hypot(petRenderCoord.x - yarnBall.x, petRenderCoord.y - yarnBall.y);
+		if (
+			petDistToYarn <= 0.9 &&
+			!yarnBall.isMoving &&
+			snapshot?.pet &&
+			snapshot.pet.state !== 'HEART'
+		) {
+			playCatMeow();
+			playCatPurr();
+			triggerEvent({
+				type: 'PET_INTERACT',
+				agentId: 'lead-dev'
+			});
+			// GitCat renvoie joyeusement la pelote un peu plus loin sur le tapis
+			yarnBall.targetX = 15.2 + Math.random() * 2.5;
+			yarnBall.targetY = 7.6 + Math.random() * 2.0;
+			yarnBall.isMoving = true;
+			playYarnBounce();
 		}
 	}
 
@@ -559,6 +693,14 @@
 
 			stepPositions();
 
+			// Bruitage subtil de frappes de clavier mécanique occasionnelles pendant le travail
+			if (frameCount % 65 === 0 && Math.random() < 0.35) {
+				const hasWorkingAgent = animatedAgents.some((a) => a.state === 'WORKING');
+				if (hasWorkingAgent) {
+					playKeyboardClick();
+				}
+			}
+
 			if (canvasEl) {
 				const ctx = canvasEl.getContext('2d');
 				if (ctx) {
@@ -569,7 +711,8 @@
 						selectedAgentId,
 						frameCount,
 						assetsBundle,
-						ambientMode
+						ambientMode,
+						yarnBall
 					);
 				}
 			}
@@ -700,7 +843,56 @@
 				<div class="nav-btn-text">
 					<span class="nav-btn-label">{audioOn ? 'SON: ON' : 'SON: OFF'}</span>
 					{#if leftSidebarExpanded}
-						<span class="nav-btn-sub">Synthèse WebAudio</span>
+						<span class="nav-btn-sub">Bruitages bureau</span>
+					{/if}
+				</div>
+			</button>
+
+			<!-- BANDE-SON LO-FI CHIPTUNE (Phase 4) -->
+			<button
+				type="button"
+				class="nav-icon-btn"
+				class:active={isLofiBgmOn}
+				onclick={toggleLofiMusic}
+				title="Bande-son Chiptune Lo-Fi WebAudio (72 BPM relaxant)"
+			>
+				<span class="nav-btn-icon">{isLofiBgmOn ? '♫♪' : 'BGM'}</span>
+				<div class="nav-btn-text">
+					<span class="nav-btn-label">{isLofiBgmOn ? 'LOFI: ON' : 'LOFI: OFF'}</span>
+					{#if leftSidebarExpanded}
+						<span class="nav-btn-sub">Chiptune 72 BPM</span>
+					{/if}
+				</div>
+			</button>
+
+			{#if isLofiBgmOn && leftSidebarExpanded}
+				<div class="lofi-volume-slider-box">
+					<span class="lofi-vol-label">VOL</span>
+					<input
+						type="range"
+						min="0"
+						max="1"
+						step="0.05"
+						value={bgmVol}
+						oninput={handleBgmVolumeChange}
+						class="lofi-slider"
+						title="Volume de la bande-son Lo-Fi"
+					/>
+				</div>
+			{/if}
+
+			<!-- INTERACTION PELOTE DE LAINE GITCAT (Phase 4) -->
+			<button
+				type="button"
+				class="nav-icon-btn"
+				onclick={() => throwYarnBall()}
+				title="Lancer la pelote de laine à GitCat dans le salon"
+			>
+				<span class="nav-btn-icon">YRN</span>
+				<div class="nav-btn-text">
+					<span class="nav-btn-label">PELOTE</span>
+					{#if leftSidebarExpanded}
+						<span class="nav-btn-sub">Jouer avec GitCat</span>
 					{/if}
 				</div>
 			</button>
@@ -4557,5 +4749,32 @@
 	.cockpit-shell.kiosk-mode.kiosk-hidden .canvas-frame {
 		max-height: 94vh;
 		width: min(96vw, calc(94vh * (20 / 13)));
+	}
+
+	/* ========================================================
+	   PHASE 4 : BANDE-SON LO-FI CHIPTUNE & PELOTE GITCAT
+	   ======================================================== */
+	.lofi-volume-slider-box {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		background: #091122;
+		border: 1px solid #1e293b;
+		padding: 4px 8px;
+		margin: 2px 4px 6px 4px;
+	}
+
+	.lofi-vol-label {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 6px;
+		color: #38bdf8;
+	}
+
+	.lofi-slider {
+		flex: 1;
+		height: 4px;
+		background: #1e293b;
+		accent-color: #38bdf8;
+		cursor: pointer;
 	}
 </style>

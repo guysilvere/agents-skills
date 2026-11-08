@@ -179,3 +179,34 @@ describe('Cycle Ambiance Jour / Nuit Cyberpunk', () => {
 	});
 });
 
+describe('Phase 4 : Audio Chiptune Lo-Fi & Foley 8-bit', () => {
+	it('permet de contrôler le volume et le statut du son global et de la musique Lo-Fi', async () => {
+		const {
+			isSoundEnabled,
+			setSoundEnabled,
+			setBgmVolume,
+			getBgmVolume,
+			isBgmPlaying
+		} = await import('$lib/services/sound-effects');
+
+		expect(isSoundEnabled()).toBe(true);
+		setSoundEnabled(false);
+		expect(isSoundEnabled()).toBe(false);
+		setSoundEnabled(true);
+		expect(isSoundEnabled()).toBe(true);
+
+		setBgmVolume(0.45);
+		expect(getBgmVolume()).toBeCloseTo(0.45);
+
+		// Clamp entre 0 et 1
+		setBgmVolume(1.8);
+		expect(getBgmVolume()).toBe(1);
+		setBgmVolume(-0.2);
+		expect(getBgmVolume()).toBe(0);
+
+		setBgmVolume(0.25);
+		expect(isBgmPlaying()).toBe(false);
+	});
+});
+
+

@@ -63,6 +63,19 @@ export interface OfficePet {
 }
 
 /**
+ * Pelote de laine jouet pour la mascotte GitCat
+ */
+export interface YarnBallState {
+	x: number;
+	y: number;
+	z: number;
+	targetX: number;
+	targetY: number;
+	isMoving: boolean;
+}
+
+
+/**
  * Dialogue ou pensée d'un agent affiché dans la boîte de dialogue RPG rétro
  */
 export interface AgentDialogue {
