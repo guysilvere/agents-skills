@@ -1,0 +1,158 @@
+import { describe, expect, it } from 'vitest';
+import { officeState } from '$lib/server/office-state';
+import { findPixelPath, isTileWalkable, OFFICE_LOCATIONS } from '$lib/services/pathfinding';
+import { IncomingEventSchema } from '$lib/types/office';
+
+describe('Pathfinding Top-Down Grid', () => {
+	it('calcule un chemin valide entre le bureau de lead-dev et la machine à café', () => {
+		const start = OFFICE_LOCATIONS.desks['lead-dev'];
+		const goal = OFFICE_LOCATIONS.coffeeSpots[0];
+		const path = findPixelPath(start, goal);
+
+		expect(path.length).toBeGreaterThan(3);
+		expect(path[path.length - 1]).toEqual(goal);
+	});
+
+	it('bloque les tuiles de murs extérieurs', () => {
+		expect(isTileWalkable(0, 0)).toBe(false);
+		expect(isTileWalkable(5, 5)).toBe(true);
+	});
+});
+
+describe('OfficeStateManager v0.2 & Schéma Zod', () => {
+	it('valide un payload WORK_START via IncomingEventSchema', () => {
+		const parsed = IncomingEventSchema.safeParse({
+			source: 'antigravity',
+			type: 'WORK_START',
+			agentId: 'lead-dev',
+			project: 'lodgi',
+			activityLabel: 'Editing +page.svelte',
+			skills: ['pwa-cadrage', 'shared-eco-tokens']
+		});
+		expect(parsed.success).toBe(true);
+	});
+
+	it('met à jour le projet, les skills, l’activityLabel et la jauge de contexte', () => {
+		const snap = officeState.applyEvent({
+			source: 'manual',
+			type: 'WORK_START',
+			agentId: 'ops-quality',
+			project: 'brvm-radar',
+			activityLabel: 'Running Lighthouse CI',
+			contextRatio: 0.62,
+			skills: ['pwa-validation']
+		});
+		const qa = snap.agents.find((a) => a.id === 'ops-quality');
+		expect(qa?.state).toBe('WORKING');
+		expect(qa?.currentProject).toBe('brvm-radar');
+		expect(qa?.activityLabel).toBe('Running Lighthouse CI');
+		expect(qa?.contextRatio).toBe(0.62);
+		expect(qa?.activeSkills).toContain('pwa-validation');
+	});
+
+	it('passe en état WAITING_HUMAN avec soundCue permission lors d’un jalon STOP', () => {
+		const snap = officeState.applyEvent({
+			source: 'antigravity',
+			type: 'WAITING_HUMAN',
+			agentId: 'lead-dev',
+			project: 'agents-skills',
+			message: 'Validation du schéma requise'
+		});
+		const lead = snap.agents.find((a) => a.id === 'lead-dev');
+		expect(lead?.state).toBe('WAITING_HUMAN');
+		expect(snap.logs[0].soundCue).toBe('permission');
+	});
+
+	it('fait entrer un sous-agent temporaire avec matrixEffect=spawn lors de SPAWN_SUBAGENT', () => {
+		const beforeCount = officeState.getSnapshot().agents.length;
+		const snap = officeState.applyEvent({
+			source: 'antigravity',
+			type: 'SPAWN_SUBAGENT',
+			agentId: 'lead-dev',
+			subagentName: 'security-auditor',
+			subagentRole: 'Audit OWASP',
+			project: 'agents-skills',
+			skills: ['pwa-validation']
+		});
+		expect(snap.agents.length).toBe(beforeCount + 1);
+		const spawned = snap.agents.find((a) => a.name === 'security-auditor');
+		expect(spawned?.isTemporary).toBe(true);
+		expect(spawned?.matrixEffect).toBe('spawn');
+	});
+
+	it('fait réagir la mascotte GitCat avec un coeur lors de PET_INTERACT', () => {
+		const snap = officeState.applyEvent({
+			source: 'manual',
+			type: 'PET_INTERACT',
+			agentId: 'lead-dev'
+		});
+		expect(snap.pet.state).toBe('HEART');
+	});
+
+	it('applique la customisation de style et de mission lors de UPDATE_AGENT_CONFIG', () => {
+		const snap = officeState.applyEvent({
+			source: 'manual',
+			type: 'UPDATE_AGENT_CONFIG',
+			agentId: 'lead-dev',
+			config: {
+				title: 'Chief AI Architect',
+				spriteIndex: 4,
+				shirtColor: '#38BDF8',
+				accessory: 'badge',
+				mission: 'Piloter la roadmap Bulles',
+				skills: ['pwa-cadrage', 'pwa-developpement']
+			}
+		});
+		const lead = snap.agents.find((a) => a.id === 'lead-dev');
+		expect(lead?.title).toBe('Chief AI Architect');
+		expect(lead?.customSpriteIndex).toBe(4);
+		expect(lead?.palette.shirt).toBe('#38BDF8');
+		expect(lead?.customAccessory).toBe('badge');
+		expect(lead?.customMission).toBe('Piloter la roadmap Bulles');
+		expect(lead?.activeSkills).toContain('pwa-cadrage');
+	});
+
+	it('résout un jalon WAITING_HUMAN via RESOLVE_HUMAN_GATE (approve et reject)', () => {
+		// 1. Déclencher un STOP
+		officeState.applyEvent({
+			source: 'antigravity',
+			type: 'WAITING_HUMAN',
+			agentId: 'ops-quality',
+			message: 'Validation déploiement Coolify'
+		});
+		let qa = officeState.getSnapshot().agents.find((a) => a.id === 'ops-quality');
+		expect(qa?.state).toBe('WAITING_HUMAN');
+		expect(qa?.lastDialogue?.type).toBe('gate');
+
+		// 2. Résoudre avec APPROVE
+		const snapApproved = officeState.applyEvent({
+			source: 'manual',
+			type: 'RESOLVE_HUMAN_GATE',
+			agentId: 'ops-quality',
+			resolutionAction: 'approve'
+		});
+		qa = snapApproved.agents.find((a) => a.id === 'ops-quality');
+		expect(qa?.state).toBe('WORKING');
+		expect(qa?.activityLabel).toContain('validé');
+		expect(qa?.lastDialogue?.type).toBe('action');
+		expect(snapApproved.logs[0].soundCue).toBe('done');
+
+		// 3. Résoudre avec REJECT
+		officeState.applyEvent({
+			source: 'antigravity',
+			type: 'WAITING_HUMAN',
+			agentId: 'ops-quality',
+			message: 'Validation migration DB'
+		});
+		const snapRejected = officeState.applyEvent({
+			source: 'manual',
+			type: 'RESOLVE_HUMAN_GATE',
+			agentId: 'ops-quality',
+			resolutionAction: 'reject'
+		});
+		qa = snapRejected.agents.find((a) => a.id === 'ops-quality');
+		expect(qa?.state).toBe('WORKING');
+		expect(qa?.activityLabel).toContain('Révision demandée');
+		expect(snapRejected.logs[0].soundCue).toBe('call');
+	});
+});
