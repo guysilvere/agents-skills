@@ -17,6 +17,13 @@ describe('Pathfinding Top-Down Grid', () => {
 		expect(isTileWalkable(0, 0)).toBe(false);
 		expect(isTileWalkable(5, 5)).toBe(true);
 	});
+
+	it('bloque l’emplacement du Rack Serveur Coolify en col 17..18, row 2..3', () => {
+		expect(isTileWalkable(17, 2)).toBe(false);
+		expect(isTileWalkable(18, 3)).toBe(false);
+		// Le couloir d'accès reste praticable
+		expect(isTileWalkable(14, 5)).toBe(true);
+	});
 });
 
 describe('OfficeStateManager v0.2 & Schéma Zod', () => {

@@ -97,8 +97,9 @@ export function renderPixelOfficeScene(
 
 	if (!assets) return;
 
-	// 2. Décorations murales (Bibliothèques, Horloge, Tableaux, Signalétique)
-	drawWallDecorations(ctx, assets.furniture);
+	// 2. Décorations murales (Bibliothèques, Horloge, Tableaux, Signalétique, Tableau Kanban)
+	const qaWorking = agents.find((a) => a.id === 'ops-quality')?.state === 'WORKING';
+	drawWallDecorations(ctx, assets.furniture, !!qaWorking, frameCount);
 
 	// 3. Liste Y-sorted de tous les meubles, personnages et mascottes pour une profondeur 3/4 parfaite
 	const entities: RenderableEntity[] = [];
@@ -282,7 +283,9 @@ function drawAuthenticFloorsAndWalls(ctx: CanvasRenderingContext2D): void {
 
 function drawWallDecorations(
 	ctx: CanvasRenderingContext2D,
-	f: Record<string, HTMLImageElement>
+	f: Record<string, HTMLImageElement>,
+	qaWorking: boolean,
+	frameCount: number
 ): void {
 	// Bureau Direction (Haut Gauche) : Bibliothèques nobles + Horloge + Plante
 	if (f.HANGING_PLANT) {
@@ -295,10 +298,9 @@ function drawWallDecorations(
 		ctx.drawImage(f.CLOCK, 5 * TILE_SIZE, 0);
 	}
 
-	// Bureau QA (Haut Droite) : Tableaux de surveillance + Diplômes
-	if (f.SMALL_PAINTING) {
-		ctx.drawImage(f.SMALL_PAINTING, 12 * TILE_SIZE, 0);
-	}
+	// Bureau QA (Haut Droite) : Tableau Kanban 8-bit mural interactif
+	drawKanbanWhiteboard(ctx, 11 * TILE_SIZE + 2, 4, qaWorking, frameCount);
+
 	if (f.LARGE_PAINTING) {
 		ctx.drawImage(f.LARGE_PAINTING, 14 * TILE_SIZE, 0);
 	}
@@ -319,6 +321,141 @@ function drawWallDecorations(
 
 	ctx.fillStyle = '#10B981';
 	ctx.fillText('API', 8 * TILE_SIZE - 10, 7 * TILE_SIZE + 10);
+}
+
+/**
+ * Tableau Kanban 8-bit mural interactif dans le bureau de QA (ops-quality)
+ * Coordonnées : col 11..13, row 0..1 (x: 11 * 16 + 2, y: 4, w: 40, h: 22)
+ */
+export function drawKanbanWhiteboard(
+	ctx: CanvasRenderingContext2D,
+	x: number,
+	y: number,
+	qaWorking: boolean,
+	frameCount: number
+): void {
+	const w = 40;
+	const h = 22;
+
+	// 1. Cadre aluminium brossé sombre & chanfrein 3D pixel
+	pxRect(ctx, x - 1, y - 1, w + 2, h + 2, '#0F172A');
+	pxRect(ctx, x, y, w, h, '#334155');
+	pxRect(ctx, x + 1, y + 1, w - 2, h - 2, '#475569');
+
+	// 2. Fond tableau blanc immaculé
+	pxRect(ctx, x + 2, y + 2, w - 4, h - 4, '#F8FAFC');
+
+	// 3. Bandeau supérieur "KANBAN QA"
+	pxRect(ctx, x + 2, y + 2, w - 4, 3, '#0284C7');
+	pxRect(ctx, x + 4, y + 3, 3, 1, '#BAE6FD');
+	pxRect(ctx, x + 9, y + 3, 4, 1, '#BAE6FD');
+	pxRect(ctx, x + 15, y + 3, 3, 1, '#BAE6FD');
+
+	// 4. Lignes séparatrices verticales de colonnes (3 colonnes)
+	pxRect(ctx, x + 14, y + 5, 1, h - 7, '#CBD5E1');
+	pxRect(ctx, x + 26, y + 5, 1, h - 7, '#CBD5E1');
+
+	// En-têtes colorés de colonnes
+	pxRect(ctx, x + 4, y + 6, 8, 1, '#F43F5E'); // Rose TODO
+	pxRect(ctx, x + 16, y + 6, 8, 1, '#F59E0B'); // Jaune WIP
+	pxRect(ctx, x + 28, y + 8, 8, 1, '#10B981'); // Vert DONE
+
+	// 5. Post-its pixelisés miniatures
+	// Colonne 1 : TODO (2 post-its)
+	pxRect(ctx, x + 4, y + 8, 7, 4, '#FB7185');
+	pxRect(ctx, x + 5, y + 9, 5, 2, '#FDA4AF');
+	pxRect(ctx, x + 4, y + 13, 7, 4, '#F43F5E');
+	pxRect(ctx, x + 5, y + 14, 5, 2, '#FB7185');
+
+	// Colonne 2 : WIP (1 ou 2 post-its animés)
+	const pulse = qaWorking && Math.floor(frameCount / 4) % 2 === 0;
+	pxRect(ctx, x + 16, y + 8, 8, 4, pulse ? '#FBBF24' : '#F59E0B');
+	pxRect(ctx, x + 17, y + 9, 6, 2, pulse ? '#FEF08A' : '#FDE68A');
+	if (qaWorking) {
+		pxRect(ctx, x + 16, y + 13, 8, 3, '#38BDF8');
+		pxRect(ctx, x + 17, y + 14, 5, 1, '#BAE6FD');
+	}
+
+	// Colonne 3 : DONE (3 post-its verts empilés)
+	pxRect(ctx, x + 28, y + 8, 7, 3, '#10B981');
+	pxRect(ctx, x + 29, y + 9, 5, 1, '#34D399');
+	pxRect(ctx, x + 28, y + 12, 7, 3, '#059669');
+	pxRect(ctx, x + 29, y + 13, 5, 1, '#10B981');
+	pxRect(ctx, x + 28, y + 16, 7, 2, '#047857');
+
+	// 6. Plumier porte-marqueurs en bas
+	pxRect(ctx, x + 8, y + h, 14, 2, '#475569');
+	pxRect(ctx, x + 9, y + h, 3, 1, '#EF4444');
+	pxRect(ctx, x + 13, y + h, 3, 1, '#2563EB');
+	pxRect(ctx, x + 17, y + h, 3, 1, '#0F172A');
+}
+
+/**
+ * Rack Serveur 19 pouces Coolify & Turso Infra dans le bureau de QA
+ * Coordonnées : col 17..18, row 2..3 (x: 17 * 16 + 2, y: 2 * 16, w: 22, h: 32)
+ */
+export function drawCoolifyServerRack(
+	ctx: CanvasRenderingContext2D,
+	x: number,
+	y: number,
+	isWorking: boolean,
+	hasAlert: boolean,
+	frameCount: number
+): void {
+	const w = 22;
+	const h = 32;
+
+	// 1. Châssis métallique 19" noir carbone
+	pxRect(ctx, x, y, w, h, '#0B0F17');
+	pxRect(ctx, x + 1, y + 1, w - 2, h - 2, '#1E293B');
+	pxRect(ctx, x + 2, y + 2, w - 4, h - 4, '#0F172A');
+
+	// Rails de montage latéraux perforés
+	for (let ry = y + 4; ry < y + h - 4; ry += 3) {
+		pxRect(ctx, x + 2, ry, 1, 1, '#334155');
+		pxRect(ctx, x + w - 3, ry, 1, 1, '#334155');
+	}
+
+	// 2. UNITE 1 (Haut) : Gateway Cloudflare & Proxy Orange (1U)
+	pxRect(ctx, x + 3, y + 3, w - 6, 5, '#1E293B');
+	pxRect(ctx, x + 4, y + 4, 3, 3, '#F97316'); // Logo Cloudflare orange
+	pxRect(ctx, x + 9, y + 5, 2, 1, '#22C55E');
+	pxRect(ctx, x + 12, y + 5, 2, 1, '#22C55E');
+	const cfBlink = Math.floor(frameCount / 3) % 2 === 0;
+	pxRect(ctx, x + 15, y + 5, 2, 1, cfBlink ? '#4ADE80' : '#14532D');
+
+	// 3. UNITE 2 : Cluster Coolify Application Engine (2U)
+	pxRect(ctx, x + 3, y + 9, w - 6, 7, '#0F172A');
+	pxRect(ctx, x + 4, y + 10, w - 8, 1, '#334155');
+	// Chenillard de compilation / déploiement actif
+	const step = isWorking ? Math.floor(frameCount / 2) % 4 : 0;
+	for (let i = 0; i < 4; i++) {
+		const ledX = x + 5 + i * 3;
+		const active = isWorking ? step === i : i === 0;
+		pxRect(ctx, ledX, y + 12, 2, 2, active ? '#38BDF8' : '#075985');
+	}
+
+	// 4. UNITE 3 : Base Managée Turso libSQL (1U)
+	pxRect(ctx, x + 3, y + 17, w - 6, 6, '#1E293B');
+	pxRect(ctx, x + 4, y + 18, 3, 4, '#065F46');
+	pxRect(ctx, x + 8, y + 18, 3, 4, '#065F46');
+	const dbFlash = isWorking && Math.floor(frameCount / 2) % 3 === 1;
+	pxRect(ctx, x + 13, y + 19, 2, 1, dbFlash ? '#F59E0B' : '#10B981');
+	pxRect(ctx, x + 13, y + 21, 2, 1, '#10B981');
+
+	// 5. UNITE 4 (Bas) : Baie de brassage & Onduleur UPS (1U)
+	pxRect(ctx, x + 3, y + 24, w - 6, 5, '#0B0F17');
+	pxRect(ctx, x + 4, y + 25, 2, 3, '#3B82F6');
+	pxRect(ctx, x + 7, y + 25, 2, 3, '#EAB308');
+	pxRect(ctx, x + 10, y + 25, 2, 3, '#10B981');
+	pxRect(ctx, x + 13, y + 26, 2, 2, '#22C55E');
+
+	// 6. Alerte Jalon Humain / STOP : Gyrophare d'alerte rouge en tête de rack
+	if (hasAlert) {
+		const alertBlink = Math.floor(frameCount / 3) % 2 === 0;
+		pxRect(ctx, x + w / 2 - 2, y - 4, 4, 4, alertBlink ? '#EF4444' : '#7F1D1D');
+		pxRect(ctx, x + w / 2 - 1, y - 3, 2, 2, alertBlink ? '#FCA5A5' : '#EF4444');
+	}
 }
 
 function drawExecutiveDualMonitors(
@@ -553,6 +690,23 @@ function addOfficeFurnitureEntities(
 		zY: 3 * TILE_SIZE,
 		draw: (ctx) => {
 			ctx.drawImage(f.PLANT_2, 11 * TILE_SIZE, 2 * TILE_SIZE);
+		}
+	});
+
+	// Rack Serveur 19" Coolify, Turso & Cloudflare en col 17..18, rows 2..3
+	const anyWorking = agents.some((a) => a.state === 'WORKING' || a.state === 'CALLING');
+	const anyAlert = agents.some((a) => a.state === 'WAITING_HUMAN');
+	entities.push({
+		zY: 4 * TILE_SIZE,
+		draw: (ctx) => {
+			drawCoolifyServerRack(
+				ctx,
+				17 * TILE_SIZE + 2,
+				2 * TILE_SIZE,
+				anyWorking,
+				anyAlert,
+				frameCount
+			);
 		}
 	});
 

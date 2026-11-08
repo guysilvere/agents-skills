@@ -57,6 +57,7 @@
 		const clickedTileX = clickX / TILE_SIZE;
 		const clickedTileY = clickY / TILE_SIZE;
 
+		// 1. Clic sur un agent ?
 		const clickedAgent = animatedAgents.find((a) => {
 			const dx = a.renderX + 0.5 - clickedTileX;
 			const dy = a.renderY + 0.5 - clickedTileY;
@@ -65,9 +66,49 @@
 
 		if (clickedAgent) {
 			toggleAgentSelection(clickedAgent.id);
-		} else {
-			selectedAgentId = null;
+			return;
 		}
+
+		// 2. Clic sur le Tableau Kanban 8-bit mural (bureau QA : cols 11..13, rows 0..2)
+		if (clickedTileX >= 11 && clickedTileX <= 14 && clickedTileY >= 0 && clickedTileY <= 2.2) {
+			showKanbanModal = true;
+			return;
+		}
+
+		// 3. Clic sur le Rack Serveur Coolify / Infra (bureau QA : cols 17..18, rows 2..4)
+		if (clickedTileX >= 16.8 && clickedTileX <= 18.8 && clickedTileY >= 2 && clickedTileY <= 4.2) {
+			showServerModal = true;
+			return;
+		}
+
+		// Clic dans le vide -> désélection
+		selectedAgentId = null;
+	}
+
+	// Modales Phase 2 : Tableau Kanban 8-bit & Rack Serveur Coolify
+	let showKanbanModal = $state(false);
+	let showServerModal = $state(false);
+	let isSimulatingDeploy = $state(false);
+
+	async function triggerDeploySimulation(): Promise<void> {
+		isSimulatingDeploy = true;
+		playSubagentSpawnChime();
+		await triggerEvent({
+			type: 'TOOL_USE',
+			agentId: 'ops-quality',
+			activityLabel: 'Coolify: Build & Deploy Docker Container (Port 3000)',
+			project: 'pixel-office'
+		});
+		setTimeout(() => {
+			isSimulatingDeploy = false;
+			playDoneChime();
+			triggerEvent({
+				type: 'TURN_DONE',
+				agentId: 'ops-quality',
+				project: 'pixel-office',
+				message: 'Conteneur déployé sur Coolify avec succès (Proxy Orange actif)'
+			});
+		}, 5000);
 	}
 
 	// Formulaire de simulation rapide (Option C Hybride)
@@ -1610,6 +1651,319 @@
 					</button>
 					<button type="button" class="pixel-btn ok-btn" onclick={saveCustomizerConfig}>
 						ENREGISTRER LA CONFIGURATION
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- MODALE PHASE 2 : TABLEAU KANBAN DES SPECS & QA (ops-quality) -->
+	{#if showKanbanModal}
+		<div
+			class="modal-backdrop"
+			onclick={() => (showKanbanModal = false)}
+			role="presentation"
+		>
+			<div
+				class="kanban-dialog"
+				onclick={(e) => e.stopPropagation()}
+				onkeydown={(e) => e.key === 'Escape' && (showKanbanModal = false)}
+				role="dialog"
+				aria-modal="true"
+				tabindex="-1"
+			>
+				<div class="dialog-header">
+					<div class="dialog-title-block">
+						<span class="dialog-dot" style="background: #38bdf8;"></span>
+						<h2>TABLEAU KANBAN DES SPECS & QA (ops-quality)</h2>
+						<span class="hierarchy-pill">MUR DE TESTS</span>
+					</div>
+					<button
+						type="button"
+						class="btn-close-dialog"
+						onclick={() => (showKanbanModal = false)}
+					>
+						✕
+					</button>
+				</div>
+
+				<div class="kanban-board-body">
+					<!-- COLONNE 1 : À FAIRE -->
+					<div class="kanban-col col-todo">
+						<div class="kanban-col-header">
+							<span class="col-pill pill-todo">À FAIRE</span>
+							<span class="col-count">3</span>
+						</div>
+						<div class="kanban-cards-stack">
+							<div class="kanban-card">
+								<span class="card-id">SPEC-003</span>
+								<strong class="card-title">Validation CI & Lighthouse</strong>
+								<p class="card-desc">Score 100/100, audits accessibilité a11y et pré-commit checklist.</p>
+								<div class="card-tags">
+									<span class="tag-pill tag-qa">ops-quality</span>
+									<span class="tag-pill">PWA</span>
+								</div>
+							</div>
+							<div class="kanban-card">
+								<span class="card-id">SPEC-004</span>
+								<strong class="card-title">Living Documentation (.md)</strong>
+								<p class="card-desc">Synchronisation temps réel DESIGN_SYSTEM.md & BLUEPRINT.md.</p>
+								<div class="card-tags">
+									<span class="tag-pill tag-doc">LivingDoc</span>
+								</div>
+							</div>
+							<div class="kanban-card">
+								<span class="card-id">SPEC-005</span>
+								<strong class="card-title">Sauvegardes Cloudflare R2</strong>
+								<p class="card-desc">Sauvegarde automatisée de la base et des secrets chiffrés.</p>
+								<div class="card-tags">
+									<span class="tag-pill tag-infra">R2 S3</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- COLONNE 2 : EN COURS -->
+					<div class="kanban-col col-wip">
+						<div class="kanban-col-header">
+							<span class="col-pill pill-wip">EN COURS (SPRINT)</span>
+							<span class="col-count">1</span>
+						</div>
+						<div class="kanban-cards-stack">
+							<div class="kanban-card active-card">
+								<div class="card-live-dot"></div>
+								<span class="card-id">PHASE-002</span>
+								<strong class="card-title">Tableau Kanban 8-bit & Rack Serveur</strong>
+								<p class="card-desc">Visualisation murale QA et diodes animées de déploiement Coolify.</p>
+								<div class="card-progress-bar">
+									<div class="progress-fill" style="width: 85%;"></div>
+								</div>
+								<div class="card-tags">
+									<span class="tag-pill tag-lead">lead-dev</span>
+									<span class="tag-pill tag-qa">ops-quality</span>
+									<span class="tag-pill tag-wip">85% WIP</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- COLONNE 3 : TERMINÉ -->
+					<div class="kanban-col col-done">
+						<div class="kanban-col-header">
+							<span class="col-pill pill-done">TERMINÉ & VALIDÉ</span>
+							<span class="col-count">3</span>
+						</div>
+						<div class="kanban-cards-stack">
+							<div class="kanban-card done-card">
+								<span class="card-id">PHASE-001</span>
+								<strong class="card-title">Jalons STOP 1-clic & Boîte RPG</strong>
+								<p class="card-desc">Validation immédiate des jalons humains et typewriter 16-bit.</p>
+								<div class="card-tags">
+									<span class="tag-pill tag-done">✔ VALIDÉ QA</span>
+								</div>
+							</div>
+							<div class="kanban-card done-card">
+								<span class="card-id">SPEC-001</span>
+								<strong class="card-title">Scaffolding SvelteKit 5 Runes</strong>
+								<p class="card-desc">Architecture mobile-first, canvas 320x208 et adapter-node.</p>
+								<div class="card-tags">
+									<span class="tag-pill tag-done">✔ PASS</span>
+								</div>
+							</div>
+							<div class="kanban-card done-card">
+								<span class="card-id">SPEC-002</span>
+								<strong class="card-title">Bus d'événements & SSE Watcher</strong>
+								<p class="card-desc">Flux continu Antigravity, OpenCode et synchronisation transcripts.</p>
+								<div class="card-tags">
+									<span class="tag-pill tag-done">✔ PASS</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="dialog-actions">
+					<button
+						type="button"
+						class="pixel-btn ok-btn"
+						onclick={() => (showKanbanModal = false)}
+					>
+						FERMER LE KANBAN
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- MODALE PHASE 2 : RACK SERVEUR COOLIFY & INFRASTRUCTURE CLOUD -->
+	{#if showServerModal}
+		<div
+			class="modal-backdrop"
+			onclick={() => (showServerModal = false)}
+			role="presentation"
+		>
+			<div
+				class="server-dialog"
+				onclick={(e) => e.stopPropagation()}
+				onkeydown={(e) => e.key === 'Escape' && (showServerModal = false)}
+				role="dialog"
+				aria-modal="true"
+				tabindex="-1"
+			>
+				<div class="dialog-header">
+					<div class="dialog-title-block">
+						<span class="dialog-dot" style="background: #22c55e;"></span>
+						<h2>INFRASTRUCTURE SERVEURS COOLIFY & CLOUDFLARE</h2>
+						<span class="hierarchy-pill">RACK 19 POUCES</span>
+					</div>
+					<button
+						type="button"
+						class="btn-close-dialog"
+						onclick={() => (showServerModal = false)}
+					>
+						✕
+					</button>
+				</div>
+
+				<div class="server-dialog-body">
+					<div class="servers-grid">
+						<!-- SERVEUR 1 : COOLIFY -->
+						<div class="server-status-card" class:deploying={isSimulatingDeploy}>
+							<div class="server-card-header">
+								<div class="server-card-title">
+									<span class="status-indicator-led led-green"></span>
+									<strong>COOLIFY APPLICATION</strong>
+								</div>
+								<span class="server-port-tag">PORT 3000 / 5173</span>
+							</div>
+							<div class="server-card-metrics">
+								<div class="metric-row">
+									<span>Statut</span>
+									<strong class="text-green">{isSimulatingDeploy ? 'DÉPLOIEMENT ACTIF 🚀' : 'EN LIGNE (HEALTHY) ✔'}</strong>
+								</div>
+								<div class="metric-row">
+									<span>Runtime</span>
+									<span>Node.js 22 LTS (@sveltejs/adapter-node)</span>
+								</div>
+								<div class="metric-row">
+									<span>Charge Mémoire</span>
+									<span>142 MB / 2048 MB (7%)</span>
+								</div>
+								<div class="metric-row">
+									<span>Uptime</span>
+									<span>99.98% (Dernier redémarrage propre)</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- SERVEUR 2 : TURSO LIBSQL -->
+						<div class="server-status-card">
+							<div class="server-card-header">
+								<div class="server-card-title">
+									<span class="status-indicator-led led-green"></span>
+									<strong>TURSO LIBSQL MANAGEE</strong>
+								</div>
+								<span class="server-port-tag">REGION cdg (Paris)</span>
+							</div>
+							<div class="server-card-metrics">
+								<div class="metric-row">
+									<span>Statut</span>
+									<strong class="text-green">SYNCHRONISÉE ✔</strong>
+								</div>
+								<div class="metric-row">
+									<span>Mode Local Dev</span>
+									<span>file:pixel-office.local.db</span>
+								</div>
+								<div class="metric-row">
+									<span>Latence ping</span>
+									<span>8 ms</span>
+								</div>
+								<div class="metric-row">
+									<span>Migrations</span>
+									<span>0 en attente (Up to date)</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- SERVEUR 3 : CLOUDFLARE TUNNELS -->
+						<div class="server-status-card">
+							<div class="server-card-header">
+								<div class="server-card-title">
+									<span class="status-indicator-led led-green"></span>
+									<strong>CLOUDFLARE ZERO TRUST</strong>
+								</div>
+								<span class="server-port-tag">PROXY ORANGE</span>
+							</div>
+							<div class="server-card-metrics">
+								<div class="metric-row">
+									<span>Statut Tunnels</span>
+									<strong class="text-green">ACTIF & CHIFFRÉ ✔</strong>
+								</div>
+								<div class="metric-row">
+									<span>SSL / TLS</span>
+									<span>Full (Strict) TLS 1.3</span>
+								</div>
+								<div class="metric-row">
+									<span>Protection DDoS</span>
+									<span>Armée (Turnstile & Rate-limit)</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- SERVEUR 4 : CLOUDFLARE R2 -->
+						<div class="server-status-card">
+							<div class="server-card-header">
+								<div class="server-card-title">
+									<span class="status-indicator-led led-green"></span>
+									<strong>CLOUDFLARE R2 BACKUPS</strong>
+								</div>
+								<span class="server-port-tag">S3 BUCKET</span>
+							</div>
+							<div class="server-card-metrics">
+								<div class="metric-row">
+									<span>Sauvegardes Auto</span>
+									<strong class="text-green">QUOTIDIENNE (24H) ✔</strong>
+								</div>
+								<div class="metric-row">
+									<span>Dernier Snapshot</span>
+									<span>Il y a 32 minutes (14.2 MB)</span>
+								</div>
+								<div class="metric-row">
+									<span>Restauration test</span>
+									<span>Validée sur environnement de test</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- ACTION DÉPLOIEMENT DIRECT -->
+					<div class="deploy-action-bar">
+						<div class="deploy-info">
+							<strong class="deploy-title">DÉPLOIEMENT AUTOMATISÉ</strong>
+							<span class="deploy-subtitle">Simuler un cycle complet Git PR → Coolify Webhook → Build Docker</span>
+						</div>
+						<button
+							type="button"
+							class="pixel-btn ok-btn deploy-trigger-btn"
+							disabled={isSimulatingDeploy}
+							onclick={triggerDeploySimulation}
+						>
+							{#if isSimulatingDeploy}
+								COMPILATION & DÉPLOIEMENT EN COURS...
+							{:else}
+								🚀 DÉCLENCHER DÉPLOIEMENT TEST
+							{/if}
+						</button>
+					</div>
+				</div>
+
+				<div class="dialog-actions">
+					<button
+						type="button"
+						class="pixel-btn secondary"
+						onclick={() => (showServerModal = false)}
+					>
+						FERMER L'INFRASTRUCTURE
 					</button>
 				</div>
 			</div>
@@ -3598,5 +3952,359 @@
 		display: flex;
 		flex-direction: column;
 		gap: 6px;
+	}
+
+	/* ========================================================
+	   PHASE 2 : TABLEAU KANBAN 8-BIT & RACK SERVEUR INFRA
+	   ======================================================== */
+	/* MODALE KANBAN DES SPECS & QA */
+	.kanban-dialog {
+		width: min(780px, 94vw);
+		max-height: 88vh;
+		background: #091122;
+		border: 4px solid #38bdf8;
+		box-shadow:
+			0 0 0 2px #0f172a,
+			0 20px 60px rgba(0, 0, 0, 0.95);
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	.kanban-board-body {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 12px;
+		padding: 16px;
+		overflow-y: auto;
+		background: #040813;
+	}
+
+	@media (max-width: 680px) {
+		.kanban-board-body {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.kanban-col {
+		background: #0c1527;
+		border: 2px solid #1e293b;
+		padding: 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		min-height: 280px;
+	}
+
+	.kanban-col-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: 8px;
+		border-bottom: 2px solid #1e293b;
+	}
+
+	.col-pill {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 7px;
+		padding: 3px 6px;
+		letter-spacing: 0.5px;
+	}
+
+	.pill-todo {
+		background: rgba(244, 63, 94, 0.2);
+		color: #fb7185;
+		border: 1px solid #f43f5e;
+	}
+
+	.pill-wip {
+		background: rgba(245, 158, 11, 0.2);
+		color: #fbbf24;
+		border: 1px solid #f59e0b;
+	}
+
+	.pill-done {
+		background: rgba(16, 185, 129, 0.2);
+		color: #34d399;
+		border: 1px solid #10b981;
+	}
+
+	.col-count {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 8px;
+		color: #64748b;
+	}
+
+	.kanban-cards-stack {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.kanban-card {
+		background: #111e38;
+		border: 2px solid #1e293b;
+		padding: 8px 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		position: relative;
+		transition: transform 0.15s ease, border-color 0.15s ease;
+	}
+
+	.kanban-card:hover {
+		transform: translateY(-2px);
+		border-color: #38bdf8;
+	}
+
+	.kanban-card.active-card {
+		border-color: #fbbf24;
+		background: #1a2333;
+		box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+	}
+
+	.card-live-dot {
+		position: absolute;
+		top: 6px;
+		right: 6px;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: #22c55e;
+		box-shadow: 0 0 6px #22c55e;
+		animation: blinkCursor 0.8s infinite alternate;
+	}
+
+	.kanban-card.done-card {
+		border-color: #065f46;
+		background: #081d19;
+		opacity: 0.88;
+	}
+
+	.card-id {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 7px;
+		color: #38bdf8;
+	}
+
+	.card-title {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 7px;
+		line-height: 1.4;
+		color: #f8fafc;
+	}
+
+	.card-desc {
+		font-family: 'Silkscreen', monospace;
+		font-size: 8px;
+		color: #94a3b8;
+		margin: 0;
+		line-height: 1.4;
+	}
+
+	.card-progress-bar {
+		height: 4px;
+		background: #0f172a;
+		border: 1px solid #334155;
+		overflow: hidden;
+		margin: 2px 0;
+	}
+
+	.progress-fill {
+		height: 100%;
+		background: #fbbf24;
+	}
+
+	.card-tags {
+		display: flex;
+		gap: 4px;
+		flex-wrap: wrap;
+		margin-top: 2px;
+	}
+
+	.tag-pill {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		padding: 2px 5px;
+		background: #0f172a;
+		color: #94a3b8;
+		border: 1px solid #334155;
+	}
+
+	.tag-qa {
+		color: #38bdf8;
+		border-color: #0284c7;
+	}
+
+	.tag-lead {
+		color: #f472b6;
+		border-color: #db2777;
+	}
+
+	.tag-wip {
+		color: #fbbf24;
+		border-color: #d97706;
+	}
+
+	.tag-done {
+		color: #4ade80;
+		border-color: #16a34a;
+	}
+
+	/* MODALE RACK SERVEUR COOLIFY & INFRA */
+	.server-dialog {
+		width: min(740px, 94vw);
+		max-height: 88vh;
+		background: #080d1a;
+		border: 4px solid #22c55e;
+		box-shadow:
+			0 0 0 2px #0f172a,
+			0 20px 60px rgba(0, 0, 0, 0.95);
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	.server-dialog-body {
+		padding: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		overflow-y: auto;
+		background: #030712;
+	}
+
+	.servers-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 12px;
+	}
+
+	@media (max-width: 640px) {
+		.servers-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.server-status-card {
+		background: #0c1424;
+		border: 2px solid #1e293b;
+		padding: 12px;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		transition: border-color 0.2s ease;
+	}
+
+	.server-status-card.deploying {
+		border-color: #38bdf8;
+		animation: gatePulse 1s infinite alternate;
+	}
+
+	.server-card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: 8px;
+		border-bottom: 2px solid #1e293b;
+	}
+
+	.server-card-title {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.server-card-title strong {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 7px;
+		color: #f8fafc;
+	}
+
+	.status-indicator-led {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		display: inline-block;
+	}
+
+	.led-green {
+		background: #22c55e;
+		box-shadow: 0 0 8px #22c55e;
+	}
+
+	.server-port-tag {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		background: #0f172a;
+		border: 1px solid #334155;
+		color: #94a3b8;
+		padding: 2px 6px;
+	}
+
+	.server-card-metrics {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.metric-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-family: 'Silkscreen', monospace;
+		font-size: 9px;
+		color: #94a3b8;
+	}
+
+	.metric-row span:last-child,
+	.metric-row strong {
+		color: #e2e8f0;
+	}
+
+	.text-green {
+		color: #4ade80 !important;
+	}
+
+	/* ACTION DÉPLOIEMENT DIRECT */
+	.deploy-action-bar {
+		background: #0d172a;
+		border: 2px solid #334155;
+		padding: 12px 14px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 14px;
+	}
+
+	@media (max-width: 600px) {
+		.deploy-action-bar {
+			flex-direction: column;
+			align-items: stretch;
+		}
+	}
+
+	.deploy-info {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.deploy-title {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 8px;
+		color: #38bdf8;
+	}
+
+	.deploy-subtitle {
+		font-family: 'Silkscreen', monospace;
+		font-size: 9px;
+		color: #94a3b8;
+	}
+
+	.deploy-trigger-btn {
+		font-size: 8px !important;
+		padding: 8px 14px !important;
+		white-space: nowrap;
 	}
 </style>

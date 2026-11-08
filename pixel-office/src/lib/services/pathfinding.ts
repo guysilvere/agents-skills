@@ -79,6 +79,8 @@ const OBSTACLE_RECTS: Array<{ x: number; y: number; w: number; h: number }> = [
 
 	// Mobilier Bureau QA (ops-quality) : Bureau en cols 13..14, rows 2..3
 	{ x: 13, y: 2, w: 3, h: 2 },
+	// Rack Serveur Coolify / Infra en cols 17..18, rows 2..3
+	{ x: 17, y: 2, w: 2, h: 2 },
 
 	// Mobilier Bureau Intégrations : Bureau en cols 3..4, rows 8..9
 	{ x: 3, y: 8, w: 2, h: 2 },
