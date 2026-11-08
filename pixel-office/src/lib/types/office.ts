@@ -223,12 +223,28 @@ export interface ActivityLogEntry {
 }
 
 /**
+ * Jalon humain en attente de validation (Pont bi-directionnel multi-projets)
+ */
+export interface PendingGate {
+	id: string;
+	project: string;
+	agentId: string;
+	agentName: string;
+	title: string;
+	message: string;
+	timestamp: number;
+	status: 'PENDING' | 'APPROVED' | 'REJECTED';
+	sourceTool: EventSource;
+}
+
+/**
  * Snapshot complet envoyé en SSE au client
  */
 export interface OfficeSnapshot {
 	agents: OfficeAgent[];
 	pet: OfficePet;
 	logs: ActivityLogEntry[];
+	pendingGates?: PendingGate[];
 	watcherStatus: {
 		antigravityActive: boolean;
 		opencodeActive: boolean;

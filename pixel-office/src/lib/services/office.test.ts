@@ -318,4 +318,45 @@ describe('Scénarios Réalistes de Bureau & Customisation Étendue', () => {
 	});
 });
 
+describe('Pont de Validation Bi-directionnel & Jalons Multi-Projets', () => {
+	it('permet de consigner des jalons STOP distincts par projet et de les résoudre', async () => {
+		const { createPendingGate, listPendingGates, resolveGate, resolveAllPendingGates } =
+			await import('$lib/server/gate-bridge');
+
+		// 1. Créer une gate pour lodgi
+		const gateLodgi = createPendingGate({
+			project: 'lodgi',
+			agentId: 'lead-dev',
+			title: 'Validation schéma Turso',
+			message: 'Ajout de la table reservations',
+			sourceTool: 'antigravity'
+		});
+
+		// 2. Créer une gate pour agencebulles
+		const gateBulles = createPendingGate({
+			project: 'agencebulles',
+			agentId: 'ops-quality',
+			title: 'Validation déploiement Coolify',
+			message: 'Passage en staging port 3000',
+			sourceTool: 'opencode'
+		});
+
+		expect(gateLodgi.project).toBe('lodgi');
+		expect(gateBulles.project).toBe('agencebulles');
+
+		const pending = listPendingGates();
+		expect(pending.some((g) => g.id === gateLodgi.id)).toBe(true);
+		expect(pending.some((g) => g.id === gateBulles.id)).toBe(true);
+
+		// 3. Résoudre individuellement le jalon lodgi
+		const resolvedLodgi = resolveGate(gateLodgi.id, 'approve');
+		expect(resolvedLodgi).toBe(true);
+
+		// 4. Résoudre tous les jalons restants
+		const resolvedCount = resolveAllPendingGates('approve');
+		expect(resolvedCount).toBeGreaterThanOrEqual(1);
+	});
+});
+
+
 

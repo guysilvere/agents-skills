@@ -55,6 +55,16 @@
 	let rightSidebarCollapsed = $state(false);
 	let inspectorCollapsed = $state(false);
 
+	// Mode d'interaction avec Antigravity, OpenCode et Claude Code (Pilotage armé vs Observateur lecture seule)
+	let bidirectionalInteractions = $state(false);
+
+	function toggleBidirectionalInteractions(): void {
+		bidirectionalInteractions = !bidirectionalInteractions;
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('pixel_office_bidirectional', String(bidirectionalInteractions));
+		}
+	}
+
 	function toggleAgentSelection(agentId: string): void {
 		selectedAgentId = selectedAgentId === agentId ? null : agentId;
 	}
@@ -415,6 +425,24 @@
 		animatedAgents.filter((a) => a.state === 'WAITING_HUMAN').length
 	);
 	const waitingAgents = $derived(animatedAgents.filter((a) => a.state === 'WAITING_HUMAN'));
+
+	// Liste des jalons humains multi-projets actifs (Synchronisé avec le pont ~/.config/pixel-office/gates/)
+	const activeGates = $derived.by(() => {
+		if (snapshot?.pendingGates && snapshot.pendingGates.length > 0) {
+			return snapshot.pendingGates;
+		}
+		return waitingAgents.map((a) => ({
+			id: `gate-${a.id}-${a.currentProject ?? 'agents-skills'}`,
+			project: a.currentProject ?? 'agents-skills',
+			agentId: a.id,
+			agentName: a.name,
+			title: `Jalon STOP [${(a.currentProject ?? 'agents-skills').toUpperCase()}]`,
+			message: a.activityLabel || 'Validation requise avant de poursuivre',
+			timestamp: a.lastActivityAt || Date.now(),
+			status: 'PENDING' as const,
+			sourceTool: 'antigravity' as const
+		}));
+	});
 	const totalTokensK = $derived(
 		Math.round(animatedAgents.reduce((acc, a) => acc + (a.contextTokens || 0), 0) / 1000)
 	);
@@ -509,14 +537,50 @@
 	}
 
 	async function resolveHumanGate(
-		agentId: string,
+		gateOrAgentId: string,
 		resolutionAction: 'approve' | 'reject' = 'approve'
 	): Promise<void> {
+		if (!bidirectionalInteractions) {
+			return; // Mode observateur : aucune interaction transmise
+		}
+
+		try {
+			await fetch('/api/gates', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ gateId: gateOrAgentId, action: resolutionAction })
+			});
+		} catch (err) {
+			console.error('[PixelOffice] Erreur résolution gate via API:', err);
+		}
+
 		await triggerEvent({
 			type: 'RESOLVE_HUMAN_GATE',
-			agentId,
+			agentId: gateOrAgentId,
 			resolutionAction
 		});
+	}
+
+	async function resolveAllGates(resolutionAction: 'approve' | 'reject' = 'approve'): Promise<void> {
+		if (!bidirectionalInteractions) return;
+
+		try {
+			await fetch('/api/gates', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ all: true, action: resolutionAction })
+			});
+		} catch (err) {
+			console.error('[PixelOffice] Erreur résolution all gates:', err);
+		}
+
+		for (const gate of activeGates) {
+			await triggerEvent({
+				type: 'RESOLVE_HUMAN_GATE',
+				agentId: gate.agentId,
+				resolutionAction
+			});
+		}
 	}
 
 	function formatStateLabel(state: string): string {
@@ -776,6 +840,9 @@
 	}
 
 	onMount(() => {
+		if (typeof localStorage !== 'undefined') {
+			bidirectionalInteractions = localStorage.getItem('pixel_office_bidirectional') === 'true';
+		}
 		audioOn = isSoundEnabled();
 		loadPixelAssets()
 			.then((bundle) => {
@@ -1038,6 +1105,28 @@
 
 			<div class="nav-divider"></div>
 
+			<!-- SECTION PILOTAGE BI-DIRECTIONNEL -->
+			{#if leftSidebarExpanded}
+				<div class="nav-section-title">PILOTAGE</div>
+			{/if}
+			<button
+				type="button"
+				class="nav-icon-btn"
+				class:active={bidirectionalInteractions}
+				onclick={toggleBidirectionalInteractions}
+				title={bidirectionalInteractions ? 'Désactiver le pilotage (passer en mode Observateur)' : 'Activer le pilotage bi-directionnel avec Antigravity, OpenCode et Claude Code'}
+			>
+				<span class="nav-btn-icon">{bidirectionalInteractions ? '⚡' : '🔒'}</span>
+				{#if leftSidebarExpanded}
+					<div class="nav-btn-text">
+						<span class="nav-btn-label">{bidirectionalInteractions ? 'PILOTAGE ACTIF' : 'OBSERVATEUR'}</span>
+						<span class="nav-btn-sub">{bidirectionalInteractions ? 'Interactions ON' : 'Lecture seule'}</span>
+					</div>
+				{/if}
+			</button>
+
+			<div class="nav-divider"></div>
+
 			<!-- SECTION 4 : AFFICHAGE -->
 			{#if leftSidebarExpanded}
 				<div class="nav-section-title">VUE</div>
@@ -1189,6 +1278,24 @@
 					</div>
 				</div>
 
+				<!-- INTERRUPTEUR DE PILOTAGE BI-DIRECTIONNEL (CLAUDE CODE, OPENCODE, ANTIGRAVITY) -->
+				<div
+					class="bridge-mode-switch"
+					title="Activer/Désactiver les interactions avec les outils IA (Actif = clics effectifs, Off = capsules de lecture seule)"
+				>
+					<button
+						type="button"
+						class="bridge-mode-btn"
+						class:is-active={bidirectionalInteractions}
+						onclick={toggleBidirectionalInteractions}
+					>
+						<span class="bridge-mode-dot"></span>
+						<span class="bridge-mode-text">
+							{bidirectionalInteractions ? 'PILOTAGE : ON' : 'OBSERVATEUR : OFF'}
+						</span>
+					</button>
+				</div>
+
 				<div class="kpi-clock">{currentTime}</div>
 			</div>
 		</header>
@@ -1248,41 +1355,98 @@
 					{/each}
 				</div>
 
-				<!-- BANNIÈRE D'ACTION JALON HUMAIN (STOP) -->
-				{#if waitingAgents.length > 0}
-					{@const firstWaiting = waitingAgents[0]}
-					{@const charIdx = getAgentCharIndex(firstWaiting)}
-					<div class="human-gate-banner" role="alert">
-						<div class="gate-banner-left">
-							<div
-								class="gate-banner-avatar"
-								style="background-image: url('/assets/characters/char_{charIdx}.png');"
-							></div>
-							<div class="gate-banner-text">
-								<div class="gate-banner-title">
-									<span class="gate-stop-sign">⛔ STOP JALON HUMAIN</span>
-									<span class="gate-agent-tag">[{firstWaiting.name}]</span>
-								</div>
-								<div class="gate-banner-msg">
-									{firstWaiting.activityLabel || 'Validation humaine requise avant de poursuivre'}
-								</div>
+				<!-- HUB DE VALIDATION HUMAINE MULTI-PROJETS (PONT BI-DIRECTIONNEL) -->
+				{#if activeGates.length > 0}
+					<div class="human-gates-hub" role="alert">
+						<div class="gates-hub-header">
+							<div class="hub-header-left">
+								<span class="hub-pulse-dot"></span>
+								<h3 class="hub-title">
+									JALONS EN ATTENTE ({activeGates.length} PROJET{activeGates.length > 1 ? 'S' : ''})
+								</h3>
+								<span class="hub-mode-badge" class:is-armed={bidirectionalInteractions}>
+									{bidirectionalInteractions ? '⚡ PILOTAGE ACTIF' : '🔒 MODE OBSERVATEUR (LECTURE SEULE)'}
+								</span>
 							</div>
+
+							{#if bidirectionalInteractions && activeGates.length > 1}
+								<button
+									type="button"
+									class="pixel-btn gate-approve-all-btn"
+									onclick={() => resolveAllGates('approve')}
+									title="Valider simultanément tous les jalons sur tous les projets"
+								>
+									✔ TOUT VALIDER ({activeGates.length})
+								</button>
+							{/if}
 						</div>
-						<div class="gate-banner-actions">
-							<button
-								type="button"
-								class="pixel-btn gate-approve-btn"
-								onclick={() => resolveHumanGate(firstWaiting.id, 'approve')}
-							>
-								✔ VALIDER LE JALON
-							</button>
-							<button
-								type="button"
-								class="pixel-btn gate-reject-btn"
-								onclick={() => resolveHumanGate(firstWaiting.id, 'reject')}
-							>
-								↺ RÉVISION
-							</button>
+
+						<div class="gates-cards-container">
+							{#each activeGates as gate (gate.id)}
+								{@const waitingAgent = animatedAgents.find((a) => a.id === gate.agentId)}
+								{@const charIdx = waitingAgent ? getAgentCharIndex(waitingAgent) : 0}
+								{@const isLodgi = gate.project.toLowerCase().includes('lodgi')}
+								{@const isBulles = gate.project.toLowerCase().includes('bulles') || gate.project.toLowerCase().includes('agents')}
+
+								<div
+									class="gate-project-card"
+									class:project-lodgi={isLodgi}
+									class:project-bulles={isBulles}
+								>
+									<div class="gate-card-header">
+										<div class="gate-project-pill" class:pill-lodgi={isLodgi} class:pill-bulles={isBulles}>
+											<span class="project-pill-dot"></span>
+											<strong>{gate.project.toUpperCase()}</strong>
+										</div>
+										<span class="gate-agent-tag">[{gate.agentName}]</span>
+										<span class="gate-source-tag">source: {gate.sourceTool}</span>
+									</div>
+
+									<div class="gate-card-body">
+										<div
+											class="gate-card-avatar"
+											style="background-image: url('/assets/characters/char_{charIdx}.png');"
+										></div>
+										<div class="gate-card-text">
+											<div class="gate-card-title">{gate.title}</div>
+											<div class="gate-card-msg">{gate.message}</div>
+										</div>
+									</div>
+
+									<!-- MODE PILOTAGE ACTIF vs MODE OBSERVATEUR LECTURE SEULE -->
+									{#if bidirectionalInteractions}
+										<div class="gate-card-actions">
+											<button
+												type="button"
+												class="pixel-btn gate-btn-approve"
+												onclick={() => resolveHumanGate(gate.id, 'approve')}
+												title="Débloquer {gate.agentName} et valider le jalon pour {gate.project}"
+											>
+												✔ VALIDER [{gate.project.toUpperCase()}]
+											</button>
+											<button
+												type="button"
+												class="pixel-btn gate-btn-reject"
+												onclick={() => resolveHumanGate(gate.id, 'reject')}
+												title="Demander une révision"
+											>
+												↺ RÉVISION
+											</button>
+										</div>
+									{:else}
+										<!-- CAPSULE D'INFORMATION PURE SANS BOUTON D'ACTION -->
+										<div
+											class="gate-card-readonly-pill"
+											title="Activez le pilotage bi-directionnel pour interagir"
+										>
+											<span class="readonly-lock-icon">🔒</span>
+											<span class="readonly-text">
+												EN ATTENTE DE CONFIRMATION DANS LE TERMINAL ({gate.project.toUpperCase()})
+											</span>
+										</div>
+									{/if}
+								</div>
+							{/each}
 						</div>
 					</div>
 				{/if}
@@ -1393,26 +1557,32 @@
 
 							{#if activeDialogueAgent.state === 'WAITING_HUMAN' || dialogue.type === 'gate'}
 								<div class="rpg-dialogue-actions">
-									<button
-										type="button"
-										class="pixel-btn rpg-btn-approve"
-										onclick={(e) => {
-											e.stopPropagation();
-											resolveHumanGate(activeDialogueAgent.id, 'approve');
-										}}
-									>
-										✔ APPROUVER LE JALON
-									</button>
-									<button
-										type="button"
-										class="pixel-btn rpg-btn-reject"
-										onclick={(e) => {
-											e.stopPropagation();
-											resolveHumanGate(activeDialogueAgent.id, 'reject');
-										}}
-									>
-										↺ RÉVISION
-									</button>
+									{#if bidirectionalInteractions}
+										<button
+											type="button"
+											class="pixel-btn rpg-btn-approve"
+											onclick={(e) => {
+												e.stopPropagation();
+												resolveHumanGate(activeDialogueAgent.id, 'approve');
+											}}
+										>
+											✔ APPROUVER LE JALON
+										</button>
+										<button
+											type="button"
+											class="pixel-btn rpg-btn-reject"
+											onclick={(e) => {
+												e.stopPropagation();
+												resolveHumanGate(activeDialogueAgent.id, 'reject');
+											}}
+										>
+											↺ RÉVISION
+										</button>
+									{:else}
+										<div class="rpg-readonly-notice">
+											<span>🔒 MODE OBSERVATEUR : Activez PILOTAGE pour approuver d'un clic</span>
+										</div>
+									{/if}
 								</div>
 							{/if}
 						</div>
@@ -4374,108 +4544,322 @@
 		}
 	}
 
-	/* BANNIÈRE D'ALERTE JALON HUMAIN DANS LE CANVAS */
-	.human-gate-banner {
-		position: absolute;
-		top: 8px;
-		left: 8px;
-		right: 8px;
-		z-index: 28;
-		background: #090e17;
-		border: 3px solid #f59e0b;
-		padding: 8px 12px;
+	/* INTERRUPTEUR DE PILOTAGE BI-DIRECTIONNEL */
+	.bridge-mode-switch {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		animation: gatePulse 1.2s infinite alternate;
 	}
 
-	.gate-banner-left {
+	.bridge-mode-btn {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 7px;
+		background: #0b1320;
+		border: 1.5px solid #334155;
+		color: #94a3b8;
+		padding: 4px 8px;
+		cursor: pointer;
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		min-width: 0;
+		gap: 6px;
+		border-radius: 2px;
+		transition: all 0.15s ease;
+		box-shadow: 1px 1px 0px #000000;
 	}
 
-	.gate-banner-avatar {
-		width: 36px;
-		height: 36px;
-		background-size: 144px 144px;
-		background-position: -6px -4px;
-		background-repeat: no-repeat;
-		image-rendering: pixelated;
-		border: 2px solid #f59e0b;
-		background-color: #020617;
+	.bridge-mode-btn:hover {
+		border-color: #64748b;
+		color: #e2e8f0;
+	}
+
+	.bridge-mode-btn.is-active {
+		background: #022c22;
+		border-color: #10b981;
+		color: #6ee7b7;
+		box-shadow: 0 0 8px rgba(16, 185, 129, 0.4), 1px 1px 0px #000000;
+	}
+
+	.bridge-mode-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: #64748b;
 		flex-shrink: 0;
 	}
 
-	.gate-banner-text {
-		display: flex;
-		flex-direction: column;
-		gap: 3px;
-		min-width: 0;
+	.bridge-mode-btn.is-active .bridge-mode-dot {
+		background: #10b981;
+		box-shadow: 0 0 6px #10b981;
+		animation: livePulse 1s infinite alternate;
 	}
 
-	.gate-banner-title {
+	/* HUB DE JALONS MULTI-PROJETS (PONT BI-DIRECTIONNEL) */
+	.human-gates-hub {
+		position: absolute;
+		top: 6px;
+		left: 8px;
+		right: 8px;
+		z-index: 28;
+		background: rgba(9, 14, 23, 0.96);
+		backdrop-filter: blur(4px);
+		border: 2px solid #f59e0b;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 0 1px #000000;
+		padding: 8px 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		max-height: calc(100% - 16px);
+		overflow-y: auto;
+	}
+
+	.gates-hub-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		border-bottom: 1px solid #1e293b;
+		padding-bottom: 6px;
+	}
+
+	.hub-header-left {
 		display: flex;
 		align-items: center;
 		gap: 8px;
+		flex-wrap: wrap;
 	}
 
-	.gate-stop-sign {
+	.hub-pulse-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #ef4444;
+		box-shadow: 0 0 8px #ef4444;
+		animation: livePulse 0.8s infinite;
+		flex-shrink: 0;
+	}
+
+	.hub-title {
 		font-family: 'Press Start 2P', monospace;
 		font-size: 8px;
-		color: #ef4444;
+		color: #ffffff;
+		margin: 0;
 		letter-spacing: 0.5px;
+	}
+
+	.hub-mode-badge {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		padding: 2px 6px;
+		border-radius: 2px;
+		background: #1e293b;
+		color: #94a3b8;
+		border: 1px solid #334155;
+	}
+
+	.hub-mode-badge.is-armed {
+		background: rgba(16, 185, 129, 0.2);
+		color: #34d399;
+		border-color: #10b981;
+	}
+
+	.gate-approve-all-btn {
+		background: #059669 !important;
+		border-color: #34d399 !important;
+		color: #ffffff !important;
+		font-size: 7px !important;
+		padding: 4px 8px !important;
+		box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+	}
+
+	.gate-approve-all-btn:hover {
+		background: #10b981 !important;
+	}
+
+	.gates-cards-container {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.gate-project-card {
+		background: #0b1320;
+		border: 2px solid #f59e0b;
+		box-shadow: 2px 2px 0px #000000;
+		padding: 6px 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		border-radius: 2px;
+		transition: all 0.15s ease;
+	}
+
+	.gate-project-card.project-lodgi {
+		border-color: #818cf8;
+		background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+		box-shadow: 0 0 10px rgba(129, 140, 248, 0.2), 2px 2px 0px #000000;
+	}
+
+	.gate-project-card.project-bulles {
+		border-color: #f43f5e;
+		background: linear-gradient(135deg, rgba(76, 5, 25, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+		box-shadow: 0 0 10px rgba(244, 63, 94, 0.2), 2px 2px 0px #000000;
+	}
+
+	.gate-card-header {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+
+	.gate-project-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-family: 'Press Start 2P', monospace;
+		font-size: 6px;
+		padding: 2px 6px;
+		background: #1e293b;
+		border: 1px solid #f59e0b;
+		color: #f59e0b;
+		border-radius: 2px;
+	}
+
+	.gate-project-pill.pill-lodgi {
+		background: #1e1b4b;
+		border-color: #818cf8;
+		color: #a5b4fc;
+	}
+
+	.gate-project-pill.pill-bulles {
+		background: #4c0519;
+		border-color: #f43f5e;
+		color: #fda4af;
+	}
+
+	.project-pill-dot {
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: currentColor;
 	}
 
 	.gate-agent-tag {
 		font-family: 'Silkscreen', monospace;
 		font-size: 8px;
-		color: #f59e0b;
+		color: #e2e8f0;
 	}
 
-	.gate-banner-msg {
+	.gate-source-tag {
 		font-family: 'Silkscreen', monospace;
-		font-size: 9px;
-		color: #e2e8f0;
+		font-size: 7px;
+		color: #64748b;
+		margin-left: auto;
+	}
+
+	.gate-card-body {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.gate-card-avatar {
+		width: 32px;
+		height: 32px;
+		background-size: 144px 144px;
+		background-position: -6px -4px;
+		background-repeat: no-repeat;
+		image-rendering: pixelated;
+		border: 2px solid #334155;
+		background-color: #020617;
+		flex-shrink: 0;
+	}
+
+	.gate-card-text {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+		flex: 1;
+	}
+
+	.gate-card-title {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 7px;
+		color: #f8fafc;
+	}
+
+	.gate-card-msg {
+		font-family: 'Silkscreen', monospace;
+		font-size: 8px;
+		color: #94a3b8;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
-	.gate-banner-actions {
+	.gate-card-actions {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		flex-shrink: 0;
+		gap: 6px;
+		margin-top: 2px;
 	}
 
-	.gate-approve-btn {
+	.gate-btn-approve {
 		background: #15803d !important;
 		border-color: #4ade80 !important;
 		color: #ffffff !important;
-		font-size: 7px !important;
-		padding: 6px 10px !important;
+		font-size: 6px !important;
+		padding: 4px 8px !important;
 	}
 
-	.gate-approve-btn:hover {
+	.gate-btn-approve:hover {
 		background: #16a34a !important;
 		transform: translateY(-1px);
 	}
 
-	.gate-reject-btn {
+	.gate-btn-reject {
 		background: #c2410c !important;
 		border-color: #fb923c !important;
 		color: #ffffff !important;
-		font-size: 7px !important;
-		padding: 6px 10px !important;
+		font-size: 6px !important;
+		padding: 4px 8px !important;
 	}
 
-	.gate-reject-btn:hover {
+	.gate-btn-reject:hover {
 		background: #ea580c !important;
 		transform: translateY(-1px);
+	}
+
+	/* CAPSULE D'INFORMATION EN LECTURE SEULE (MODE OBSERVATEUR) */
+	.gate-card-readonly-pill {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		background: rgba(15, 23, 42, 0.9);
+		border: 1px dashed #64748b;
+		padding: 4px 8px;
+		border-radius: 2px;
+	}
+
+	.readonly-lock-icon {
+		font-size: 8px;
+	}
+
+	.readonly-text {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		color: #94a3b8;
+		letter-spacing: 0.3px;
+	}
+
+	.rpg-readonly-notice {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		color: #94a3b8;
+		border: 1px dashed #64748b;
+		padding: 4px 8px;
+		background: rgba(15, 23, 42, 0.8);
+		border-radius: 2px;
 	}
 
 	/* BOÎTE DE DIALOGUE RPG RÉTRO (Typewriter Dialogue Box) : POSITIONNÉE SOUS LE CANVAS */

@@ -37,6 +37,7 @@ class OfficeStateManager {
 	private logs: ActivityLogEntry[] = [];
 	private subscribers: Set<StateSubscriber> = new Set();
 	private idleTimer: ReturnType<typeof setInterval> | null = null;
+	private gateProvider: (() => import('$lib/types/office').PendingGate[]) | null = null;
 
 	public watcherStatus = {
 		antigravityActive: false,
@@ -1088,11 +1089,20 @@ class OfficeStateManager {
 		}
 	}
 
+	public registerGateProvider(provider: () => import('$lib/types/office').PendingGate[]): void {
+		this.gateProvider = provider;
+	}
+
+	public getWaitingAgents(): OfficeAgent[] {
+		return Array.from(this.agents.values()).filter((a) => a.state === 'WAITING_HUMAN');
+	}
+
 	public getSnapshot(): OfficeSnapshot {
 		return {
 			agents: Array.from(this.agents.values()),
 			pet: this.pet,
 			logs: this.logs,
+			pendingGates: this.gateProvider ? this.gateProvider() : undefined,
 			watcherStatus: this.watcherStatus,
 			stats: this.stats
 		};
