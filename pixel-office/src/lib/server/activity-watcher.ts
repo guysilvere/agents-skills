@@ -24,22 +24,30 @@ const KNOWN_SKILLS = [
 let watcherInitialized = false;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 
-/** Mémorise la taille du dernier fichier lu pour ne traiter que les nouvelles lignes */
+/** Mémorise la taille du dernier transcript lu pour ne traiter que les nouvelles lignes */
 const fileOffsets = new Map<string, number>();
+
+/** Mémorise le projet associé à chaque session active (fichier transcript) */
+const sessionProjects = new Map<string, string>();
+
+/** Mémorise les timestamps de dernière modification des .git/index des projets locaux */
+const gitProjectMtimes = new Map<string, number>();
+
+const PROJETS_ROOT = '/Users/silveremeya/Projets';
 
 function cleanQuotes(val: unknown): string {
 	if (typeof val !== 'string') return '';
 	return val.replace(/^"+|"+$/g, '').trim();
 }
 
-/**
- * Extrait le nom du projet depuis n'importe quel chemin sous /Users/silveremeya/Projets/
- */
-function extractProjectFromPath(str: string): string | null {
-	const match = str.match(/\/Projets\/([^/"'\s\\]+)/);
-	if (match && match[1] && match[1] !== 'Projets' && match[1] !== '.git') {
-		return match[1];
-	}
+export function extractProjectFromPath(str: string): string | null {
+	if (!str) return null;
+	const match = str.match(/\/Projets\/([^/"'\s\\]+)/i);
+	if (match) return match[1];
+
+	const claudeMatch = str.match(/-Users-[^-]+-Projets-([a-zA-Z0-9._-]+)/i);
+	if (claudeMatch) return claudeMatch[1];
+
 	return null;
 }
 
@@ -51,9 +59,10 @@ function extractSkillFromPath(str: string): string | null {
 }
 
 /**
- * Analyse les dernières lignes d'un fichier transcript Antigravity (transcript.jsonl)
+ * Analyse les dernières lignes d'un fichier `transcript.jsonl` Antigravity ou Claude Code
+ * et déclenche les vrais mouvements/états dans le bureau.
  */
-function parseAntigravityTranscriptTail(filePath: string, isInitialBoot = false): void {
+function parseTranscriptTail(filePath: string, isInitialBoot = false): void {
 	try {
 		const stat = fs.statSync(filePath);
 		const prevSize = fileOffsets.get(filePath) ?? 0;
@@ -75,6 +84,7 @@ function parseAntigravityTranscriptTail(filePath: string, isInitialBoot = false)
 		if (lines.length === 0) return;
 
 		const lastEntry = JSON.parse(lines[lines.length - 1]);
+		const source = filePath.includes('.gemini') ? 'antigravity' : 'claude';
 		officeState.watcherStatus.lastFileEventAt = Date.now();
 
 		const inputTokens =
@@ -82,18 +92,25 @@ function parseAntigravityTranscriptTail(filePath: string, isInitialBoot = false)
 		const contextRatio =
 			inputTokens > 0 ? Math.min(0.98, +(inputTokens / 300_000).toFixed(2)) : undefined;
 
-		// 1. Appel d'outil (tool_calls)
+		// 1. Le modèle appelle un outil (tool_calls)
 		if (Array.isArray(lastEntry.tool_calls) && lastEntry.tool_calls.length > 0) {
 			const tc = lastEntry.tool_calls[lastEntry.tool_calls.length - 1];
 			const toolName = String(tc.name || '');
 			const args = (tc.args || {}) as Record<string, unknown>;
 			const serializedArgs = JSON.stringify(args);
 
-			const detectedProject =
+			let detectedProject =
 				extractProjectFromPath(serializedArgs) ??
 				extractProjectFromPath(filePath) ??
-				officeState.stats.activeProject ??
-				'agents-skills';
+				sessionProjects.get(filePath);
+
+			if (!detectedProject) {
+				detectedProject = officeState.stats.activeProject ?? 'agents-skills';
+			}
+
+			// Mémoriser le projet pour cette session
+			sessionProjects.set(filePath, detectedProject);
+
 			const detectedSkill = extractSkillFromPath(serializedArgs);
 
 			if (toolName === 'invoke_subagent') {
@@ -101,17 +118,17 @@ function parseAntigravityTranscriptTail(filePath: string, isInitialBoot = false)
 				const subRole = cleanQuotes(args.Role) || 'Renfort Spécialisé';
 				if (subType === 'ops-quality' || subType === 'integrations') {
 					officeState.applyEvent({
-						source: 'antigravity',
+						source,
 						type: 'CALL_AGENT',
 						agentId: 'lead-dev',
 						targetAgentId: subType,
 						project: detectedProject,
 						contextRatio,
-						message: `Délégation: ${subRole}`
+						message: `Délégation [${detectedProject}]: ${subRole}`
 					});
 				} else {
 					officeState.applyEvent({
-						source: 'antigravity',
+						source,
 						type: 'SPAWN_SUBAGENT',
 						agentId: 'lead-dev',
 						subagentName: subType,
@@ -125,20 +142,20 @@ function parseAntigravityTranscriptTail(filePath: string, isInitialBoot = false)
 
 			if (toolName === 'send_message') {
 				officeState.applyEvent({
-					source: 'antigravity',
+					source,
 					type: 'VISIT_AGENT',
 					agentId: 'lead-dev',
 					targetAgentId: 'ops-quality',
 					project: detectedProject,
 					contextRatio,
-					message: 'Échange inter-agents'
+					message: `Échange [${detectedProject}]`
 				});
 				return;
 			}
 
 			if (detectedSkill && (toolName === 'view_file' || toolName === 'read_file')) {
 				officeState.applyEvent({
-					source: 'antigravity',
+					source,
 					type: 'SKILL_LOAD',
 					agentId: 'lead-dev',
 					project: detectedProject,
@@ -172,18 +189,19 @@ function parseAntigravityTranscriptTail(filePath: string, isInitialBoot = false)
 
 			const activeAgentId =
 				toolName === 'run_command' &&
-				/vitest|test|check|lighthouse|lint|cypress/i.test(serializedArgs)
+				/vitest|test|check|lighthouse|lint|build/i.test(serializedArgs)
 					? 'ops-quality'
-					: /payment|turso|migration|db|brevo|webhook/i.test(serializedArgs)
+					: /db|turso|migration|payment|webhook|stripe|geniuspay/i.test(serializedArgs)
 						? 'integrations'
 						: 'lead-dev';
 
 			officeState.applyEvent({
-				source: 'antigravity',
+				source,
 				type: 'WORK_START',
 				agentId: activeAgentId,
 				project: detectedProject,
-				activityLabel,
+				activityLabel: `[${detectedProject}] ${activityLabel}`,
+				skills: detectedSkill ? [detectedSkill] : undefined,
 				contextRatio
 			});
 			return;
@@ -191,13 +209,18 @@ function parseAntigravityTranscriptTail(filePath: string, isInitialBoot = false)
 
 		// 2. Nouveau prompt utilisateur (USER_INPUT)
 		if (lastEntry.type === 'USER_INPUT') {
-			const detectedProject = extractProjectFromPath(JSON.stringify(lastEntry)) ?? officeState.stats.activeProject ?? 'agents-skills';
+			const project =
+				sessionProjects.get(filePath) ??
+				extractProjectFromPath(filePath) ??
+				officeState.stats.activeProject ??
+				'agents-skills';
+
 			officeState.applyEvent({
-				source: 'antigravity',
+				source,
 				type: 'WORK_START',
 				agentId: 'lead-dev',
-				project: detectedProject,
-				activityLabel: 'Analyse de ta demande...',
+				project,
+				activityLabel: `[${project}] Analyse de ta demande...`,
 				contextRatio
 			});
 			return;
@@ -205,155 +228,50 @@ function parseAntigravityTranscriptTail(filePath: string, isInitialBoot = false)
 
 		// 3. Fin de réponse ou Jalon STOP
 		if (lastEntry.type === 'PLANNER_RESPONSE' && typeof lastEntry.content === 'string') {
-			const detectedProject = extractProjectFromPath(lastEntry.content) ?? officeState.stats.activeProject ?? 'agents-skills';
+			const project =
+				sessionProjects.get(filePath) ??
+				extractProjectFromPath(filePath) ??
+				officeState.stats.activeProject ??
+				'agents-skills';
+
 			if (lastEntry.content.includes('⛔ STOP')) {
 				officeState.applyEvent({
-					source: 'antigravity',
+					source,
 					type: 'WAITING_HUMAN',
 					agentId: 'lead-dev',
-					project: detectedProject,
-					message: 'STOP Jalon Humain — Validation attendue',
+					project,
+					message: `STOP Jalon Humain sur [${project}] — Validation attendue`,
 					contextRatio
 				});
 			} else if (!isInitialBoot) {
 				officeState.applyEvent({
-					source: 'antigravity',
+					source,
 					type: 'TURN_DONE',
 					agentId: 'lead-dev',
-					project: detectedProject,
-					message: 'Réponse livrée — En attente',
+					project,
+					message: `[${project}] Réponse livrée — En attente`,
 					contextRatio
 				});
 			}
 		}
 	} catch {
-		// Ignore
+		// Ignore fichier en cours d'écriture
 	}
 }
 
 /**
- * Analyse les sessions Claude Code stockées dans ~/.claude/projects/
+ * Scanne toutes les sessions Antigravity récentes (modifiées dans les dernières 6h)
+ * pour détecter l'activité multi-projets en temps réel.
  */
-function parseClaudeSessionTail(filePath: string, projectName: string, isInitialBoot = false): void {
-	try {
-		const stat = fs.statSync(filePath);
-		const prevSize = fileOffsets.get(filePath) ?? 0;
-		if (!isInitialBoot && stat.size <= prevSize) return;
-		fileOffsets.set(filePath, stat.size);
-
-		const readSize = Math.min(stat.size, 28_672);
-		const fd = fs.openSync(filePath, 'r');
-		const buffer = Buffer.alloc(readSize);
-		fs.readSync(fd, buffer, 0, readSize, stat.size - readSize);
-		fs.closeSync(fd);
-
-		const lines = buffer
-			.toString('utf-8')
-			.split('\n')
-			.map((l) => l.trim())
-			.filter((l) => l.startsWith('{') && l.endsWith('}'));
-
-		if (lines.length === 0) return;
-
-		officeState.watcherStatus.lastFileEventAt = Date.now();
-
-		// Scanner les messages récents de la fin vers le début
-		for (let i = lines.length - 1; i >= 0; i--) {
-			const entry = JSON.parse(lines[i]);
-			if (entry.type === 'assistant' && entry.message?.content) {
-				const contents = Array.isArray(entry.message.content)
-					? entry.message.content
-					: [entry.message.content];
-
-				// @ts-expect-error typage souple jsonl claude
-				const toolUse = contents.find((c) => c && c.type === 'tool_use');
-				// @ts-expect-error typage souple jsonl claude
-				const textContent = contents.find((c) => c && c.type === 'text' && c.text);
-
-				const inputTokens = entry.message?.usage?.cache_read_input_tokens || 0;
-				const contextRatio =
-					inputTokens > 0 ? Math.min(0.98, +(inputTokens / 200_000).toFixed(2)) : 0.35;
-
-				if (toolUse) {
-					const toolName = String(toolUse.name || '');
-					const toolInput = (toolUse.input || {}) as Record<string, unknown>;
-					const toolStr = JSON.stringify(toolInput);
-
-					let activityLabel = `Tool: ${toolName}`;
-					let activeAgentId = 'lead-dev';
-
-					if (toolName === 'Bash') {
-						const cmd = String(toolInput.command || '');
-						if (/test|vitest|check|lint|lighthouse/i.test(cmd)) {
-							activeAgentId = 'ops-quality';
-							activityLabel = `Tests: ${cmd.slice(0, 26)}`;
-						} else if (/git commit|push|deploy|coolify/i.test(cmd)) {
-							activeAgentId = 'ops-quality';
-							activityLabel = `Git: ${cmd.slice(0, 26)}`;
-						} else {
-							activityLabel = `Bash: ${cmd.slice(0, 26)}`;
-						}
-					} else if (toolName === 'Edit' || toolName === 'Write') {
-						const file = path.basename(String(toolInput.file_path || 'file'));
-						activityLabel = `Editing ${file}`;
-					} else if (toolName === 'View') {
-						const file = path.basename(String(toolInput.file_path || 'file'));
-						activityLabel = `Reading ${file}`;
-					}
-
-					if (/payment|wave|orange|turso|migration|db/i.test(toolStr)) {
-						activeAgentId = 'integrations';
-					}
-
-					officeState.applyEvent({
-						source: 'claude',
-						type: 'WORK_START',
-						agentId: activeAgentId,
-						project: projectName,
-						activityLabel,
-						contextRatio
-					});
-					return;
-				} else if (textContent) {
-					const text = String(textContent.text || '');
-					if (text.includes('⛔ STOP')) {
-						officeState.applyEvent({
-							source: 'claude',
-							type: 'WAITING_HUMAN',
-							agentId: 'lead-dev',
-							project: projectName,
-							message: 'STOP Jalon Humain — Validation attendue',
-							contextRatio
-						});
-					} else if (!isInitialBoot) {
-						officeState.applyEvent({
-							source: 'claude',
-							type: 'TURN_DONE',
-							agentId: 'lead-dev',
-							project: projectName,
-							message: text.slice(0, 80),
-							contextRatio
-						});
-					}
-					return;
-				}
-			}
-		}
-	} catch {
-		// Ignore
-	}
-}
-
-/**
- * Scanne toutes les conversations Antigravity actives récemment (multi-projets)
- */
-function scanAntigravityTranscripts(antigravityDir: string, isInitial = false): void {
+function scanActiveAntigravityTranscripts(antigravityDir: string, isInitial = false): void {
 	if (!fs.existsSync(antigravityDir)) return;
 	try {
 		const convDirs = fs.readdirSync(antigravityDir);
-		const candidates: { path: string; mtime: number }[] = [];
+		const candidates: { file: string; mtime: number }[] = [];
+		const now = Date.now();
 
 		for (const conv of convDirs) {
+			if (conv.startsWith('.')) continue;
 			const candidate = path.join(
 				antigravityDir,
 				conv,
@@ -363,17 +281,17 @@ function scanAntigravityTranscripts(antigravityDir: string, isInitial = false): 
 			);
 			if (fs.existsSync(candidate)) {
 				const st = fs.statSync(candidate);
-				// Transcripts actifs au cours des 2 dernières heures
-				if (st.mtimeMs > Date.now() - 2 * 3600 * 1000) {
-					candidates.push({ path: candidate, mtime: st.mtimeMs });
+				// Sessions actives au cours des dernières 6 heures
+				if (now - st.mtimeMs < 6 * 3600 * 1000) {
+					candidates.push({ file: candidate, mtime: st.mtimeMs });
 				}
 			}
 		}
 
+		// Trier par fraîcheur et traiter les 8 sessions les plus récentes
 		candidates.sort((a, b) => b.mtime - a.mtime);
-		// Scanner jusqu'aux 8 conversations les plus récentes en parallèle
 		for (const item of candidates.slice(0, 8)) {
-			parseAntigravityTranscriptTail(item.path, isInitial);
+			parseTranscriptTail(item.file, isInitial);
 		}
 	} catch {
 		// Ignore
@@ -381,42 +299,27 @@ function scanAntigravityTranscripts(antigravityDir: string, isInitial = false): 
 }
 
 /**
- * Scanne tous les projets surveillés dans ~/.claude/projects/
+ * Scanne les projets Claude Code (~/.claude/projects/-Users-silveremeya-Projets-*)
  */
-function scanClaudeProjects(claudeProjectsDir: string, isInitial = false): void {
+function scanClaudeCodeProjects(claudeProjectsDir: string, isInitial = false): void {
 	if (!fs.existsSync(claudeProjectsDir)) return;
 	try {
-		const dirs = fs.readdirSync(claudeProjectsDir);
-		for (const dirName of dirs) {
-			if (!dirName.startsWith('-Users-') || !dirName.includes('-Projets-')) continue;
-			const projectDirPath = path.join(claudeProjectsDir, dirName);
-			try {
-				const stDir = fs.statSync(projectDirPath);
-				if (!stDir.isDirectory()) continue;
+		const projDirs = fs.readdirSync(claudeProjectsDir);
+		const now = Date.now();
 
-				// Extraire le nom du projet, ex: '-Users-silveremeya-Projets-lodgi' -> 'lodgi'
-				const match = dirName.match(/-Projets-([^-]+(?:-[^-]+)*?)(?:--|$)/);
-				const projectName = match ? match[1] : null;
-				if (!projectName) continue;
+		for (const pDir of projDirs) {
+			if (!pDir.includes('-Projets-')) continue;
+			const fullProjDir = path.join(claudeProjectsDir, pDir);
+			const files = fs.readdirSync(fullProjDir);
 
-				const files = fs.readdirSync(projectDirPath).filter((f) => f.endsWith('.jsonl'));
-				let newestSession: string | null = null;
-				let newestMtime = 0;
-
-				for (const f of files) {
-					const fPath = path.join(projectDirPath, f);
-					const st = fs.statSync(fPath);
-					if (st.mtimeMs > newestMtime) {
-						newestMtime = st.mtimeMs;
-						newestSession = fPath;
+			for (const f of files) {
+				if (f.endsWith('.jsonl')) {
+					const filePath = path.join(fullProjDir, f);
+					const st = fs.statSync(filePath);
+					if (now - st.mtimeMs < 6 * 3600 * 1000) {
+						parseTranscriptTail(filePath, isInitial);
 					}
 				}
-
-				if (newestSession && newestMtime > Date.now() - 2 * 3600 * 1000) {
-					parseClaudeSessionTail(newestSession, projectName, isInitial);
-				}
-			} catch {
-				// Ignore
 			}
 		}
 	} catch {
@@ -425,30 +328,37 @@ function scanClaudeProjects(claudeProjectsDir: string, isInitial = false): void 
 }
 
 /**
- * Scanne directement le dossier /Users/silveremeya/Projets pour détecter les projets modifiés
+ * Surveillance directe et ultra-rapide des dépôts Git dans /Users/silveremeya/Projets/
+ * (détecte instantanément les commits, status, switch de branches sur lodgi, meya.me, brvmradar, etc.)
  */
-function scanDirectProjetsDirectory(): void {
-	const projetsRoot = '/Users/silveremeya/Projets';
-	if (!fs.existsSync(projetsRoot)) return;
+function scanProjetsGitActivity(): void {
+	if (!fs.existsSync(PROJETS_ROOT)) return;
 	try {
-		const entries = fs.readdirSync(projetsRoot);
-		for (const name of entries) {
-			if (name.startsWith('.') || name === 'Archive') continue;
-			const projDir = path.join(projetsRoot, name);
-			try {
-				const st = fs.statSync(projDir);
-				if (st.isDirectory()) {
-					// Si le dossier a été modifié très récemment (< 30s)
-					if (st.mtimeMs > Date.now() - 30_000) {
-						if (!officeState.stats.activeProjects.includes(name)) {
-							officeState.stats.activeProjects = Array.from(
-								new Set([name, ...officeState.stats.activeProjects])
-							).slice(0, 6);
-						}
-					}
+		const dirs = fs.readdirSync(PROJETS_ROOT);
+		for (const dir of dirs) {
+			if (
+				dir.startsWith('.') ||
+				dir === 'Archive' ||
+				dir === 'Briefs Clients' ||
+				dir === 'n8n'
+			)
+				continue;
+
+			const gitIndexPath = path.join(PROJETS_ROOT, dir, '.git', 'index');
+			if (fs.existsSync(gitIndexPath)) {
+				const st = fs.statSync(gitIndexPath);
+				const prev = gitProjectMtimes.get(dir);
+				if (prev !== undefined && st.mtimeMs > prev) {
+					// Détecte une action Git locale active sur ce projet !
+					officeState.applyEvent({
+						source: 'manual',
+						type: 'WORK_START',
+						agentId: 'lead-dev',
+						project: dir,
+						activityLabel: `Git: activité sur [${dir}]`
+					});
 				}
-			} catch {
-				// Ignore
+				gitProjectMtimes.set(dir, st.mtimeMs);
 			}
 		}
 	} catch {
@@ -468,7 +378,7 @@ export function ensureActivityWatcher(): void {
 	const opencodeShareDir = path.join(home, '.local', 'share', 'opencode');
 	const claudeProjectsDir = path.join(home, '.claude', 'projects');
 
-	const existingPaths: string[] = ['/Users/silveremeya/Projets'];
+	const existingPaths: string[] = [];
 	const hasAntigravity = fs.existsSync(antigravityDir);
 	const hasOpencode = fs.existsSync(opencodeDir) || fs.existsSync(opencodeShareDir);
 	const hasClaude = fs.existsSync(claudeProjectsDir);
@@ -477,6 +387,7 @@ export function ensureActivityWatcher(): void {
 	if (fs.existsSync(opencodeDir)) existingPaths.push(opencodeDir);
 	if (fs.existsSync(opencodeShareDir)) existingPaths.push(opencodeShareDir);
 	if (hasClaude) existingPaths.push(claudeProjectsDir);
+	if (fs.existsSync(PROJETS_ROOT)) existingPaths.push(PROJETS_ROOT);
 
 	officeState.watcherStatus = {
 		antigravityActive: hasAntigravity,
@@ -487,15 +398,23 @@ export function ensureActivityWatcher(): void {
 	};
 
 	// Scan initial
-	if (hasAntigravity) scanAntigravityTranscripts(antigravityDir, true);
-	if (hasClaude) scanClaudeProjects(claudeProjectsDir, true);
-	scanDirectProjetsDirectory();
+	if (hasAntigravity) {
+		scanActiveAntigravityTranscripts(antigravityDir, true);
+	}
+	if (hasClaude) {
+		scanClaudeCodeProjects(claudeProjectsDir, true);
+	}
+	scanProjetsGitActivity();
 
-	// Boucle de polling intelligente toutes les 1.2s
+	// Polling réactif toutes les 1200ms
 	if (pollTimer) clearInterval(pollTimer);
 	pollTimer = setInterval(() => {
-		if (hasAntigravity) scanAntigravityTranscripts(antigravityDir, false);
-		if (hasClaude) scanClaudeProjects(claudeProjectsDir, false);
-		scanDirectProjetsDirectory();
+		if (hasAntigravity) {
+			scanActiveAntigravityTranscripts(antigravityDir, false);
+		}
+		if (hasClaude) {
+			scanClaudeCodeProjects(claudeProjectsDir, false);
+		}
+		scanProjetsGitActivity();
 	}, 1200);
 }

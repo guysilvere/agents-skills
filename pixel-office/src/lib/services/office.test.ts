@@ -209,20 +209,42 @@ describe('Phase 4 : Audio Chiptune Lo-Fi & Foley 8-bit', () => {
 	});
 });
 
-describe('Surveillance Multi-Projets /Users/silveremeya/Projets', () => {
-	it('enregistre plusieurs projets actifs et suit les projets multiples par agent', () => {
-		const snap = officeState.applyEvent({
+describe('Supervision Multi-Projets Dynamique & Skills', () => {
+	it('accumule dynamiquement les projets actifs sous /Users/silveremeya/Projets et conserve les skills', () => {
+		// 1. Simuler une activité de lead-dev sur lodgi
+		let snap = officeState.applyEvent({
 			source: 'antigravity',
-			type: 'TOOL_USE',
+			type: 'WORK_START',
 			agentId: 'lead-dev',
 			project: 'lodgi',
-			activityLabel: 'Lecture de schema.ts sur lodgi'
+			skills: ['pwa-developpement'],
+			activityLabel: 'Refonte page accueil lodgi'
 		});
 
-		expect(snap.stats.activeProjects).toContain('lodgi');
-		const lead = snap.agents.find((a) => a.id === 'lead-dev');
-		expect(lead?.activeProjects).toContain('lodgi');
+		let lead = snap.agents.find((a) => a.id === 'lead-dev');
 		expect(lead?.currentProject).toBe('lodgi');
+		expect(lead?.activeProjects).toContain('lodgi');
+		expect(lead?.activeSkills).toContain('pwa-developpement');
+		expect(snap.stats.activeProjects).toContain('lodgi');
+
+		// 2. Simuler une activité simultanée sur brvmradar
+		snap = officeState.applyEvent({
+			source: 'antigravity',
+			type: 'WORK_START',
+			agentId: 'lead-dev',
+			project: 'brvmradar',
+			skills: ['api-best-practices'],
+			activityLabel: 'Analyse flux BRVM'
+		});
+
+		lead = snap.agents.find((a) => a.id === 'lead-dev');
+		expect(lead?.currentProject).toBe('brvmradar');
+		expect(lead?.activeProjects).toContain('brvmradar');
+		expect(lead?.activeProjects).toContain('lodgi');
+		expect(lead?.activeSkills).toContain('api-best-practices');
+		expect(lead?.activeSkills).toContain('pwa-developpement');
+		expect(snap.stats.activeProjects).toContain('brvmradar');
+		expect(snap.stats.activeProjects).toContain('lodgi');
 	});
 });
 

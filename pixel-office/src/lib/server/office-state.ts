@@ -69,8 +69,8 @@ class OfficeStateManager {
 				isTemporary: false,
 				state: 'WORKING',
 				currentProject: 'agents-skills',
-				activeProjects: ['agents-skills', 'lodgi'],
-				activeSkills: ['pwa-cadrage', 'shared-eco-tokens'],
+				activeProjects: ['agents-skills'],
+				activeSkills: ['shared-eco-tokens', 'pwa-developpement', 'pwa-cadrage', 'design-pwa-system'],
 				activityLabel: 'Editing pixel-office/+page.svelte',
 				contextRatio: 0.34,
 				contextTokens: 68_000,
@@ -106,7 +106,7 @@ class OfficeStateManager {
 				state: 'COFFEE',
 				currentProject: 'agents-skills',
 				activeProjects: ['agents-skills'],
-				activeSkills: ['pwa-validation'],
+				activeSkills: ['pwa-validation', 'shared-git-conventions', 'pwa-deploiement'],
 				activityLabel: 'Prêt pour audit QA & Lighthouse',
 				contextRatio: 0.12,
 				contextTokens: 24_000,
@@ -142,7 +142,7 @@ class OfficeStateManager {
 				state: 'GYM',
 				currentProject: 'lodgi',
 				activeProjects: ['lodgi'],
-				activeSkills: ['api-paiements'],
+				activeSkills: ['api-paiements', 'api-best-practices', 'shared-graft'],
 				activityLabel: 'Veille Webhooks GeniusPay',
 				contextRatio: 0.18,
 				contextTokens: 36_000,
@@ -302,10 +302,11 @@ class OfficeStateManager {
 		this.stats.totalEventsToday++;
 		if (event.project) {
 			this.stats.activeProject = event.project;
-			if (!this.stats.activeProjects) this.stats.activeProjects = [];
-			this.stats.activeProjects = Array.from(
-				new Set([event.project, ...this.stats.activeProjects])
-			).slice(0, 6);
+			const mergedStats = [
+				event.project,
+				...(this.stats.activeProjects || []).filter((p) => p !== event.project)
+			];
+			this.stats.activeProjects = mergedStats.slice(0, 8);
 		}
 
 		if (event.type === 'PET_INTERACT') {
@@ -329,15 +330,16 @@ class OfficeStateManager {
 			agent = this.agents.get('lead-dev')!;
 		}
 		agent.lastActivityAt = now;
-		this.bumpContextUsage(agent, event.contextRatio);
-
 		if (event.project) {
 			agent.currentProject = event.project;
-			if (!agent.activeProjects) agent.activeProjects = [];
-			agent.activeProjects = Array.from(
-				new Set([event.project, ...agent.activeProjects])
-			).slice(0, 4);
+			const currentList = agent.activeProjects || [];
+			const mergedAgent = [
+				event.project,
+				...currentList.filter((p) => p !== event.project)
+			];
+			agent.activeProjects = mergedAgent.slice(0, 5);
 		}
+		this.bumpContextUsage(agent, event.contextRatio);
 
 		switch (event.type) {
 			case 'WORK_START': {
@@ -345,13 +347,15 @@ class OfficeStateManager {
 				agent.targetPosition = { ...agent.deskPosition };
 				agent.targetAgentId = null;
 				agent.callMessage = null;
+				if (event.project) agent.currentProject = event.project;
 				if (event.activityLabel) {
 					agent.activityLabel = event.activityLabel;
 				} else {
 					agent.activityLabel = `Coding ${agent.currentProject ?? 'workspace'}`;
 				}
 				if (event.skills && event.skills.length > 0) {
-					agent.activeSkills = Array.from(new Set(event.skills)).slice(0, 4);
+					const merged = [...event.skills, ...(agent.activeSkills || [])];
+					agent.activeSkills = Array.from(new Set(merged)).slice(0, 5);
 				}
 				agent.lastDialogue = {
 					speaker: agent.name,
@@ -600,7 +604,7 @@ class OfficeStateManager {
 					isTemporary: true,
 					state: 'WORKING',
 					currentProject: event.project ?? this.stats.activeProject ?? 'agents-skills',
-					activeProjects: [event.project ?? this.stats.activeProject ?? 'agents-skills'],
+					activeProjects: event.project ? [event.project] : ['agents-skills'],
 					activeSkills: event.skills?.length ? event.skills : ['shared-eco-tokens'],
 					activityLabel: event.activityLabel ?? `Mission: ${subTitle}`,
 					contextRatio: 0,

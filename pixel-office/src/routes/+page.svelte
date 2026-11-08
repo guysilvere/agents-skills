@@ -360,16 +360,34 @@
 		return selectedAgent || leadAgent;
 	});
 
-	function getAgentDisplaySkills(agent: OfficeAgent | null): string[] {
-		if (!agent) return [];
-		if (agent.activeSkills && agent.activeSkills.length > 0) {
-			return agent.activeSkills;
+	const SKILL_LABELS: Record<string, string> = {
+		'shared-eco-tokens': 'Optimisation continue des tokens',
+		'pwa-cadrage': 'Cadrage, Naming & Blueprint',
+		'pwa-developpement': 'Développement, Specs & Code SvelteKit',
+		'design-pwa-system': 'Design System UI/UX Mobile-First',
+		'design-ux-flow': 'Méthodologie UX en 10 étapes',
+		'pwa-validation': 'Validation QA, Lighthouse & Sécurité',
+		'pwa-deploiement': 'Déploiement Coolify & Cloudflare',
+		'api-paiements': 'Passerelle Paiement Wave, OM, MTN & Moov',
+		'api-best-practices': 'Design RESTful, Idempotence & Webhooks',
+		'shared-git-conventions': 'Conventions Git & PRs GitHub',
+		'opencode-admin': 'Administration IA OpenCode & Antigravity',
+		'pwa-test-harness': 'Cockpit de tests & Specs vivantes',
+		'shared-graft': 'Indexation du graphe de code Graft',
+		'apple-design': 'Motion physique & Principes Apple',
+		'design-3d': '3D Procédural Three.js'
+	};
+
+	const activeSkillsList = $derived.by(() => {
+		if (activeDialogueAgent?.activeSkills && activeDialogueAgent.activeSkills.length > 0) {
+			return activeDialogueAgent.activeSkills;
 		}
-		if (agent.id === 'lead-dev') return ['pwa-cadrage', 'pwa-developpement', 'design-pwa-system'];
-		if (agent.id === 'ops-quality') return ['pwa-validation', 'pwa-deploiement', 'shared-git-conventions'];
-		if (agent.id === 'integrations') return ['api-paiements', 'api-best-practices'];
-		return ['shared-eco-tokens'];
-	}
+		const role = activeDialogueAgent?.role ?? 'lead-dev';
+		if (role === 'lead-dev') return ['shared-eco-tokens', 'pwa-developpement', 'pwa-cadrage', 'design-pwa-system'];
+		if (role === 'ops-quality') return ['pwa-validation', 'shared-git-conventions', 'pwa-deploiement'];
+		if (role === 'integrations') return ['api-paiements', 'api-best-practices', 'shared-graft'];
+		return ['shared-eco-tokens', 'pwa-developpement'];
+	});
 
 	$effect(() => {
 		const target = activeDialogueAgent?.lastDialogue?.text || '';
@@ -989,19 +1007,27 @@
 					<strong class="kpi-val" class:alert={waitingHumanCount > 0}>{waitingHumanCount} STOP</strong>
 				</div>
 
-				<div class="kpi-card kpi-projects-card" title="Projets surveillés dans /Users/silveremeya/Projets">
-					<span class="kpi-label">PROJETS ACTIFS ({snapshot?.stats.activeProjects?.length ?? 1})</span>
-					<div class="kpi-projects-chips">
-						{#each (snapshot?.stats.activeProjects || [snapshot?.stats.activeProject || 'agents-skills']) as proj}
-							<span
-								class="kpi-project-chip"
-								class:is-active={proj === snapshot?.stats.activeProject}
-								title="Projet: {proj}"
-							>
-								<span class="chip-led"></span>
-								{proj}
-							</span>
-						{/each}
+				<div class="kpi-card kpi-projects-card" title="Projets actuellement sollicités sous /Users/silveremeya/Projets">
+					<span class="kpi-label">
+						PROJETS EN COURS ({snapshot?.stats.activeProjects?.length ?? 1})
+					</span>
+					<div class="active-projects-list">
+						{#if snapshot?.stats.activeProjects && snapshot.stats.activeProjects.length > 0}
+							{#each snapshot.stats.activeProjects as proj}
+								<span
+									class="project-pill"
+									class:is-primary={proj === snapshot.stats.activeProject}
+									title="Projet: {proj}"
+								>
+									{#if proj === snapshot.stats.activeProject}
+										<span class="live-dot-mini"></span>
+									{/if}
+									{proj}
+								</span>
+							{/each}
+						{:else}
+							<strong class="kpi-val project-text">{snapshot?.stats.activeProject ?? 'agents-skills'}</strong>
+						{/if}
 					</div>
 				</div>
 
@@ -1114,23 +1140,19 @@
 									<div class="activity-line">{agent.activityLabel}</div>
 								{/if}
 
-								{#if (agent.state === 'WORKING' || agent.state === 'WAITING_HUMAN') && agent.currentProject}
+								{#if (agent.state === 'WORKING' || agent.state === 'WAITING_HUMAN') && (agent.currentProject || (agent.activeProjects && agent.activeProjects.length > 0))}
 									<div class="project-row">
 										<span class="project-label">PROJET:</span>
-										<strong class="project-value">{agent.currentProject}</strong>
 										{#if agent.activeProjects && agent.activeProjects.length > 1}
-											<span class="multi-project-badge" title="Actif sur {agent.activeProjects.join(' et ')}">
-												+{agent.activeProjects.length - 1} PROJ
-											</span>
+											<div class="agent-multi-projects-chips">
+												{#each agent.activeProjects as prj}
+													<span class="agent-prj-badge" class:is-current={prj === agent.currentProject}>{prj}</span>
+												{/each}
+											</div>
+										{:else}
+											<strong class="project-value">{agent.currentProject ?? agent.activeProjects?.[0]}</strong>
 										{/if}
 									</div>
-									{#if agent.activeProjects && agent.activeProjects.length > 1}
-										<div class="agent-active-projects-bar">
-											{#each agent.activeProjects as p}
-												<span class="agent-active-proj-pill" class:is-current={p === agent.currentProject}>{p}</span>
-											{/each}
-										</div>
-									{/if}
 									{#if agent.activeSkills.length > 0}
 										<div class="skills-list">
 											{#each agent.activeSkills as skill}
@@ -1244,7 +1266,15 @@
 											⚙ ACTION
 										{/if}
 									</span>
-									{#if activeDialogueAgent.currentProject}
+									{#if activeDialogueAgent.activeProjects && activeDialogueAgent.activeProjects.length > 0}
+										<div class="rpg-projects-group">
+											{#each activeDialogueAgent.activeProjects as prj}
+												<span class="rpg-project-badge" class:is-primary={prj === activeDialogueAgent.currentProject}>
+													{prj}
+												</span>
+											{/each}
+										</div>
+									{:else if activeDialogueAgent.currentProject}
 										<span class="rpg-project-badge">
 											{activeDialogueAgent.currentProject}
 										</span>
@@ -1264,16 +1294,27 @@
 							</div>
 
 							<!-- VUE DES SKILLS UTILISÉS DANS LA NOTE EN DESSOUS DU BUREAU -->
-							{#if getAgentDisplaySkills(activeDialogueAgent).length > 0}
-								<div class="rpg-skills-bar" title="Skills d'agent actives chargées dans la mémoire">
-									<span class="rpg-skills-title">SKILLS :</span>
-									<div class="rpg-skills-chips">
-										{#each getAgentDisplaySkills(activeDialogueAgent) as skill}
-											<span class="rpg-skill-chip">{skill}</span>
-										{/each}
-									</div>
+							<div class="rpg-skills-bar" title="Skills d'agent actives chargées dans la mémoire">
+								<div class="rpg-skills-lead">
+									<span class="skills-pulse-dot"></span>
+									<span class="rpg-skills-title">SKILLS EN JEU ({activeSkillsList.length}) :</span>
 								</div>
-							{/if}
+								<div class="rpg-skills-chips">
+									{#each activeSkillsList as skill, idx}
+										<span
+											class="rpg-skill-chip"
+											class:is-active-skill={idx === 0}
+											title="{skill} : {SKILL_LABELS[skill] ?? 'Skill certifiée Agence Bulles'}"
+										>
+											<span class="skill-dot-neon"></span>
+											<span class="skill-chip-name">{skill}</span>
+											{#if idx === 0}
+												<span class="skill-active-tag">ACTIF</span>
+											{/if}
+										</span>
+									{/each}
+								</div>
+							</div>
 
 							<div class="rpg-text-container">
 								<p class="rpg-typewriter-text">
@@ -1620,6 +1661,15 @@
 								></span>
 							</div>
 							<span class="roster-title">{leadAgent.title}</span>
+							<div class="roster-projects-row">
+								{#if leadAgent.activeProjects && leadAgent.activeProjects.length > 0}
+									{#each leadAgent.activeProjects as prj}
+										<span class="roster-prj-badge" class:is-primary={prj === leadAgent.currentProject}>{prj}</span>
+									{/each}
+								{:else if leadAgent.currentProject}
+									<span class="roster-prj-badge is-primary">{leadAgent.currentProject}</span>
+								{/if}
+							</div>
 							<div class="roster-status-row">
 								<span class="roster-state-chip state-{leadAgent.state.toLowerCase()}">
 									{formatStateLabel(leadAgent.state)}
@@ -1632,15 +1682,6 @@
 									style="width: {Math.round(leadAgent.contextRatio * 100)}%; background: {getContextGaugeColor(leadAgent.contextRatio)};"
 								></div>
 							</div>
-							{#if leadAgent.activeProjects && leadAgent.activeProjects.length > 0}
-								<div class="roster-projects-row" title="Projets surveillés dans /Users/silveremeya/Projets">
-									{#each leadAgent.activeProjects as proj}
-										<span class="roster-proj-tag" class:is-curr={proj === leadAgent.currentProject}>
-											{proj}
-										</span>
-									{/each}
-								</div>
-							{/if}
 						</div>
 					</button>
 				{/if}
@@ -1677,6 +1718,15 @@
 								></span>
 							</div>
 							<span class="roster-title">{ag.title}</span>
+							<div class="roster-projects-row">
+								{#if ag.activeProjects && ag.activeProjects.length > 0}
+									{#each ag.activeProjects as prj}
+										<span class="roster-prj-badge" class:is-primary={prj === ag.currentProject}>{prj}</span>
+									{/each}
+								{:else if ag.currentProject}
+									<span class="roster-prj-badge is-primary">{ag.currentProject}</span>
+								{/if}
+							</div>
 							<div class="roster-status-row">
 								<span class="roster-state-chip state-{ag.state.toLowerCase()}">
 									{formatStateLabel(ag.state)}
@@ -1689,15 +1739,6 @@
 									style="width: {Math.round(ag.contextRatio * 100)}%; background: {getContextGaugeColor(ag.contextRatio)};"
 								></div>
 							</div>
-							{#if ag.activeProjects && ag.activeProjects.length > 0}
-								<div class="roster-projects-row" title="Projets surveillés dans /Users/silveremeya/Projets">
-									{#each ag.activeProjects as proj}
-										<span class="roster-proj-tag" class:is-curr={proj === ag.currentProject}>
-											{proj}
-										</span>
-									{/each}
-								</div>
-							{/if}
 						</div>
 					</button>
 				{/each}
@@ -1730,15 +1771,6 @@
 								</div>
 								<span class="roster-title">{ag.title}</span>
 								<span class="roster-state-chip state-working">{formatStateLabel(ag.state)}</span>
-								{#if ag.activeProjects && ag.activeProjects.length > 0}
-									<div class="roster-projects-row" title="Projets surveillés dans /Users/silveremeya/Projets">
-										{#each ag.activeProjects as proj}
-											<span class="roster-proj-tag" class:is-curr={proj === ag.currentProject}>
-												{proj}
-											</span>
-										{/each}
-									</div>
-								{/if}
 							</div>
 						</button>
 					{/each}
@@ -1788,23 +1820,20 @@
 							<strong class="meta-value state-label">{formatStateLabel(selectedAgent.state)}</strong>
 						</div>
 						<div class="meta-field">
-							<span class="meta-caption">PROJET PRINCIPAL</span>
-							<strong class="meta-value">{selectedAgent.currentProject ?? '—'}</strong>
+							<span class="meta-caption">PROJETS ACTIFS</span>
+							{#if selectedAgent.activeProjects && selectedAgent.activeProjects.length > 0}
+								<div class="inspector-projects-chips">
+									{#each selectedAgent.activeProjects as prj}
+										<span class="inspector-prj-pill" class:is-primary={prj === selectedAgent.currentProject}>
+											{#if prj === selectedAgent.currentProject}●{/if} {prj}
+										</span>
+									{/each}
+								</div>
+							{:else}
+								<strong class="meta-value">{selectedAgent.currentProject ?? '—'}</strong>
+							{/if}
 						</div>
 					</div>
-
-					{#if selectedAgent.activeProjects && selectedAgent.activeProjects.length > 1}
-						<div class="inspector-multi-proj-box">
-							<span class="meta-caption">PROJETS EN CHARGE SIMULTANÉMENT</span>
-							<div class="inspector-proj-tags">
-								{#each selectedAgent.activeProjects as proj}
-									<span class="inspector-proj-pill" class:is-active={proj === selectedAgent.currentProject}>
-										<span class="pill-dot"></span>{proj}
-									</span>
-								{/each}
-							</div>
-						</div>
-					{/if}
 
 					{#if !selectedAgent.isTemporary}
 						<div class="inspector-gauge-section">
@@ -2439,12 +2468,12 @@
 		overflow: hidden;
 	}
 
-	/* 2. BARRE LATÉRALE GAUCHE (Refonte : 56px compact -> 195px étendu) */
+	/* 2. BARRE LATÉRALE GAUCHE (Refonte : 60px compact -> 210px étendu) */
 	.cockpit-sidebar {
-		width: 56px;
+		width: 60px;
 		flex-shrink: 0;
 		height: 100dvh;
-		background: #090e18;
+		background: #080d18;
 		border-right: 2px solid #1e293b;
 		display: flex;
 		flex-direction: column;
@@ -2452,15 +2481,15 @@
 		padding: 10px 0 8px 0;
 		box-sizing: border-box;
 		z-index: 30;
-		transition: width 140ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition: width 150ms cubic-bezier(0.4, 0, 0.2, 1);
 		overflow-x: hidden;
 		overflow-y: auto;
 	}
 
 	.cockpit-sidebar.expanded {
-		width: 195px;
+		width: 210px;
 		align-items: stretch;
-		padding: 10px 8px 8px 8px;
+		padding: 10px 10px 8px 10px;
 	}
 
 	.sidebar-header-dock {
@@ -2469,7 +2498,7 @@
 		align-items: center;
 		justify-content: center;
 		width: 100%;
-		margin-bottom: 10px;
+		margin-bottom: 12px;
 		gap: 6px;
 	}
 
@@ -2484,13 +2513,14 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		width: 38px;
-		height: 38px;
+		width: 42px;
+		height: 42px;
 		background: #111827;
 		border: 2px solid #d81b60;
 		box-shadow: 2px 2px 0px #000000;
 		position: relative;
 		flex-shrink: 0;
+		border-radius: 2px;
 	}
 
 	.logo-dot {
@@ -2552,19 +2582,6 @@
 		align-items: stretch;
 	}
 
-	/* RÈGLE STRICTE ANTI-DÉBORDEMENT : quand le menu est replié, masquer complètement tout texte */
-	.cockpit-sidebar:not(.expanded) .nav-btn-text,
-	.cockpit-sidebar:not(.expanded) .nav-section-title,
-	.cockpit-sidebar:not(.expanded) .lofi-volume-slider-box {
-		display: none !important;
-		visibility: hidden !important;
-		width: 0 !important;
-		height: 0 !important;
-		overflow: hidden !important;
-		pointer-events: none !important;
-		position: absolute !important;
-	}
-
 	.nav-section-title {
 		font-family: 'Press Start 2P', monospace;
 		font-size: 6px;
@@ -2588,62 +2605,56 @@
 	}
 
 	.nav-icon-btn {
-		width: 38px;
-		height: 38px;
-		min-width: 38px;
-		min-height: 38px;
-		max-width: 38px;
-		max-height: 38px;
-		background: #111827;
+		width: 42px;
+		height: 42px;
+		background: #0f172a;
 		border: 2px solid #1e293b;
 		box-shadow: 2px 2px 0px #000000;
 		color: #94a3b8;
 		display: flex;
+		flex-direction: row;
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
 		padding: 0;
 		box-sizing: border-box;
-		transition: all 80ms ease;
+		transition: all 120ms ease;
 		flex-shrink: 0;
-		overflow: hidden;
+		border-radius: 2px;
 	}
 
 	.cockpit-sidebar.expanded .nav-icon-btn {
 		width: 100%;
-		min-width: 100%;
-		max-width: 100%;
-		height: auto;
-		min-height: 38px;
-		max-height: none;
-		padding: 6px 8px;
+		height: 42px;
+		padding: 4px 10px;
 		justify-content: flex-start;
-		gap: 8px;
-		overflow: visible;
+		gap: 10px;
 	}
 
 	.nav-icon-btn:hover {
 		background: #1e293b;
 		border-color: #38bdf8;
 		color: #ffffff;
+		box-shadow: 0 0 8px rgba(56, 189, 248, 0.4), 2px 2px 0px #000000;
 	}
 
 	.nav-icon-btn.active {
-		background: #1a2333;
+		background: #1e1b4b;
 		border-color: #d81b60;
 		color: #ffffff;
-		box-shadow: 2px 2px 0px #d81b60;
+		box-shadow: 0 0 8px rgba(216, 27, 96, 0.5), 2px 2px 0px #000000;
 	}
 
 	.nav-icon-btn.muted {
-		opacity: 0.5;
-		border-color: #475569;
+		opacity: 0.4;
+		border-color: #334155;
 		color: #64748b;
 	}
 
 	.nav-btn-icon {
 		font-family: 'Press Start 2P', monospace;
 		font-size: 8px;
+		font-weight: bold;
 		color: currentColor;
 		flex-shrink: 0;
 		text-align: center;
@@ -2861,26 +2872,27 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: space-between;
+		justify-content: flex-start;
 		position: relative;
-		overflow: hidden;
-		padding: 4px 12px 4px 12px;
-		gap: 4px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		padding: 6px 12px 6px 12px;
+		gap: 6px;
 		box-sizing: border-box;
 	}
 
 	.canvas-frame {
 		position: relative;
 		aspect-ratio: 20 / 13;
-		width: min(100%, calc((100dvh - 195px) * (20 / 13)));
-		max-height: calc(100dvh - 195px);
+		width: min(100%, calc((100dvh - 250px) * (20 / 13)));
+		max-height: calc(100dvh - 250px);
 		border: 4px solid #000000;
 		box-shadow:
 			0 0 0 2px #1e293b,
 			0 16px 40px rgba(0, 0, 0, 0.85);
 		background: #18202c;
 		cursor: crosshair;
-		flex-shrink: 1;
+		flex-shrink: 0;
 	}
 
 	canvas {
@@ -3599,80 +3611,6 @@
 		transition: width 200ms ease;
 	}
 
-	.roster-projects-row {
-		display: flex;
-		align-items: center;
-		gap: 3px;
-		flex-wrap: wrap;
-		margin-top: 3px;
-	}
-
-	.roster-proj-tag {
-		font-family: 'Silkscreen', monospace;
-		font-size: 7px;
-		background: #090e17;
-		border: 1px solid #1e293b;
-		color: #94a3b8;
-		padding: 1px 4px;
-		border-radius: 2px;
-		line-height: 1.1;
-		white-space: nowrap;
-	}
-
-	.roster-proj-tag.is-curr {
-		background: #064e3b;
-		border-color: #10b981;
-		color: #a7f3d0;
-		font-weight: bold;
-	}
-
-	.inspector-multi-proj-box {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		padding: 6px 8px;
-		background: #0d131f;
-		border: 1px solid #1e293b;
-	}
-
-	.inspector-proj-tags {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		flex-wrap: wrap;
-	}
-
-	.inspector-proj-pill {
-		font-family: 'Silkscreen', monospace;
-		font-size: 7px;
-		background: #1e293b;
-		border: 1px solid #334155;
-		color: #cbd5e1;
-		padding: 2px 6px;
-		border-radius: 2px;
-		display: inline-flex;
-		align-items: center;
-		gap: 4px;
-	}
-
-	.inspector-proj-pill.is-active {
-		background: #064e3b;
-		border-color: #10b981;
-		color: #6ee7b7;
-	}
-
-	.inspector-proj-pill .pill-dot {
-		width: 4px;
-		height: 4px;
-		border-radius: 50%;
-		background: #94a3b8;
-	}
-
-	.inspector-proj-pill.is-active .pill-dot {
-		background: #10b981;
-		box-shadow: 0 0 4px #10b981;
-	}
-
 	.empty-subagents-card {
 		font-family: 'Silkscreen', monospace;
 		font-size: 8px;
@@ -4316,16 +4254,14 @@
 	/* BOÎTE DE DIALOGUE RPG RÉTRO (Typewriter Dialogue Box) : POSITIONNÉE SOUS LE CANVAS */
 	.rpg-dialogue-box {
 		position: relative;
-		width: min(100%, calc((100dvh - 195px) * (20 / 13)));
-		margin-top: auto;
-		margin-bottom: 2px;
+		width: min(100%, calc((100dvh - 250px) * (20 / 13)));
 		z-index: 10;
 		background: linear-gradient(180deg, #091122 0%, #030712 100%);
 		border: 3px solid #fbbf24;
 		box-shadow:
 			0 4px 16px rgba(0, 0, 0, 0.95),
 			inset 0 0 0 1px #78350f;
-		padding: 6px 12px;
+		padding: 8px 12px;
 		display: flex;
 		flex-direction: column;
 		cursor: pointer;
@@ -4455,40 +4391,228 @@
 	/* VUE DES SKILLS UTILISÉS DANS LA NOTE EN DESSOUS DU BUREAU */
 	.rpg-skills-bar {
 		display: flex;
+		flex-direction: column;
+		gap: 5px;
+		background: #030814;
+		border: 1px solid #0284c7;
+		box-shadow: inset 0 0 8px rgba(2, 132, 199, 0.2);
+		padding: 6px 10px;
+		margin: 2px 0 6px 0;
+		border-radius: 2px;
+	}
+
+	.rpg-skills-lead {
+		display: flex;
 		align-items: center;
 		gap: 6px;
-		background: #051020;
-		border: 1px dashed #1e3a5f;
-		padding: 3px 8px;
-		margin: 2px 0 4px 0;
-		border-radius: 2px;
+	}
+
+	.skills-pulse-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: #22c55e;
+		box-shadow: 0 0 6px #22c55e;
+		animation: livePulse 1.2s infinite;
+		flex-shrink: 0;
 	}
 
 	.rpg-skills-title {
 		font-family: 'Press Start 2P', monospace;
 		font-size: 6px;
-		color: #06b6d4;
+		color: #38bdf8;
 		letter-spacing: 0.5px;
 		flex-shrink: 0;
 	}
 
 	.rpg-skills-chips {
 		display: flex;
-		gap: 4px;
+		gap: 6px;
 		flex-wrap: wrap;
 		align-items: center;
 	}
 
 	.rpg-skill-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
 		font-family: 'Silkscreen', monospace;
-		font-size: 7px;
-		background: #022c22;
-		border: 1px solid #059669;
-		color: #34d399;
-		padding: 1px 6px;
+		font-size: 8px;
+		background: #061e2a;
+		border: 1px solid #0891b2;
+		color: #67e8f9;
+		padding: 2px 6px;
 		border-radius: 2px;
 		line-height: 1.2;
 		letter-spacing: 0.3px;
+		transition: all 0.15s ease;
+	}
+
+	.rpg-skill-chip.is-active-skill {
+		background: #022c22;
+		border-color: #10b981;
+		color: #a7f3d0;
+		box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+	}
+
+	.skill-dot-neon {
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: #34d399;
+		box-shadow: 0 0 4px #34d399;
+	}
+
+	.skill-chip-name {
+		font-weight: 500;
+	}
+
+	.skill-active-tag {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 5px;
+		background: #10b981;
+		color: #022c22;
+		padding: 1px 3px;
+		border-radius: 1px;
+		font-weight: bold;
+		letter-spacing: 0.2px;
+	}
+
+	.rpg-projects-group {
+		display: flex;
+		gap: 4px;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.rpg-project-badge.is-primary {
+		border-color: #38bdf8;
+		color: #ffffff;
+		background: #0369a1;
+		box-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+	}
+
+	/* STYLES MULTI-PROJETS : KPI, BUBBLES, ROSTER & INSPECTOR */
+	.kpi-projects-card {
+		min-width: 140px;
+	}
+
+	.active-projects-list {
+		display: flex;
+		gap: 4px;
+		flex-wrap: wrap;
+		align-items: center;
+		margin-top: 2px;
+	}
+
+	.project-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		background: #0f172a;
+		border: 1px solid #334155;
+		color: #94a3b8;
+		padding: 1px 5px;
+		border-radius: 2px;
+	}
+
+	.project-pill.is-primary {
+		background: #022c22;
+		border-color: #059669;
+		color: #34d399;
+		font-weight: bold;
+	}
+
+	.live-dot-mini {
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: #10b981;
+		box-shadow: 0 0 4px #10b981;
+		animation: livePulse 1s infinite;
+	}
+
+	.agent-multi-projects-chips {
+		display: flex;
+		gap: 3px;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.agent-prj-badge {
+		font-family: 'Silkscreen', monospace;
+		font-size: 6px;
+		background: #0f172a;
+		border: 1px solid #1e293b;
+		color: #64748b;
+		padding: 1px 4px;
+		border-radius: 2px;
+	}
+
+	.agent-prj-badge.is-current {
+		background: #042f2e;
+		border-color: #0d9488;
+		color: #2dd4bf;
+		font-weight: bold;
+	}
+
+	.roster-projects-row {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		margin-top: 2px;
+		flex-wrap: wrap;
+	}
+
+	.roster-prj-title {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 5px;
+		color: #475569;
+		letter-spacing: 0.3px;
+	}
+
+	.roster-prj-badge {
+		font-family: 'Silkscreen', monospace;
+		font-size: 6px;
+		background: #0f172a;
+		border: 1px solid #1e293b;
+		color: #64748b;
+		padding: 1px 4px;
+		border-radius: 2px;
+	}
+
+	.roster-prj-badge.is-current {
+		background: #022c22;
+		border-color: #059669;
+		color: #34d399;
+		font-weight: bold;
+	}
+
+	.inspector-projects-chips {
+		display: flex;
+		gap: 4px;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.inspector-prj-pill {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		background: #0f172a;
+		border: 1px solid #334155;
+		color: #94a3b8;
+		padding: 1px 6px;
+		border-radius: 2px;
+	}
+
+	.inspector-prj-pill.is-current {
+		background: #0369a1;
+		border-color: #38bdf8;
+		color: #ffffff;
+		box-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
+		font-weight: bold;
 	}
 
 	.rpg-text-container {

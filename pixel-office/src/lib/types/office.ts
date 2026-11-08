@@ -96,7 +96,7 @@ export interface OfficeAgent {
 	isTemporary: boolean;
 	state: AgentState;
 	currentProject: string | null;
-	/** Liste des projets récents actifs sur lesquels l'agent est mobilisé */
+	/** Liste des projets récents sur lesquels cet agent intervient (ex: ['agents-skills', 'lodgi']) */
 	activeProjects: string[];
 	activeSkills: string[];
 	/** Action précise en cours (ex: "Editing +page.svelte", "Running vitest") */
@@ -212,6 +212,7 @@ export interface OfficeSnapshot {
 	};
 	stats: {
 		activeProject: string | null;
+		/** Tous les projets actuellement actifs dans /Users/silveremeya/Projets */
 		activeProjects: string[];
 		totalEventsToday: number;
 		subagentsSpawnedToday: number;
