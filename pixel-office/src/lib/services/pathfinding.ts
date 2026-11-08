@@ -14,16 +14,40 @@ export const OFFICE_LOCATIONS = {
 		'ops-quality': { x: 14, y: 4 } satisfies GridPoint,
 		integrations: { x: 4, y: 10 } satisfies GridPoint
 	},
+	visitorSpots: {
+		'lead-dev': { x: 5, y: 5 } satisfies GridPoint,
+		'ops-quality': { x: 14, y: 5 } satisfies GridPoint,
+		integrations: { x: 5, y: 10 } satisfies GridPoint
+	},
+	meetingSpots: [
+		{ x: 16, y: 8 },
+		{ x: 17, y: 9 },
+		{ x: 16, y: 10 },
+		{ x: 17, y: 10 }
+	] satisfies GridPoint[],
+	serverRackSpot: { x: 16, y: 4 } satisfies GridPoint,
+	coffeeSpots: [
+		{ x: 17, y: 7 },
+		{ x: 3, y: 4 },
+		{ x: 5, y: 11 }
+	] satisfies GridPoint[],
+	plantSpots: [
+		{ x: 9, y: 7 },
+		{ x: 14, y: 7 }
+	] satisfies GridPoint[],
+	windowSpots: [
+		{ x: 6, y: 4 },
+		{ x: 12, y: 4 }
+	] satisfies GridPoint[],
+	librarySpots: [
+		{ x: 18, y: 9 },
+		{ x: 7, y: 5 }
+	] satisfies GridPoint[],
 	internDesks: [
 		{ x: 9, y: 8 },
 		{ x: 13, y: 8 },
 		{ x: 9, y: 10 },
 		{ x: 13, y: 10 }
-	] satisfies GridPoint[],
-	coffeeSpots: [
-		{ x: 17, y: 7 },
-		{ x: 17, y: 10 },
-		{ x: 2, y: 10 }
 	] satisfies GridPoint[],
 	loungeSpots: [
 		{ x: 16, y: 8 },

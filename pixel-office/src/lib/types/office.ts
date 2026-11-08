@@ -16,7 +16,13 @@ export const AgentStateSchema = z.enum([
 	'WAITING_HUMAN',
 	'DONE',
 	'CALLING',
+	'PHONE_CALL',
 	'VISITING',
+	'MEETING',
+	'CONTEMPLATING',
+	'WATERING_PLANT',
+	'LIBRARY',
+	'SERVER_CHECK',
 	'COFFEE',
 	'GYM',
 	'LOUNGE',
@@ -123,6 +129,17 @@ export interface OfficeAgent {
 	customMission?: string;
 	/** Accessoire visuel superposé */
 	customAccessory?: 'glasses' | 'headset' | 'coffee' | 'badge' | 'none';
+	/** Décoration posée sur le bureau */
+	deskDecor?: 'bonsai' | 'mug' | 'robot' | 'neon' | 'dual_monitor' | 'none';
+	/** Humeur / Statut personnalisé affiché en bulle au repos */
+	moodStatus?: string;
+	/** État de coup de fil ou intercom */
+	phoneCall?: {
+		withAgentId: string;
+		withAgentName: string;
+		isCaller: boolean;
+		topic: string;
+	} | null;
 	/** Dernier dialogue ou prise de parole (Typewriter RPG) */
 	lastDialogue?: AgentDialogue | null;
 	/** Effet Matrix Digital Rain au spawn / despawn */
@@ -145,6 +162,11 @@ export const IncomingEventSchema = z.object({
 		'TURN_DONE',
 		'CALL_AGENT',
 		'VISIT_AGENT',
+		'TEAM_MEETING',
+		'PHONE_CALL',
+		'END_CALL',
+		'SERVER_ALERT',
+		'COFFEE_CHAT',
 		'SPAWN_SUBAGENT',
 		'DISMISS_SUBAGENT',
 		'GO_COFFEE',
@@ -171,9 +193,13 @@ export const IncomingEventSchema = z.object({
 			title: z.string().optional(),
 			role: AgentRoleSchema.optional(),
 			shirtColor: z.string().optional(),
+			hairColor: z.string().optional(),
+			skinTone: z.string().optional(),
 			spriteIndex: z.number().min(0).max(5).optional(),
 			mission: z.string().optional(),
 			accessory: z.enum(['glasses', 'headset', 'coffee', 'badge', 'none']).optional(),
+			deskDecor: z.enum(['bonsai', 'mug', 'robot', 'neon', 'dual_monitor', 'none']).optional(),
+			moodStatus: z.string().optional(),
 			skills: z.array(z.string()).optional()
 		})
 		.optional()

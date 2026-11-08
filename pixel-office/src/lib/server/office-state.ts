@@ -89,6 +89,9 @@ class OfficeStateManager {
 				},
 				matrixEffect: null,
 				matrixStartedAt: null,
+				deskDecor: 'dual_monitor',
+				moodStatus: 'Architecte en deep work',
+				phoneCall: null,
 				lastDialogue: {
 					speaker: 'lead-dev',
 					text: 'Système opérationnel. Prêt à orchestrer les tâches et valider les specs.',
@@ -125,6 +128,9 @@ class OfficeStateManager {
 				},
 				matrixEffect: null,
 				matrixStartedAt: null,
+				deskDecor: 'robot',
+				moodStatus: 'Veille QA & Sécurité 100%',
+				phoneCall: null,
 				lastDialogue: {
 					speaker: 'ops-quality',
 					text: 'Pause café terminée. Standby pour audits Lighthouse, a11y et tests CI.',
@@ -161,6 +167,9 @@ class OfficeStateManager {
 				},
 				matrixEffect: null,
 				matrixStartedAt: null,
+				deskDecor: 'bonsai',
+				moodStatus: 'Passerelles de paiement parées',
+				phoneCall: null,
 				lastDialogue: {
 					speaker: 'integrations',
 					text: 'Session d\'échauffement. Connecteurs de paiement et tables Turso opérationnels.',
@@ -227,17 +236,20 @@ class OfficeStateManager {
 					continue;
 				}
 
-				if (!agent.isTemporary && idleMs > 15_000) {
-					if ((agent.state === 'WORKING' || agent.state === 'DONE') && idleMs > 25_000) {
+				if (!agent.isTemporary && idleMs > 12_000) {
+					if ((agent.state === 'WORKING' || agent.state === 'DONE') && idleMs > 20_000) {
 						this.sendToRandomBreak(agent);
 						changed = true;
 					} else if (
 						agent.state === 'IDLE_DESK' ||
 						agent.state === 'COFFEE' ||
 						agent.state === 'GYM' ||
-						agent.state === 'LOUNGE'
+						agent.state === 'LOUNGE' ||
+						agent.state === 'CONTEMPLATING' ||
+						agent.state === 'WATERING_PLANT' ||
+						agent.state === 'LIBRARY'
 					) {
-						if (Math.random() < 0.7) {
+						if (Math.random() < 0.75) {
 							this.sendToRandomBreak(agent);
 							changed = true;
 						}
@@ -245,23 +257,69 @@ class OfficeStateManager {
 				}
 			}
 
+			// Détection de rencontre spontanée (Pause café / échange informel entre collègues)
+			const restingAgents = Array.from(this.agents.values()).filter(
+				(a) =>
+					a.state !== 'WORKING' &&
+					a.state !== 'WAITING_HUMAN' &&
+					a.state !== 'MEETING' &&
+					a.state !== 'PHONE_CALL' &&
+					!a.isTemporary
+			);
+			if (restingAgents.length >= 2 && Math.random() < 0.5) {
+				const a1 = restingAgents[0];
+				const a2 = restingAgents[1];
+				const dist = Math.abs(a1.position.x - a2.position.x) + Math.abs(a1.position.y - a2.position.y);
+				if (dist <= 4) {
+					const casualQuotes = [
+						'Tu as vu les benchmarks de réactivité Svelte 5 ? C\'est bluffant.',
+						'La base Turso en dev local sans démon, quel gain de temps.',
+						'On synchronise les specs avant la prochaine PR ?',
+						'Un petit expresso pour recharger les tokens d\'attention.',
+						'Tout est vert côté CI/CD et Lighthouse.'
+					];
+					const quote = casualQuotes[Math.floor(Math.random() * casualQuotes.length)];
+					a1.lastDialogue = {
+						speaker: a1.name,
+						text: `[Échange informel avec ${a2.name}] « ${quote} »`,
+						type: 'thought',
+						timestamp: now
+					};
+					changed = true;
+				}
+			}
+
 			if (changed) {
 				this.broadcast();
 			}
-		}, 10_000);
+		}, 8_000);
 	}
 
 	private sendToRandomBreak(agent: OfficeAgent): void {
-		const choices: Array<'COFFEE' | 'GYM' | 'LOUNGE' | 'IDLE_DESK'> = [
+		const choices: Array<
+			| 'COFFEE'
+			| 'CONTEMPLATING'
+			| 'WATERING_PLANT'
+			| 'LIBRARY'
+			| 'LOUNGE'
+			| 'GYM'
+			| 'IDLE_DESK'
+		> = [
 			'COFFEE',
-			'GYM',
+			'COFFEE',
+			'CONTEMPLATING',
+			'WATERING_PLANT',
+			'LIBRARY',
 			'LOUNGE',
+			'GYM',
+			'IDLE_DESK',
 			'IDLE_DESK'
 		];
 		const nextState = choices[Math.floor(Math.random() * choices.length)];
 		agent.state = nextState;
 		agent.targetAgentId = null;
 		agent.callMessage = null;
+		agent.phoneCall = null;
 
 		if (nextState === 'COFFEE') {
 			const spot =
@@ -269,7 +327,28 @@ class OfficeStateManager {
 					Math.floor(Math.random() * OFFICE_LOCATIONS.coffeeSpots.length)
 				];
 			agent.targetPosition = { ...spot };
-			agent.activityLabel = 'Pause expresso';
+			agent.activityLabel = 'Pause café & expresso';
+		} else if (nextState === 'CONTEMPLATING') {
+			const spot =
+				OFFICE_LOCATIONS.windowSpots[
+					Math.floor(Math.random() * OFFICE_LOCATIONS.windowSpots.length)
+				];
+			agent.targetPosition = { ...spot };
+			agent.activityLabel = 'Regarde la vue par la baie vitrée';
+		} else if (nextState === 'WATERING_PLANT') {
+			const spot =
+				OFFICE_LOCATIONS.plantSpots[
+					Math.floor(Math.random() * OFFICE_LOCATIONS.plantSpots.length)
+				];
+			agent.targetPosition = { ...spot };
+			agent.activityLabel = 'Arrose la plante Monstera';
+		} else if (nextState === 'LIBRARY') {
+			const spot =
+				OFFICE_LOCATIONS.librarySpots[
+					Math.floor(Math.random() * OFFICE_LOCATIONS.librarySpots.length)
+				];
+			agent.targetPosition = { ...spot };
+			agent.activityLabel = 'Feuillette la documentation d\'architecture';
 		} else if (nextState === 'GYM') {
 			const spot =
 				OFFICE_LOCATIONS.gymSpots[Math.floor(Math.random() * OFFICE_LOCATIONS.gymSpots.length)];
@@ -281,10 +360,10 @@ class OfficeStateManager {
 					Math.floor(Math.random() * OFFICE_LOCATIONS.loungeSpots.length)
 				];
 			agent.targetPosition = { ...spot };
-			agent.activityLabel = 'Lecture doc architecture';
+			agent.activityLabel = 'Détente sur le canapé';
 		} else {
 			agent.targetPosition = { ...agent.deskPosition };
-			agent.activityLabel = 'En veille au poste';
+			agent.activityLabel = agent.moodStatus || 'En veille active au poste';
 		}
 	}
 
@@ -496,31 +575,58 @@ class OfficeStateManager {
 				break;
 			}
 
-			case 'CALL_AGENT': {
+			case 'CALL_AGENT':
+			case 'PHONE_CALL': {
 				const targetId = event.targetAgentId ?? 'ops-quality';
 				const target = this.agents.get(targetId);
+				const topic = event.message ?? `Relais vers ${targetId}`;
 				agent.state = 'CALLING';
 				agent.targetPosition = { ...agent.deskPosition };
 				agent.targetAgentId = targetId;
-				agent.callMessage = event.message ?? `Relais vers ${targetId}`;
-				agent.activityLabel = `En appel avec ${targetId}`;
+				agent.callMessage = topic;
+				agent.activityLabel = `En appel avec ${target?.name ?? targetId}`;
+				agent.phoneCall = {
+					withAgentId: targetId,
+					withAgentName: target?.name ?? targetId,
+					isCaller: true,
+					topic
+				};
 				if (event.project) agent.currentProject = event.project;
 
 				if (target) {
-					target.state = 'CALLING';
+					target.state = 'PHONE_CALL';
 					target.targetPosition = { ...target.deskPosition };
 					target.targetAgentId = agent.id;
 					target.callMessage = `En ligne avec ${agent.name}`;
 					target.activityLabel = `Répond à ${agent.name}`;
 					target.currentProject = agent.currentProject;
 					target.lastActivityAt = now;
+					target.phoneCall = {
+						withAgentId: agent.id,
+						withAgentName: agent.name,
+						isCaller: false,
+						topic
+					};
+					target.lastDialogue = {
+						speaker: target.name,
+						text: `📞 [Intercom ${agent.name}] « Reçu 5/5 pour : ${topic} »`,
+						type: 'action',
+						timestamp: now
+					};
 				}
+
+				agent.lastDialogue = {
+					speaker: agent.name,
+					text: `📞 [Appel ${target?.name ?? targetId}] « Point direct : ${topic} »`,
+					type: 'action',
+					timestamp: now
+				};
 
 				this.addLog({
 					source: event.source,
 					agentId: agent.id,
 					agentName: agent.name,
-					summary: `${agent.name} appelle ${targetId} au téléphone (${agent.callMessage})`,
+					summary: `${agent.name} appelle ${target?.name ?? targetId} au téléphone (« ${topic} »)`,
 					project: agent.currentProject,
 					skills: agent.activeSkills,
 					soundCue: 'call'
@@ -529,44 +635,77 @@ class OfficeStateManager {
 				setTimeout(() => {
 					const callerNow = this.agents.get(agent.id);
 					const receiverNow = this.agents.get(targetId);
-					if (callerNow && callerNow.state === 'CALLING') {
+					if (callerNow && (callerNow.state === 'CALLING' || callerNow.state === 'PHONE_CALL')) {
 						callerNow.state = 'WORKING';
 						callerNow.targetAgentId = null;
 						callerNow.callMessage = null;
+						callerNow.phoneCall = null;
 					}
-					if (receiverNow && receiverNow.state === 'CALLING') {
+					if (receiverNow && (receiverNow.state === 'CALLING' || receiverNow.state === 'PHONE_CALL')) {
 						receiverNow.state = 'WORKING';
 						receiverNow.targetAgentId = null;
 						receiverNow.callMessage = null;
+						receiverNow.phoneCall = null;
 					}
 					this.broadcast();
-				}, 7000);
+				}, 10_000);
+				break;
+			}
+
+			case 'END_CALL': {
+				agent.state = 'WORKING';
+				agent.phoneCall = null;
+				if (event.targetAgentId) {
+					const target = this.agents.get(event.targetAgentId);
+					if (target) {
+						target.state = 'WORKING';
+						target.phoneCall = null;
+					}
+				}
 				break;
 			}
 
 			case 'VISIT_AGENT': {
-				const targetId = event.targetAgentId ?? 'integrations';
+				const targetId = event.targetAgentId ?? 'ops-quality';
 				const target = this.agents.get(targetId);
 				agent.state = 'VISITING';
 				agent.targetAgentId = targetId;
 				agent.callMessage = event.message ?? `Point rapide avec ${targetId}`;
-				agent.activityLabel = `Briefing au bureau de ${targetId}`;
+				agent.activityLabel = `Briefing au bureau de ${target?.name ?? targetId}`;
 
 				if (target) {
 					target.state = 'WORKING';
 					target.targetPosition = { ...target.deskPosition };
 					target.lastActivityAt = now;
-					agent.targetPosition = {
-						x: target.deskPosition.x - 1,
-						y: target.deskPosition.y + 1
+					const vSpot = (OFFICE_LOCATIONS.visitorSpots as Record<string, { x: number; y: number }>)[targetId];
+					if (vSpot) {
+						agent.targetPosition = { ...vSpot };
+					} else {
+						agent.targetPosition = {
+							x: target.deskPosition.x - 1,
+							y: target.deskPosition.y + 1
+						};
+					}
+					target.lastDialogue = {
+						speaker: target.name,
+						text: `Reçu ${agent.name} au bureau : synchronisation en binôme.`,
+						type: 'action',
+						timestamp: now
 					};
 				}
+
+				agent.lastDialogue = {
+					speaker: agent.name,
+					text: `En visite chez ${target?.name ?? targetId} : ${agent.callMessage}`,
+					type: 'action',
+					timestamp: now
+				};
 
 				this.addLog({
 					source: event.source,
 					agentId: agent.id,
 					agentName: agent.name,
-					summary: `${agent.name} se déplace au bureau de ${targetId}`,
+					summary: `${agent.name} se déplace au bureau de ${target?.name ?? targetId}`,
 					project: agent.currentProject,
 					skills: agent.activeSkills,
 					soundCue: null
@@ -581,7 +720,129 @@ class OfficeStateManager {
 						visitorNow.callMessage = null;
 						this.broadcast();
 					}
-				}, 8500);
+				}, 10_000);
+				break;
+			}
+
+			case 'TEAM_MEETING': {
+				const meetingTopic = event.message ?? 'Standup & Revue d\'Architecture Globale';
+				let spotIdx = 0;
+				for (const ag of this.agents.values()) {
+					ag.state = 'MEETING';
+					ag.activityLabel = `En réunion : ${meetingTopic}`;
+					ag.targetAgentId = 'lead-dev';
+					ag.phoneCall = null;
+					const spot = OFFICE_LOCATIONS.meetingSpots[spotIdx % OFFICE_LOCATIONS.meetingSpots.length];
+					ag.targetPosition = { ...spot };
+					ag.lastDialogue = {
+						speaker: ag.name,
+						text:
+							ag.id === 'lead-dev'
+								? `Point d'équipe convoqué : « ${meetingTopic} ». Priorités alignées !`
+								: `Présent au salon : revue de code et synchronisation des modules en cours.`,
+						type: 'action',
+						timestamp: now
+					};
+					spotIdx++;
+				}
+
+				this.addLog({
+					source: event.source,
+					agentId: 'lead-dev',
+					agentName: 'lead-dev',
+					summary: `Convocation d'équipe par lead-dev : "${meetingTopic}"`,
+					project: this.stats.activeProject,
+					skills: ['pwa-cadrage', 'pwa-developpement'],
+					soundCue: 'call'
+				});
+
+				setTimeout(() => {
+					for (const ag of this.agents.values()) {
+						if (ag.state === 'MEETING') {
+							ag.state = 'WORKING';
+							ag.targetPosition = { ...ag.deskPosition };
+							ag.activityLabel = 'Fin de réunion — Reprise du code';
+						}
+					}
+					this.broadcast();
+				}, 16_000);
+				break;
+			}
+
+			case 'SERVER_ALERT': {
+				const qa = this.agents.get('ops-quality') ?? agent;
+				qa.state = 'SERVER_CHECK';
+				qa.targetPosition = { ...OFFICE_LOCATIONS.serverRackSpot };
+				qa.activityLabel = '🚨 Alerte Baie Serveur Coolify !';
+				qa.lastDialogue = {
+					speaker: qa.name,
+					text: '🚨 Alerte monitoring sur le Rack Coolify ! Examen des conteneurs et des tunnels Zero Trust.',
+					type: 'gate',
+					timestamp: now
+				};
+
+				this.addLog({
+					source: event.source,
+					agentId: qa.id,
+					agentName: qa.name,
+					summary: `Alerte infrastructure sur le Rack Serveur Coolify — ${qa.name} intervient`,
+					project: this.stats.activeProject,
+					skills: ['pwa-deploiement', 'pwa-validation'],
+					soundCue: 'permission'
+				});
+
+				setTimeout(() => {
+					const qaNow = this.agents.get(qa.id);
+					if (qaNow && qaNow.state === 'SERVER_CHECK') {
+						qaNow.state = 'DONE';
+						qaNow.targetPosition = { ...qaNow.deskPosition };
+						qaNow.activityLabel = 'Serveurs Coolify nominaux [OK]';
+						qaNow.lastDialogue = {
+							speaker: qaNow.name,
+							text: 'Conteneurs vérifiés, santé verte : proxy Cloudflare et Turso 100% nominaux.',
+							type: 'done',
+							timestamp: Date.now()
+						};
+						this.broadcast();
+					}
+				}, 11_000);
+				break;
+			}
+
+			case 'COFFEE_CHAT': {
+				const spot1 = OFFICE_LOCATIONS.coffeeSpots[0];
+				const spot2 = { x: spot1.x - 1, y: spot1.y };
+				agent.state = 'COFFEE';
+				agent.targetPosition = { ...spot1 };
+				agent.activityLabel = 'Pause café partagée';
+				const partnerId = event.targetAgentId ?? 'ops-quality';
+				const partner = this.agents.get(partnerId);
+				if (partner) {
+					partner.state = 'COFFEE';
+					partner.targetPosition = { ...spot2 };
+					partner.activityLabel = 'Discussion café informelle';
+					partner.lastDialogue = {
+						speaker: partner.name,
+						text: `Pause avec ${agent.name} : « Les tests CI passent à la vitesse de l'éclair ! »`,
+						type: 'thought',
+						timestamp: now
+					};
+				}
+				agent.lastDialogue = {
+					speaker: agent.name,
+					text: `Au coin café avec ${partner?.name ?? partnerId} : « Les specs sont verrouillées pour la suite. »`,
+					type: 'thought',
+					timestamp: now
+				};
+				this.addLog({
+					source: event.source,
+					agentId: agent.id,
+					agentName: agent.name,
+					summary: `Pause café partagée entre ${agent.name} et ${partner?.name ?? partnerId}`,
+					project: agent.currentProject,
+					skills: agent.activeSkills,
+					soundCue: null
+				});
 				break;
 			}
 
@@ -786,8 +1047,15 @@ class OfficeStateManager {
 					if (event.config.spriteIndex !== undefined)
 						agent.customSpriteIndex = event.config.spriteIndex;
 					if (event.config.shirtColor) agent.palette.shirt = event.config.shirtColor;
+					if (event.config.hairColor) agent.palette.hair = event.config.hairColor;
+					if (event.config.skinTone) agent.palette.skin = event.config.skinTone;
 					if (event.config.mission) agent.customMission = event.config.mission;
 					if (event.config.accessory) agent.customAccessory = event.config.accessory;
+					if (event.config.deskDecor) agent.deskDecor = event.config.deskDecor;
+					if (event.config.moodStatus) {
+						agent.moodStatus = event.config.moodStatus;
+						if (agent.state === 'IDLE_DESK') agent.activityLabel = event.config.moodStatus;
+					}
 					if (event.config.skills && event.config.skills.length > 0) {
 						agent.activeSkills = event.config.skills;
 					}
@@ -795,7 +1063,7 @@ class OfficeStateManager {
 						source: event.source,
 						agentId: agent.id,
 						agentName: agent.name,
-						summary: `Profil mis à jour : ${agent.name} (${agent.title}) [Style char_${agent.customSpriteIndex ?? 'auto'}]`,
+						summary: `Profil mis à jour : ${agent.name} (${agent.title}) [Sprite char_${agent.customSpriteIndex ?? 'auto'} | Décor: ${agent.deskDecor ?? 'standard'}]`,
 						project: agent.currentProject,
 						skills: agent.activeSkills,
 						soundCue: 'done'

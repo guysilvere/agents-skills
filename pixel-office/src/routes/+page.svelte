@@ -237,10 +237,14 @@
 
 	// Customisation des Agents (Style & Rôles/Objectifs)
 	let showCustomizerModal = $state(false);
-	let customizerTab: 'style' | 'role' = $state('style');
+	let customizerTab: 'style' | 'role' | 'desk' = $state('style');
 	let editSpriteIndex = $state(0);
 	let editShirtColor = $state('#D81B60');
+	let editHairColor = $state('#1A1A1A');
+	let editSkinTone = $state('#D49B6A');
 	let editAccessory: 'glasses' | 'headset' | 'coffee' | 'badge' | 'none' = $state('none');
+	let editDeskDecor: 'bonsai' | 'mug' | 'robot' | 'neon' | 'dual_monitor' | 'none' = $state('dual_monitor');
+	let editMoodStatus = $state('');
 	let editTitle = $state('');
 	let editMission = $state('');
 	let editRole: 'lead-dev' | 'ops-quality' | 'integrations' | 'subagent' = $state('lead-dev');
@@ -270,6 +274,33 @@
 		'#F8FAFC'
 	];
 
+	const HAIR_COLORS = [
+		'#1A1A1A', // Noir ébène
+		'#3E2723', // Châtain foncé
+		'#78350F', // Brun chaud
+		'#D97706', // Roux / Auburn
+		'#FBBF24', // Blond doré
+		'#0284C7', // Bleu Cyberpunk
+		'#D81B60', // Rose fluo
+		'#E2E8F0'  // Blanc argenté
+	];
+
+	const SKIN_TONES = [
+		'#F5CBA7', // Très claire
+		'#E59866', // Pêche dorée
+		'#D49B6A', // Métisse claire
+		'#C68642', // Ambrée
+		'#8D5524'  // Ébène foncée
+	];
+
+	const MOOD_PRESETS = [
+		'Architecte en deep work',
+		'Besoin urgent d\'un café',
+		'Mode Ninja Débug 100%',
+		'Zen & Spécifications alignées',
+		'Sprint final vers la release'
+	];
+
 	function getHierarchyRoleLabel(ag: OfficeAgent): string {
 		if (ag.id === 'lead-dev') return 'ORCHESTRATEUR';
 		if (ag.id === 'ops-quality') return 'SPÉCIALISTE QA';
@@ -281,7 +312,11 @@
 		selectedAgentId = agent.id;
 		editSpriteIndex = agent.customSpriteIndex ?? getAgentCharIndex(agent);
 		editShirtColor = agent.palette.shirt;
+		editHairColor = agent.palette.hair;
+		editSkinTone = agent.palette.skin;
 		editAccessory = agent.customAccessory ?? (agent.id === 'lead-dev' ? 'badge' : 'none');
+		editDeskDecor = agent.deskDecor ?? 'none';
+		editMoodStatus = agent.moodStatus ?? '';
 		editTitle = agent.title;
 		editMission = agent.customMission ?? '';
 		editRole = agent.role;
@@ -307,12 +342,60 @@
 				role: editRole,
 				spriteIndex: editSpriteIndex,
 				shirtColor: editShirtColor,
+				hairColor: editHairColor,
+				skinTone: editSkinTone,
 				accessory: editAccessory,
+				deskDecor: editDeskDecor,
+				moodStatus: editMoodStatus,
 				mission: editMission,
 				skills: editSkills
 			}
 		});
 		showCustomizerModal = false;
+	}
+
+	// Scénarios de vie et interactions d'équipe
+	function triggerTeamMeeting(): void {
+		triggerEvent({
+			type: 'TEAM_MEETING',
+			agentId: 'lead-dev',
+			message: 'Standup & Revue d\'Architecture Globale'
+		});
+	}
+
+	function triggerPhoneCall(callerId: string = 'lead-dev', targetId: string = 'ops-quality'): void {
+		triggerEvent({
+			type: 'PHONE_CALL',
+			agentId: callerId,
+			targetAgentId: targetId,
+			message: 'Synchronisation specs et validation continue'
+		});
+	}
+
+	function triggerDeskVisit(visitorId: string = 'lead-dev', targetId: string = 'ops-quality'): void {
+		triggerEvent({
+			type: 'VISIT_AGENT',
+			agentId: visitorId,
+			targetAgentId: targetId,
+			message: 'Briefing en binôme au poste'
+		});
+	}
+
+	function triggerServerAlert(): void {
+		triggerEvent({
+			type: 'SERVER_ALERT',
+			agentId: 'ops-quality',
+			message: 'Diagnostic Baie Coolify & Cloudflare'
+		});
+	}
+
+	function triggerCoffeeChat(): void {
+		triggerEvent({
+			type: 'COFFEE_CHAT',
+			agentId: 'lead-dev',
+			targetAgentId: 'ops-quality',
+			message: 'Pause café et échange technique'
+		});
 	}
 
 	const agentPaths = new Map<string, GridPoint[]>();
@@ -445,9 +528,21 @@
 			case 'DONE':
 				return 'TERMINÉ';
 			case 'CALLING':
-				return 'APPEL';
+				return 'APPEL INTERCOM';
+			case 'PHONE_CALL':
+				return '📞 EN LIGNE';
+			case 'MEETING':
+				return '📢 STANDUP';
 			case 'VISITING':
-				return 'RÉUNION';
+				return 'VISITE BINÔME';
+			case 'CONTEMPLATING':
+				return 'VUE EXTÉRIEURE';
+			case 'WATERING_PLANT':
+				return 'ARROSAGE PLANTE';
+			case 'LIBRARY':
+				return 'DOCUMENTATION';
+			case 'SERVER_CHECK':
+				return '🚨 RACK COOLIFY';
 			case 'COFFEE':
 				return 'PAUSE CAFÉ';
 			case 'GYM':
@@ -1501,6 +1596,52 @@
 
 						<hr />
 
+						<h3>SCÉNARIOS DE BUREAU & MEETINGS</h3>
+						<div class="btn-grid">
+							<button
+								type="button"
+								class="pixel-btn highlight-btn"
+								onclick={triggerTeamMeeting}
+								title="Convoquer toute l'équipe pour un Standup général au Salon"
+							>
+								📢 CONVOQUER STANDUP
+							</button>
+							<button
+								type="button"
+								class="pixel-btn warn-btn"
+								onclick={triggerServerAlert}
+								title="Déclencher une alerte sur le Rack Serveur Coolify"
+							>
+								🚨 ALERTE COOLIFY
+							</button>
+							<button
+								type="button"
+								class="pixel-btn ok-btn"
+								onclick={() => triggerPhoneCall(simAgentId, simTargetAgentId)}
+								title="Déclencher un appel intercom direct entre deux collègues"
+							>
+								📞 APPEL INTERCOM
+							</button>
+							<button
+								type="button"
+								class="pixel-btn secondary"
+								onclick={() => triggerDeskVisit(simAgentId, simTargetAgentId)}
+								title="Envoyer un agent au bureau d'un autre en binôme"
+							>
+								🚶 VISITE BINÔME
+							</button>
+							<button
+								type="button"
+								class="pixel-btn secondary"
+								onclick={triggerCoffeeChat}
+								title="Déclencher une pause café collective au comptoir"
+							>
+								☕ PAUSE CAFÉ ÉQUIPE
+							</button>
+						</div>
+
+						<hr />
+
 						<h3>RENFORTS (SOUS-AGENTS)</h3>
 						<div class="control-row">
 							<input
@@ -1951,7 +2092,15 @@
 						class:active={customizerTab === 'style'}
 						onclick={() => (customizerTab = 'style')}
 					>
-						1. STYLE & APPARENCE
+						1. STYLE & PHYSIQUE
+					</button>
+					<button
+						type="button"
+						class="tab-btn"
+						class:active={customizerTab === 'desk'}
+						onclick={() => (customizerTab = 'desk')}
+					>
+						2. BUREAU & HUMEUR
 					</button>
 					<button
 						type="button"
@@ -1959,7 +2108,7 @@
 						class:active={customizerTab === 'role'}
 						onclick={() => (customizerTab = 'role')}
 					>
-						2. RÔLE & OBJECTIFS
+						3. RÔLE & OBJECTIFS
 					</button>
 				</div>
 
@@ -2003,9 +2152,43 @@
 							</div>
 						</div>
 
+						<!-- Couleur de Cheveux -->
+						<div class="custom-section">
+							<span class="section-label">COULEUR DES CHEVEUX & COIFFURE</span>
+							<div class="color-palette-grid">
+								{#each HAIR_COLORS as color}
+									<button
+										type="button"
+										class="color-circle"
+										class:selected={editHairColor === color}
+										style="background-color: {color}; border-radius: 2px;"
+										onclick={() => (editHairColor = color)}
+										title="Cheveux: {color}"
+									></button>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Teinte de Peau -->
+						<div class="custom-section">
+							<span class="section-label">TEINTE DE PEAU & CARNATION</span>
+							<div class="color-palette-grid">
+								{#each SKIN_TONES as tone}
+									<button
+										type="button"
+										class="color-circle"
+										class:selected={editSkinTone === tone}
+										style="background-color: {tone}; border-radius: 4px;"
+										onclick={() => (editSkinTone = tone)}
+										title="Carnation: {tone}"
+									></button>
+								{/each}
+							</div>
+						</div>
+
 						<!-- Accessoires Pixel Art -->
 						<div class="custom-section">
-							<span class="section-label">ACCESSOIRE SUPERPOSÉ</span>
+							<span class="section-label">ACCESSOIRE PORTÉ</span>
 							<div class="accessory-chips">
 								<button
 									type="button"
@@ -2047,6 +2230,85 @@
 								>
 									Tasse Expresso
 								</button>
+							</div>
+						</div>
+					{:else if customizerTab === 'desk'}
+						<!-- Décoration posée sur le bureau -->
+						<div class="custom-section">
+							<span class="section-label">DÉCORATION POSÉE SUR LE BUREAU</span>
+							<div class="accessory-chips">
+								<button
+									type="button"
+									class="chip-btn"
+									class:active={editDeskDecor === 'none'}
+									onclick={() => (editDeskDecor = 'none')}
+								>
+									Standard (Aucun)
+								</button>
+								<button
+									type="button"
+									class="chip-btn"
+									class:active={editDeskDecor === 'dual_monitor'}
+									onclick={() => (editDeskDecor = 'dual_monitor')}
+								>
+									Double Écran Rétro
+								</button>
+								<button
+									type="button"
+									class="chip-btn"
+									class:active={editDeskDecor === 'bonsai'}
+									onclick={() => (editDeskDecor = 'bonsai')}
+								>
+									Bonsaï Zen
+								</button>
+								<button
+									type="button"
+									class="chip-btn"
+									class:active={editDeskDecor === 'mug'}
+									onclick={() => (editDeskDecor = 'mug')}
+								>
+									Mug Céramique
+								</button>
+								<button
+									type="button"
+									class="chip-btn"
+									class:active={editDeskDecor === 'robot'}
+									onclick={() => (editDeskDecor = 'robot')}
+								>
+									Figurine Robot
+								</button>
+								<button
+									type="button"
+									class="chip-btn"
+									class:active={editDeskDecor === 'neon'}
+									onclick={() => (editDeskDecor = 'neon')}
+								>
+									Lampe Néon Cyber
+								</button>
+							</div>
+						</div>
+
+						<!-- Humeur et statut personnel -->
+						<div class="custom-section">
+							<label for="edit-mood" class="section-label">HUMEUR & BULLE PERSONNELLE AU REPOS</label>
+							<input
+								id="edit-mood"
+								class="pixel-input"
+								type="text"
+								bind:value={editMoodStatus}
+								placeholder="ex: Architecte en deep work..."
+							/>
+							<div class="mood-presets-chips">
+								{#each MOOD_PRESETS as preset}
+									<button
+										type="button"
+										class="mood-chip-btn"
+										class:active={editMoodStatus === preset}
+										onclick={() => (editMoodStatus = preset)}
+									>
+										{preset}
+									</button>
+								{/each}
 							</div>
 						</div>
 					{:else}
@@ -3941,9 +4203,39 @@
 
 	.customizer-tabs {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 1fr 1fr 1fr;
 		background: #0b0f19;
 		border-bottom: 2px solid #1e293b;
+	}
+
+	.mood-presets-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+		margin-top: 6px;
+	}
+
+	.mood-chip-btn {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		background: #0f172a;
+		border: 1px solid #334155;
+		color: #94a3b8;
+		padding: 3px 6px;
+		cursor: pointer;
+		border-radius: 2px;
+		transition: all 0.1s ease;
+	}
+
+	.mood-chip-btn:hover {
+		border-color: #38bdf8;
+		color: #ffffff;
+	}
+
+	.mood-chip-btn.active {
+		background: #022c22;
+		border-color: #10b981;
+		color: #a7f3d0;
 	}
 
 	.tab-btn {

@@ -134,6 +134,12 @@ export function renderPixelOfficeScene(
 					frameCount
 				)
 		});
+		if (agent.deskDecor && agent.deskDecor !== 'none') {
+			entities.push({
+				zY: (agent.deskPosition.y + 1) * TILE_SIZE,
+				draw: (c) => drawAgentDeskDecor(c, agent, frameCount)
+			});
+		}
 	}
 
 	entities.sort((a, b) => a.zY - b.zY);
@@ -1053,6 +1059,19 @@ function drawAuthenticCharacter(
 		pxRect(ctx, drawX + 14, drawY + 19, 1, 2, '#78350F');
 	}
 
+	// Indicateur visuel d'appel téléphonique / intercom en cours (icône 📞 rétro clignotante)
+	if (agent.state === 'PHONE_CALL' || (agent.state === 'CALLING' && agent.phoneCall)) {
+		const phoneY = drawY - 8 - (Math.floor(frameCount / 3) % 2);
+		pxRect(ctx, drawX + 3, phoneY, 10, 6, '#1E293B');
+		pxRect(ctx, drawX + 4, phoneY + 1, 8, 4, '#F59E0B');
+		pxRect(ctx, drawX + 5, phoneY + 2, 2, 2, '#000000');
+		pxRect(ctx, drawX + 9, phoneY + 2, 2, 2, '#000000');
+		if (frameCount % 4 < 2) {
+			pxRect(ctx, drawX + 14, phoneY + 1, 1, 4, '#38BDF8');
+			pxRect(ctx, drawX + 16, phoneY, 1, 6, '#38BDF8');
+		}
+	}
+
 	// Effet Matrix Digital Rain au spawn / despawn
 	if (agent.matrixEffect) {
 		for (let c = 0; c < 8; c++) {
@@ -1060,6 +1079,53 @@ function drawAuthenticCharacter(
 			pxRect(ctx, drawX + c * 2, dropY, 2, 2, '#CCFFCC');
 			pxRect(ctx, drawX + c * 2, dropY - 2, 2, 2, 'rgba(0, 255, 65, 0.85)');
 		}
+	}
+}
+
+/**
+ * Dessine la décoration personnalisée posée sur le bureau de l'agent
+ */
+function drawAgentDeskDecor(
+	ctx: CanvasRenderingContext2D,
+	agent: AnimatedAgentView,
+	frameCount: number
+): void {
+	if (!agent.deskDecor || agent.deskDecor === 'none') return;
+	const deskX = agent.deskPosition.x * TILE_SIZE;
+	const deskY = agent.deskPosition.y * TILE_SIZE - 12;
+
+	if (agent.deskDecor === 'bonsai') {
+		// Mini bonsaï pixel art avec pot terre cuite
+		pxRect(ctx, deskX - 8, deskY + 6, 8, 3, '#9A3412');
+		pxRect(ctx, deskX - 7, deskY + 9, 6, 1, '#7C2D12');
+		pxRect(ctx, deskX - 6, deskY + 2, 4, 4, '#15803D');
+		pxRect(ctx, deskX - 8, deskY, 8, 3, '#166534');
+		pxRect(ctx, deskX - 5, deskY - 2, 5, 2, '#22C55E');
+	} else if (agent.deskDecor === 'mug') {
+		// Mug café céramique personnalisé
+		pxRect(ctx, deskX - 6, deskY + 4, 5, 5, '#0284C7');
+		pxRect(ctx, deskX - 2, deskY + 5, 2, 3, '#0369A1');
+		pxRect(ctx, deskX - 5, deskY + 5, 3, 3, '#38BDF8');
+		if (frameCount % 6 < 3) {
+			pxRect(ctx, deskX - 4, deskY + 1, 1, 2, 'rgba(255, 255, 255, 0.6)');
+		}
+	} else if (agent.deskDecor === 'robot') {
+		// Mini figurine Robot rétro avec yeux néon
+		pxRect(ctx, deskX - 7, deskY + 2, 6, 6, '#475569');
+		pxRect(ctx, deskX - 6, deskY + 4, 1, 1, '#38BDF8');
+		pxRect(ctx, deskX - 3, deskY + 4, 1, 1, '#38BDF8');
+		pxRect(ctx, deskX - 5, deskY, 2, 2, '#E11D48');
+	} else if (agent.deskDecor === 'neon') {
+		// Mini lampe néon cyberpunk
+		const glow = frameCount % 4 < 2 ? '#F43F5E' : '#FB7185';
+		pxRect(ctx, deskX - 6, deskY + 6, 5, 2, '#1E293B');
+		pxRect(ctx, deskX - 5, deskY + 2, 3, 4, glow);
+		pxRect(ctx, deskX - 6, deskY, 5, 2, '#FDA4AF');
+	} else if (agent.deskDecor === 'dual_monitor') {
+		// Écran secondaire compact inclinable
+		pxRect(ctx, deskX - 10, deskY + 2, 7, 7, '#0F172A');
+		pxRect(ctx, deskX - 9, deskY + 3, 5, 5, frameCount % 6 < 3 ? '#0369A1' : '#0284C7');
+		pxRect(ctx, deskX - 8, deskY + 9, 3, 2, '#334155');
 	}
 }
 
@@ -1096,8 +1162,13 @@ function drawPhoneConnectionBeams(
 	frameCount: number
 ): void {
 	for (const agent of agents) {
-		if (agent.state === 'CALLING' && agent.targetAgentId) {
-			const target = agents.find((a) => a.id === agent.targetAgentId);
+		const targetId = agent.targetAgentId ?? agent.phoneCall?.withAgentId;
+		if (
+			(agent.state === 'CALLING' || agent.state === 'PHONE_CALL') &&
+			targetId &&
+			agent.phoneCall?.isCaller !== false
+		) {
+			const target = agents.find((a) => a.id === targetId);
 			if (!target) continue;
 
 			const x1 = agent.renderX * TILE_SIZE + 8;

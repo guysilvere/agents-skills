@@ -248,4 +248,74 @@ describe('Supervision Multi-Projets Dynamique & Skills', () => {
 	});
 });
 
+describe('Scénarios Réalistes de Bureau & Customisation Étendue', () => {
+	it('déclenche un TEAM_MEETING et regroupe tous les agents au salon', () => {
+		const snap = officeState.applyEvent({
+			source: 'manual',
+			type: 'TEAM_MEETING',
+			agentId: 'lead-dev',
+			message: 'Sprint Review & Architecture'
+		});
+
+		for (const ag of snap.agents) {
+			expect(ag.state).toBe('MEETING');
+			expect(ag.activityLabel).toContain('Sprint Review');
+		}
+		expect(snap.logs[0].summary).toContain('Convocation d\'équipe');
+	});
+
+	it('établit un coup de fil PHONE_CALL bidirectionnel avec phoneCall state', () => {
+		const snap = officeState.applyEvent({
+			source: 'manual',
+			type: 'PHONE_CALL',
+			agentId: 'lead-dev',
+			targetAgentId: 'ops-quality',
+			message: 'Validation déploiement'
+		});
+
+		const lead = snap.agents.find((a) => a.id === 'lead-dev');
+		const qa = snap.agents.find((a) => a.id === 'ops-quality');
+		expect(lead?.state).toBe('CALLING');
+		expect(lead?.phoneCall?.isCaller).toBe(true);
+		expect(lead?.phoneCall?.withAgentId).toBe('ops-quality');
+
+		expect(qa?.state).toBe('PHONE_CALL');
+		expect(qa?.phoneCall?.isCaller).toBe(false);
+		expect(qa?.phoneCall?.withAgentId).toBe('lead-dev');
+	});
+
+	it('envoie ops-quality au rack serveur lors d’une SERVER_ALERT', () => {
+		const snap = officeState.applyEvent({
+			source: 'manual',
+			type: 'SERVER_ALERT',
+			agentId: 'ops-quality'
+		});
+
+		const qa = snap.agents.find((a) => a.id === 'ops-quality');
+		expect(qa?.state).toBe('SERVER_CHECK');
+		expect(qa?.targetPosition.x).toBe(16);
+		expect(qa?.targetPosition.y).toBe(4);
+	});
+
+	it('enregistre les options étendues hairColor, skinTone, deskDecor et moodStatus', () => {
+		const snap = officeState.applyEvent({
+			source: 'manual',
+			type: 'UPDATE_AGENT_CONFIG',
+			agentId: 'lead-dev',
+			config: {
+				hairColor: '#D81B60',
+				skinTone: '#8D5524',
+				deskDecor: 'bonsai',
+				moodStatus: 'Architecte zen et concentré'
+			}
+		});
+
+		const lead = snap.agents.find((a) => a.id === 'lead-dev');
+		expect(lead?.palette.hair).toBe('#D81B60');
+		expect(lead?.palette.skin).toBe('#8D5524');
+		expect(lead?.deskDecor).toBe('bonsai');
+		expect(lead?.moodStatus).toBe('Architecte zen et concentré');
+	});
+});
+
 
