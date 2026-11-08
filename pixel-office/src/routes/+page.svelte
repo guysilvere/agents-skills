@@ -824,114 +824,114 @@
 						</div>
 					</div>
 				{/if}
+			</div>
 
-				<!-- BOÎTE DE DIALOGUE RPG RÉTRO (Typewriter Dialogue Box) -->
-				{#if rpgDialogueVisible && activeDialogueAgent && activeDialogueAgent.lastDialogue}
-					{@const charIdx = getAgentCharIndex(activeDialogueAgent)}
-					{@const dialogue = activeDialogueAgent.lastDialogue}
-					<div
-						class="rpg-dialogue-box"
-						class:is-gate={activeDialogueAgent.state === 'WAITING_HUMAN' || dialogue.type === 'gate'}
-						onclick={completeTypewriterImmediately}
-						onkeydown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') completeTypewriterImmediately();
-						}}
-						role="button"
-						tabindex="0"
-						aria-label="Boîte de dialogue RPG. Cliquer pour afficher le texte complet"
-					>
-						<div class="rpg-box-border-top"></div>
-						<div class="rpg-box-inner">
+			<!-- BOÎTE DE DIALOGUE RPG RÉTRO (Typewriter Dialogue Box) : DÉPLACÉE SOUS LE CANVAS -->
+			{#if rpgDialogueVisible && activeDialogueAgent && activeDialogueAgent.lastDialogue}
+				{@const charIdx = getAgentCharIndex(activeDialogueAgent)}
+				{@const dialogue = activeDialogueAgent.lastDialogue}
+				<div
+					class="rpg-dialogue-box"
+					class:is-gate={activeDialogueAgent.state === 'WAITING_HUMAN' || dialogue.type === 'gate'}
+					onclick={completeTypewriterImmediately}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') completeTypewriterImmediately();
+					}}
+					role="button"
+					tabindex="0"
+					aria-label="Boîte de dialogue RPG. Cliquer pour afficher le texte complet"
+				>
+					<div class="rpg-box-border-top"></div>
+					<div class="rpg-box-inner">
+						<div
+							class="rpg-portrait-frame"
+							style="--portrait-border: {activeDialogueAgent.palette.shirt};"
+						>
 							<div
-								class="rpg-portrait-frame"
-								style="--portrait-border: {activeDialogueAgent.palette.shirt};"
-							>
-								<div
-									class="rpg-portrait"
-									style="background-image: url('/assets/characters/char_{charIdx}.png');"
-								></div>
-							</div>
-
-							<div class="rpg-dialogue-body">
-								<div class="rpg-dialogue-header">
-									<div class="rpg-speaker-row">
-										<strong class="rpg-speaker-name" style="color: {activeDialogueAgent.palette.shirt};">
-											{activeDialogueAgent.name.toUpperCase()}
-										</strong>
-										<span class="rpg-type-badge type-{dialogue.type}">
-											{#if dialogue.type === 'gate'}
-												⛔ JALON STOP
-											{:else if dialogue.type === 'thought'}
-												💭 RÉFLEXION
-											{:else if dialogue.type === 'done'}
-												✔ SUCCÈS
-											{:else}
-												⚙ ACTION
-											{/if}
-										</span>
-									</div>
-									<button
-										type="button"
-										class="rpg-close-btn"
-										onclick={(e) => {
-											e.stopPropagation();
-											rpgDialogueVisible = false;
-										}}
-										title="Masquer la boîte de dialogue"
-									>
-										✕
-									</button>
-								</div>
-
-								<div class="rpg-text-container">
-									<p class="rpg-typewriter-text">
-										{typewriterText}
-										{#if typewriterText.length < typewriterTargetText.length}
-											<span class="typewriter-cursor">▌</span>
-										{/if}
-									</p>
-								</div>
-
-								{#if activeDialogueAgent.state === 'WAITING_HUMAN' || dialogue.type === 'gate'}
-									<div class="rpg-dialogue-actions">
-										<button
-											type="button"
-											class="pixel-btn rpg-btn-approve"
-											onclick={(e) => {
-												e.stopPropagation();
-												resolveHumanGate(activeDialogueAgent.id, 'approve');
-											}}
-										>
-											✔ APPROUVER LE JALON
-										</button>
-										<button
-											type="button"
-											class="pixel-btn rpg-btn-reject"
-											onclick={(e) => {
-												e.stopPropagation();
-												resolveHumanGate(activeDialogueAgent.id, 'reject');
-											}}
-										>
-											↺ RÉVISION
-										</button>
-									</div>
-								{/if}
-							</div>
+								class="rpg-portrait"
+								style="background-image: url('/assets/characters/char_{charIdx}.png');"
+							></div>
 						</div>
 
-						<div class="rpg-next-arrow" title="Cliquer pour afficher tout le texte">▼</div>
+						<div class="rpg-dialogue-body">
+							<div class="rpg-dialogue-header">
+								<div class="rpg-speaker-row">
+									<strong class="rpg-speaker-name" style="color: {activeDialogueAgent.palette.shirt};">
+										{activeDialogueAgent.name.toUpperCase()}
+									</strong>
+									<span class="rpg-type-badge type-{dialogue.type}">
+										{#if dialogue.type === 'gate'}
+											⛔ JALON STOP
+										{:else if dialogue.type === 'thought'}
+											💭 RÉFLEXION
+										{:else if dialogue.type === 'done'}
+											✔ SUCCÈS
+										{:else}
+											⚙ ACTION
+										{/if}
+									</span>
+								</div>
+								<button
+									type="button"
+									class="rpg-close-btn"
+									onclick={(e) => {
+										e.stopPropagation();
+										rpgDialogueVisible = false;
+									}}
+									title="Masquer la boîte de dialogue"
+								>
+									✕
+								</button>
+							</div>
+
+							<div class="rpg-text-container">
+								<p class="rpg-typewriter-text">
+									{typewriterText}
+									{#if typewriterText.length < typewriterTargetText.length}
+										<span class="typewriter-cursor">▌</span>
+									{/if}
+								</p>
+							</div>
+
+							{#if activeDialogueAgent.state === 'WAITING_HUMAN' || dialogue.type === 'gate'}
+								<div class="rpg-dialogue-actions">
+									<button
+										type="button"
+										class="pixel-btn rpg-btn-approve"
+										onclick={(e) => {
+											e.stopPropagation();
+											resolveHumanGate(activeDialogueAgent.id, 'approve');
+										}}
+									>
+										✔ APPROUVER LE JALON
+									</button>
+									<button
+										type="button"
+										class="pixel-btn rpg-btn-reject"
+										onclick={(e) => {
+											e.stopPropagation();
+											resolveHumanGate(activeDialogueAgent.id, 'reject');
+										}}
+									>
+										↺ RÉVISION
+									</button>
+								</div>
+							{/if}
+						</div>
 					</div>
-				{:else if !rpgDialogueVisible && activeDialogueAgent}
-					<button
-						type="button"
-						class="btn-restore-dialogue"
-						onclick={() => (rpgDialogueVisible = true)}
-						title="Afficher la boîte de dialogue RPG"
-					>
-						💬 DIALOGUE RPG : {activeDialogueAgent.name}
-					</button>
-				{/if}
-			</div>
+
+					<div class="rpg-next-arrow" title="Cliquer pour afficher tout le texte">▼</div>
+				</div>
+			{:else if !rpgDialogueVisible && activeDialogueAgent}
+				<button
+					type="button"
+					class="btn-restore-dialogue"
+					onclick={() => (rpgDialogueVisible = true)}
+					title="Afficher la boîte de dialogue RPG"
+				>
+					💬 DIALOGUE RPG : {activeDialogueAgent.name}
+				</button>
+			{/if}
 
 			{#if showControlDrawer}
 				<aside class="control-drawer-dock" aria-label="Console de commande">
@@ -2352,25 +2352,28 @@
 	.stage-viewport {
 		flex: 1;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		position: relative;
 		overflow: hidden;
-		padding: 10px;
+		padding: 6px 12px 8px 12px;
+		gap: 8px;
 		box-sizing: border-box;
 	}
 
 	.canvas-frame {
 		position: relative;
 		aspect-ratio: 20 / 13;
-		width: min(100%, calc((100dvh - 120px) * (20 / 13)));
-		max-height: calc(100dvh - 120px);
+		width: min(100%, calc((100dvh - 215px) * (20 / 13)));
+		max-height: calc(100dvh - 215px);
 		border: 4px solid #000000;
 		box-shadow:
 			0 0 0 2px #1e293b,
-			0 20px 50px rgba(0, 0, 0, 0.85);
+			0 16px 40px rgba(0, 0, 0, 0.85);
 		background: #18202c;
 		cursor: crosshair;
+		flex-shrink: 0;
 	}
 
 	canvas {
@@ -3729,30 +3732,30 @@
 		transform: translateY(-1px);
 	}
 
-	/* BOÎTE DE DIALOGUE RPG RÉTRO (Typewriter Dialogue Box) */
+	/* BOÎTE DE DIALOGUE RPG RÉTRO (Typewriter Dialogue Box) : POSITIONNÉE SOUS LE CANVAS */
 	.rpg-dialogue-box {
-		position: absolute;
-		bottom: 8px;
-		left: 8px;
-		right: 8px;
-		z-index: 30;
+		position: relative;
+		width: min(100%, calc((100dvh - 215px) * (20 / 13)));
+		z-index: 10;
 		background: linear-gradient(180deg, #091122 0%, #030712 100%);
 		border: 3px solid #fbbf24;
 		box-shadow:
-			0 6px 18px rgba(0, 0, 0, 0.95),
+			0 4px 16px rgba(0, 0, 0, 0.95),
 			inset 0 0 0 1px #78350f;
 		padding: 8px 12px;
 		display: flex;
 		flex-direction: column;
 		cursor: pointer;
 		user-select: none;
+		box-sizing: border-box;
+		flex-shrink: 0;
 	}
 
 	.rpg-dialogue-box.is-gate {
 		border-color: #f59e0b;
 		box-shadow:
 			0 0 0 2px #ef4444,
-			0 6px 20px rgba(0, 0, 0, 0.95);
+			0 4px 16px rgba(0, 0, 0, 0.95);
 	}
 
 	.rpg-box-inner {
@@ -3762,8 +3765,8 @@
 	}
 
 	.rpg-portrait-frame {
-		width: 48px;
-		height: 48px;
+		width: 44px;
+		height: 44px;
 		flex-shrink: 0;
 		background: #020617;
 		border: 2px solid var(--portrait-border, #38bdf8);
@@ -3775,8 +3778,10 @@
 	.rpg-portrait {
 		width: 100%;
 		height: 100%;
-		background-size: 192px 192px;
-		background-position: -8px -6px;
+		/* Spritesheet 112x96 (7 frames de 16x32). La tête de face est en (0,0) avec 16x16px.
+		   Zoom x2.75 -> 308px x 264px pour remplir parfaitement le cadre 44x44 sans clone */
+		background-size: 308px 264px;
+		background-position: 0px 0px;
 		background-repeat: no-repeat;
 		image-rendering: pixelated;
 	}
@@ -3905,18 +3910,16 @@
 	}
 
 	.btn-restore-dialogue {
-		position: absolute;
-		bottom: 10px;
-		right: 10px;
-		z-index: 20;
+		position: relative;
 		font-family: 'Press Start 2P', monospace;
 		font-size: 7px;
 		background: #091122;
 		border: 2px solid #fbbf24;
 		color: #fbbf24;
-		padding: 6px 10px;
+		padding: 6px 12px;
 		cursor: pointer;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+		margin-top: 4px;
 	}
 
 	.btn-restore-dialogue:hover {
