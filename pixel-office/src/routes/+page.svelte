@@ -1214,63 +1214,34 @@
 							style="left: {leftPct}%; top: {topPct}%; --agent-color: {agent.palette.shirt};"
 						>
 							{#if agent.state === 'WAITING_HUMAN'}
-								<div class="permission-alert-badge">STOP — VALIDATION HUMAINE</div>
+								<div class="permission-alert-badge">⛔ STOP JALON</div>
 							{:else if agent.state === 'DONE'}
-								<div class="done-check-badge">TERMINÉ [OK]</div>
+								<div class="done-check-badge">✔ TERMINÉ</div>
 							{/if}
 
 							<div
-								class="speech-bubble"
-								class:is-calling={agent.state === 'CALLING'}
+								class="speech-bubble mini-pill"
+								class:is-calling={agent.state === 'CALLING' || agent.state === 'PHONE_CALL'}
 								class:is-waiting={agent.state === 'WAITING_HUMAN'}
+								class:is-selected={selectedAgentId === agent.id}
+								onclick={(e) => {
+									e.stopPropagation();
+									toggleAgentSelection(agent.id);
+								}}
+								role="button"
+								tabindex="0"
+								onkeydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') toggleAgentSelection(agent.id);
+								}}
+								aria-label="Agent {agent.name}: {agent.activityLabel || agent.callMessage || formatStateLabel(agent.state)}"
 							>
-								<div class="bubble-header">
-									<span class="agent-name">{agent.name}</span>
-									<span class="state-chip state-{agent.state.toLowerCase()}">
-										{formatStateLabel(agent.state)}
+								<span class="pill-dot state-{agent.state.toLowerCase()}"></span>
+								<strong class="pill-name">{agent.name}</strong>
+								{#if agent.activityLabel || agent.callMessage}
+									<span class="pill-sep">·</span>
+									<span class="pill-action" title={agent.activityLabel || agent.callMessage}>
+										{agent.activityLabel || agent.callMessage}
 									</span>
-								</div>
-
-								{#if agent.activityLabel}
-									<div class="activity-line">{agent.activityLabel}</div>
-								{/if}
-
-								{#if (agent.state === 'WORKING' || agent.state === 'WAITING_HUMAN') && (agent.currentProject || (agent.activeProjects && agent.activeProjects.length > 0))}
-									<div class="project-row">
-										<span class="project-label">PROJET:</span>
-										{#if agent.activeProjects && agent.activeProjects.length > 1}
-											<div class="agent-multi-projects-chips">
-												{#each agent.activeProjects as prj}
-													<span class="agent-prj-badge" class:is-current={prj === agent.currentProject}>{prj}</span>
-												{/each}
-											</div>
-										{:else}
-											<strong class="project-value">{agent.currentProject ?? agent.activeProjects?.[0]}</strong>
-										{/if}
-									</div>
-									{#if agent.activeSkills.length > 0}
-										<div class="skills-list">
-											{#each agent.activeSkills as skill}
-												<span class="skill-badge">{skill}</span>
-											{/each}
-										</div>
-									{/if}
-								{:else if (agent.state === 'CALLING' || agent.state === 'VISITING') && agent.callMessage}
-									<div class="call-row">
-										<span>{agent.callMessage}</span>
-									</div>
-								{/if}
-
-								{#if !agent.isTemporary && agent.contextTokens > 0}
-									<div
-										class="context-gauge-track"
-										title="{Math.round(agent.contextRatio * 100)}% contexte utilisé ({Math.round(agent.contextTokens / 1000)}k / {Math.round(agent.maxContextTokens / 1000)}k tokens)"
-									>
-										<div
-											class="context-gauge-fill"
-											style="width: {Math.min(100, Math.round(agent.contextRatio * 100))}%; background: {getContextGaugeColor(agent.contextRatio)};"
-										></div>
-									</div>
 								{/if}
 							</div>
 						</div>
@@ -3131,10 +3102,11 @@
 	/* SCÈNE DU BUREAU TOP-DOWN (100% VISIBLE ET LIBÉRÉE) */
 	.stage-viewport {
 		flex: 1;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: flex-start;
+		justify-content: space-between;
 		position: relative;
 		overflow-y: auto;
 		overflow-x: hidden;
@@ -3146,15 +3118,16 @@
 	.canvas-frame {
 		position: relative;
 		aspect-ratio: 20 / 13;
-		width: min(100%, calc((100dvh - 250px) * (20 / 13)));
-		max-height: calc(100dvh - 250px);
+		flex: 1 1 0;
+		min-height: 0;
+		width: auto;
+		max-width: 100%;
 		border: 4px solid #000000;
 		box-shadow:
 			0 0 0 2px #1e293b,
 			0 16px 40px rgba(0, 0, 0, 0.85);
 		background: #18202c;
 		cursor: crosshair;
-		flex-shrink: 0;
 	}
 
 	canvas {
@@ -3208,164 +3181,126 @@
 		margin-bottom: 3px;
 	}
 
-	.speech-bubble {
-		min-width: 135px;
-		max-width: 215px;
-		background: rgba(15, 23, 42, 0.94);
-		border: 2px solid var(--agent-color, #d81b60);
-		box-shadow: 3px 3px 0px #000000;
-		padding: 4px 6px;
-		color: #ffffff;
+	.speech-bubble.mini-pill {
+		min-width: 0;
+		max-width: 145px;
+		height: 18px;
+		background: rgba(8, 13, 24, 0.78);
+		backdrop-filter: blur(2px);
+		border: 1.5px solid var(--agent-color, #d81b60);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 1px 1px 0px #000000;
+		padding: 0 6px;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		white-space: nowrap;
 		position: relative;
-		margin-bottom: 4px;
+		margin-bottom: 3px;
+		pointer-events: auto;
+		cursor: pointer;
+		border-radius: 2px;
+		transition: all 0.15s ease;
+		user-select: none;
 	}
 
-	.speech-bubble.is-calling {
+	.speech-bubble.mini-pill:hover {
+		background: rgba(15, 23, 42, 0.95);
 		border-color: #38bdf8;
-		animation: pulseBorder 0.7s infinite alternate;
+		max-width: 220px;
+		z-index: 20;
+		transform: translateY(-1px);
 	}
 
-	.speech-bubble.is-waiting {
+	.speech-bubble.mini-pill.is-calling {
+		border-color: #38bdf8;
+		background: rgba(12, 74, 110, 0.88);
+		animation: pulsePill 0.6s infinite alternate;
+	}
+
+	.speech-bubble.mini-pill.is-waiting {
 		border-color: #f59e0b;
-		background: rgba(69, 26, 3, 0.95);
+		background: rgba(120, 53, 15, 0.88);
+		animation: pulsePill 0.5s infinite alternate;
 	}
 
-	@keyframes pulseBorder {
+	.speech-bubble.mini-pill.is-selected {
+		border-color: #38bdf8;
+		box-shadow: 0 0 8px rgba(56, 189, 248, 0.7), 1px 1px 0px #000000;
+	}
+
+	@keyframes pulsePill {
 		from {
-			transform: translateY(0px);
+			transform: translateY(0);
 		}
 		to {
-			transform: translateY(-3px);
+			transform: translateY(-2px);
 		}
 	}
 
-	@keyframes pulseCard {
-		from {
-			border-color: #f59e0b;
-			box-shadow: 0 0 4px #f59e0b;
-		}
-		to {
-			border-color: #ef4444;
-			box-shadow: 0 0 10px #ef4444;
-		}
-	}
-
-	.speech-bubble::after {
+	.speech-bubble.mini-pill::after {
 		content: '';
 		position: absolute;
-		bottom: -6px;
+		bottom: -4px;
 		left: 50%;
 		transform: translateX(-50%);
 		width: 0;
 		height: 0;
-		border-left: 5px solid transparent;
-		border-right: 5px solid transparent;
-		border-top: 6px solid var(--agent-color, #d81b60);
+		border-left: 3px solid transparent;
+		border-right: 3px solid transparent;
+		border-top: 4px solid var(--agent-color, #d81b60);
 	}
 
-	.bubble-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 6px;
-		border-bottom: 1px solid #334155;
-		padding-bottom: 2px;
-		margin-bottom: 2px;
+	.speech-bubble.mini-pill .pill-dot {
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: #64748b;
+		flex-shrink: 0;
 	}
 
-	.agent-name {
-		font-family: 'Press Start 2P', monospace;
-		font-size: 7px;
-		color: #ffffff;
+	.speech-bubble.mini-pill .pill-dot.state-working {
+		background: #22c55e;
+		box-shadow: 0 0 5px #22c55e;
 	}
 
-	.state-chip {
+	.speech-bubble.mini-pill .pill-dot.state-waiting_human {
+		background: #f59e0b;
+		box-shadow: 0 0 6px #f59e0b;
+		animation: livePulse 0.8s infinite;
+	}
+
+	.speech-bubble.mini-pill .pill-dot.state-done {
+		background: #4ade80;
+	}
+
+	.speech-bubble.mini-pill .pill-dot.state-calling,
+	.speech-bubble.mini-pill .pill-dot.state-visiting {
+		background: #38bdf8;
+		box-shadow: 0 0 6px #38bdf8;
+	}
+
+	.speech-bubble.mini-pill .pill-name {
 		font-family: 'Press Start 2P', monospace;
 		font-size: 6px;
-		padding: 1px 4px;
-		background: #334155;
-		color: #e2e8f0;
+		color: #ffffff;
+		flex-shrink: 0;
+		letter-spacing: 0.2px;
 	}
 
-	.state-chip.state-working {
-		background: #14532d;
-		color: #4ade80;
-	}
-
-	.state-chip.state-waiting_human {
-		background: #b45309;
-		color: #fef3c7;
-	}
-
-	.state-chip.state-done {
-		background: #15803d;
-		color: #bbf7d0;
-	}
-
-	.state-chip.state-calling,
-	.state-chip.state-visiting {
-		background: #0c4a6e;
-		color: #38bdf8;
-	}
-
-	.activity-line {
-		font-family: 'Silkscreen', monospace;
+	.speech-bubble.mini-pill .pill-sep {
 		font-size: 8px;
-		color: #38bdf8;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		margin-bottom: 2px;
+		color: #64748b;
+		flex-shrink: 0;
 	}
 
-	.project-row {
-		font-family: 'Silkscreen', monospace;
-		font-size: 8px;
-		line-height: 1.1;
-		margin-bottom: 2px;
-	}
-
-	.project-label {
-		color: #94a3b8;
-	}
-
-	.project-value {
-		color: #f472b6;
-	}
-
-	.skills-list {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 3px;
-		margin-bottom: 3px;
-	}
-
-	.skill-badge {
+	.speech-bubble.mini-pill .pill-action {
 		font-family: 'Silkscreen', monospace;
 		font-size: 7px;
-		background: #134242;
-		color: #c2e8e8;
-		border: 1px solid #2dd4bf;
-		padding: 1px 4px;
-	}
-
-	.call-row {
-		font-family: 'Silkscreen', monospace;
-		font-size: 8px;
 		color: #7dd3fc;
-	}
-
-	.context-gauge-track {
-		width: 100%;
-		height: 3px;
-		background: #1e293b;
-		margin-top: 2px;
 		overflow: hidden;
-	}
-
-	.context-gauge-fill {
-		height: 100%;
-		transition: width 200ms ease;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		line-height: 1;
 	}
 
 	/* TIROIR DE COMMANDE DOCKABLE */
@@ -4546,20 +4481,22 @@
 	/* BOÎTE DE DIALOGUE RPG RÉTRO (Typewriter Dialogue Box) : POSITIONNÉE SOUS LE CANVAS */
 	.rpg-dialogue-box {
 		position: relative;
-		width: min(100%, calc((100dvh - 250px) * (20 / 13)));
+		width: 100%;
+		max-width: 820px;
 		z-index: 10;
 		background: linear-gradient(180deg, #091122 0%, #030712 100%);
 		border: 3px solid #fbbf24;
 		box-shadow:
 			0 4px 16px rgba(0, 0, 0, 0.95),
 			inset 0 0 0 1px #78350f;
-		padding: 8px 12px;
+		padding: 6px 12px;
 		display: flex;
 		flex-direction: column;
 		cursor: pointer;
 		user-select: none;
 		box-sizing: border-box;
 		flex-shrink: 0;
+		margin-top: auto;
 	}
 
 	.rpg-dialogue-box.is-gate {
@@ -4967,7 +4904,8 @@
 		padding: 6px 12px;
 		cursor: pointer;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-		margin-top: 4px;
+		margin-top: auto;
+		margin-bottom: 2px;
 	}
 
 	.btn-restore-dialogue:hover {
