@@ -163,3 +163,19 @@ describe('OfficeStateManager v0.2 & Schéma Zod', () => {
 		expect(snapRejected.logs[0].soundCue).toBe('call');
 	});
 });
+
+describe('Cycle Ambiance Jour / Nuit Cyberpunk', () => {
+	it('respecte les modes manuels explicites', async () => {
+		const { getEffectiveAmbientMode } = await import('$lib/services/pixel-renderer');
+		expect(getEffectiveAmbientMode('day')).toBe('day');
+		expect(getEffectiveAmbientMode('sunset')).toBe('sunset');
+		expect(getEffectiveAmbientMode('night')).toBe('night');
+	});
+
+	it('calcule un mode effectif valide en mode auto', async () => {
+		const { getEffectiveAmbientMode } = await import('$lib/services/pixel-renderer');
+		const autoResult = getEffectiveAmbientMode('auto');
+		expect(['day', 'sunset', 'night']).toContain(autoResult);
+	});
+});
+

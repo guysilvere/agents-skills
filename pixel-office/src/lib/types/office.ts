@@ -38,6 +38,11 @@ export const EventSourceSchema = z.enum([
 export type EventSource = z.infer<typeof EventSourceSchema>;
 
 /**
+ * Modes d'ambiance lumineuse du bureau Pixel Art
+ */
+export type TimeOfDayMode = 'auto' | 'day' | 'sunset' | 'night';
+
+/**
  * Coordonnées sur la grille Top-Down (tuiles 16x16)
  */
 export interface GridPoint {

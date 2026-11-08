@@ -1,6 +1,6 @@
 import { MAP_COLS, MAP_ROWS, TILE_SIZE } from '$lib/services/pathfinding';
 import type { PixelAssetsBundle } from '$lib/services/sprite-loader';
-import type { OfficeAgent, OfficePet } from '$lib/types/office';
+import type { OfficeAgent, OfficePet, TimeOfDayMode } from '$lib/types/office';
 
 export interface AnimatedAgentView extends OfficeAgent {
 	renderX: number;
@@ -84,7 +84,8 @@ export function renderPixelOfficeScene(
 	pet: AnimatedPetView | null,
 	selectedAgentId: string | null,
 	frameCount: number,
-	assets: PixelAssetsBundle | null
+	assets: PixelAssetsBundle | null,
+	ambientMode: TimeOfDayMode = 'auto'
 ): void {
 	const width = MAP_COLS * TILE_SIZE;
 	const height = MAP_ROWS * TILE_SIZE;
@@ -134,6 +135,119 @@ export function renderPixelOfficeScene(
 
 	// 4. Faisceaux d'appels téléphoniques entre collègues
 	drawPhoneConnectionBeams(ctx, agents, frameCount);
+
+	// 5. Calque d'ambiance Jour / Nuit Cyberpunk & Lueurs 2D
+	drawDayNightAmbientOverlay(ctx, ambientMode, frameCount);
+}
+
+/**
+ * Calcule l'ambiance lumineuse effective en fonction de l'heure réelle ou forcée
+ */
+export function getEffectiveAmbientMode(mode: TimeOfDayMode): 'day' | 'sunset' | 'night' {
+	if (mode !== 'auto') return mode;
+	const hour = new Date().getHours();
+	if (hour >= 9 && hour < 18) {
+		return 'day';
+	} else if (hour >= 18 && hour < 21) {
+		return 'sunset';
+	} else {
+		// 21h à 09h : Nuit Cyberpunk
+		return 'night';
+	}
+}
+
+/**
+ * Applique le filtre d'ambiance lumineuse et les lueurs d'écrans/lampes
+ */
+function drawDayNightAmbientOverlay(
+	ctx: CanvasRenderingContext2D,
+	mode: TimeOfDayMode,
+	frameCount: number
+): void {
+	const effective = getEffectiveAmbientMode(mode);
+	if (effective === 'day') return; // En journée, lumière naturelle claire 100%
+
+	const width = MAP_COLS * TILE_SIZE;
+	const height = MAP_ROWS * TILE_SIZE;
+
+	ctx.save();
+
+	if (effective === 'sunset') {
+		// Teinte ambrée / orangée crépusculaire chaleureuse
+		ctx.fillStyle = 'rgba(217, 119, 6, 0.16)';
+		ctx.fillRect(0, 0, width, height);
+
+		// Légère lueur dorée des fenêtres hautes
+		ctx.fillStyle = 'rgba(251, 191, 36, 0.08)';
+		ctx.fillRect(16, 4, width - 32, 28);
+	} else if (effective === 'night') {
+		// Nuit Cyberpunk : Voile bleu nuit / indigo profond
+		ctx.fillStyle = 'rgba(8, 14, 30, 0.52)';
+		ctx.fillRect(0, 0, width, height);
+
+		// Halos de lumière émis par les écrans et serveurs (Glow / Lighting 2D)
+		// 1. Halo des doubles écrans du bureau Lead-dev (x: 4.5 * 16, y: 2.5 * 16)
+		const pulseLead = 0.22 + Math.sin(frameCount * 0.1) * 0.05;
+		const radLead = ctx.createRadialGradient(
+			4.5 * TILE_SIZE + 8,
+			2.5 * TILE_SIZE + 6,
+			2,
+			4.5 * TILE_SIZE + 8,
+			2.5 * TILE_SIZE + 6,
+			32
+		);
+		radLead.addColorStop(0, `rgba(56, 189, 248, ${pulseLead})`);
+		radLead.addColorStop(1, 'rgba(56, 189, 248, 0)');
+		ctx.fillStyle = radLead;
+		ctx.fillRect(4 * TILE_SIZE - 16, 2 * TILE_SIZE - 16, 64, 64);
+
+		// 2. Halo du moniteur QA (x: 14 * 16, y: 2.5 * 16)
+		const pulseQa = 0.2 + Math.cos(frameCount * 0.1) * 0.04;
+		const radQa = ctx.createRadialGradient(
+			14 * TILE_SIZE + 8,
+			2.5 * TILE_SIZE + 6,
+			2,
+			14 * TILE_SIZE + 8,
+			2.5 * TILE_SIZE + 6,
+			28
+		);
+		radQa.addColorStop(0, `rgba(74, 222, 128, ${pulseQa})`);
+		radQa.addColorStop(1, 'rgba(74, 222, 128, 0)');
+		ctx.fillStyle = radQa;
+		ctx.fillRect(13 * TILE_SIZE - 12, 2 * TILE_SIZE - 12, 56, 56);
+
+		// 3. Halo chenillard du Rack Serveur Coolify (x: 17 * 16 + 12, y: 3 * 16)
+		const pulseRack = 0.26 + Math.sin(frameCount * 0.2) * 0.07;
+		const radRack = ctx.createRadialGradient(
+			17 * TILE_SIZE + 12,
+			3 * TILE_SIZE,
+			2,
+			17 * TILE_SIZE + 12,
+			3 * TILE_SIZE,
+			26
+		);
+		radRack.addColorStop(0, `rgba(56, 189, 248, ${pulseRack})`);
+		radRack.addColorStop(0.5, `rgba(34, 197, 94, ${pulseRack * 0.6})`);
+		radRack.addColorStop(1, 'rgba(15, 23, 42, 0)');
+		ctx.fillStyle = radRack;
+		ctx.fillRect(16 * TILE_SIZE, 2 * TILE_SIZE, 52, 52);
+
+		// 4. Halo tamisé du salon lounge (x: 16.5 * 16, y: 9 * 16)
+		const radLounge = ctx.createRadialGradient(
+			16.5 * TILE_SIZE + 8,
+			9 * TILE_SIZE,
+			2,
+			16.5 * TILE_SIZE + 8,
+			9 * TILE_SIZE,
+			36
+		);
+		radLounge.addColorStop(0, 'rgba(251, 191, 36, 0.16)');
+		radLounge.addColorStop(1, 'rgba(251, 191, 36, 0)');
+		ctx.fillStyle = radLounge;
+		ctx.fillRect(15 * TILE_SIZE, 7 * TILE_SIZE, 64, 64);
+	}
+
+	ctx.restore();
 }
 
 function drawAuthenticFloorsAndWalls(ctx: CanvasRenderingContext2D): void {

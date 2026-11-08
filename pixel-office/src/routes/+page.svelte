@@ -19,7 +19,8 @@
 		GridPoint,
 		IncomingOfficeEvent,
 		OfficeAgent,
-		OfficeSnapshot
+		OfficeSnapshot,
+		TimeOfDayMode
 	} from '$lib/types/office';
 
 	const NATIVE_WIDTH = MAP_COLS * TILE_SIZE; // 320px
@@ -109,6 +110,32 @@
 				message: 'Conteneur déployé sur Coolify avec succès (Proxy Orange actif)'
 			});
 		}, 5000);
+	}
+
+	// Phase 3 : Cycle Jour / Nuit Cyberpunk & Mode Kiosk Ambiant
+	let ambientMode: TimeOfDayMode = $state('auto');
+	let isKioskMode = $state(false);
+	let kioskControlsVisible = $state(true);
+	let kioskIdleTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function toggleKioskMode(): void {
+		isKioskMode = !isKioskMode;
+		kioskControlsVisible = true;
+		if (kioskIdleTimer) clearTimeout(kioskIdleTimer);
+		if (isKioskMode) {
+			resetKioskIdleTimer();
+		}
+	}
+
+	function resetKioskIdleTimer(): void {
+		if (!isKioskMode) return;
+		kioskControlsVisible = true;
+		if (kioskIdleTimer) clearTimeout(kioskIdleTimer);
+		kioskIdleTimer = setTimeout(() => {
+			if (isKioskMode) {
+				kioskControlsVisible = false;
+			}
+		}, 3500);
 	}
 
 	// Formulaire de simulation rapide (Option C Hybride)
@@ -541,7 +568,8 @@
 						animatedPet,
 						selectedAgentId,
 						frameCount,
-						assetsBundle
+						assetsBundle,
+						ambientMode
 					);
 				}
 			}
@@ -549,15 +577,55 @@
 
 		animId = requestAnimationFrame(renderLoop);
 
+		const handleKioskActivity = () => {
+			if (isKioskMode) {
+				resetKioskIdleTimer();
+			}
+		};
+		const handleKioskKey = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && isKioskMode) {
+				isKioskMode = false;
+				kioskControlsVisible = true;
+			} else if (isKioskMode) {
+				resetKioskIdleTimer();
+			}
+		};
+		window.addEventListener('mousemove', handleKioskActivity);
+		window.addEventListener('click', handleKioskActivity);
+		window.addEventListener('keydown', handleKioskKey);
+
 		return () => {
 			clearInterval(clockTimer);
 			evtSource.close();
 			cancelAnimationFrame(animId);
+			window.removeEventListener('mousemove', handleKioskActivity);
+			window.removeEventListener('click', handleKioskActivity);
+			window.removeEventListener('keydown', handleKioskKey);
+			if (kioskIdleTimer) clearTimeout(kioskIdleTimer);
 		};
 	});
 </script>
 
-<div class="cockpit-shell">
+<div
+	class="cockpit-shell"
+	class:kiosk-mode={isKioskMode}
+	class:kiosk-hidden={isKioskMode && !kioskControlsVisible}
+>
+	{#if isKioskMode}
+		<button
+			type="button"
+			class="btn-exit-kiosk"
+			class:visible={kioskControlsVisible}
+			onclick={() => {
+				isKioskMode = false;
+				kioskControlsVisible = true;
+			}}
+			title="Quitter le mode Kiosk (ou appuyer sur Échap)"
+		>
+			✕ QUITTER LE MODE KIOSK (ÉCHAP)
+		</button>
+	{/if}
+
 	<!-- 1. BARRE LATÉRALE GAUCHE : Cockpit Navigation (Extensible 64px -> 210px) -->
 	<aside class="cockpit-sidebar" class:expanded={leftSidebarExpanded} aria-label="Navigation Cockpit">
 		<div class="sidebar-header-dock">
@@ -640,6 +708,22 @@
 			<button
 				type="button"
 				class="nav-icon-btn"
+				class:active={isKioskMode}
+				onclick={toggleKioskMode}
+				title="Basculer en Mode Kiosk immersif (auto-hide)"
+			>
+				<span class="nav-btn-icon">KSK</span>
+				<div class="nav-btn-text">
+					<span class="nav-btn-label">{isKioskMode ? 'QUITTER' : 'KIOSK'}</span>
+					{#if leftSidebarExpanded}
+						<span class="nav-btn-sub">Ambiant auto-hide</span>
+					{/if}
+				</div>
+			</button>
+
+			<button
+				type="button"
+				class="nav-icon-btn"
 				onclick={toggleFullscreen}
 				title="Basculer en plein écran sur écran secondaire"
 			>
@@ -703,6 +787,49 @@
 					<div class="mini-watcher" class:active={snapshot?.watcherStatus.claudeActive} title="Claude Watcher">
 						<span class="watcher-dot"></span>
 						<span>CL</span>
+					</div>
+				</div>
+
+				<!-- SELECTEUR D'AMBIANCE JOUR / NUIT CYBERPUNK (Phase 3) -->
+				<div class="ambient-theme-picker" title="Ambiance lumineuse du bureau">
+					<span class="ambient-label">AMBIANCE</span>
+					<div class="ambient-btn-group">
+						<button
+							type="button"
+							class="ambient-pill"
+							class:active={ambientMode === 'auto'}
+							onclick={() => (ambientMode = 'auto')}
+							title="Heure réelle locale"
+						>
+							AUTO
+						</button>
+						<button
+							type="button"
+							class="ambient-pill"
+							class:active={ambientMode === 'day'}
+							onclick={() => (ambientMode = 'day')}
+							title="Plein jour clair"
+						>
+							JOUR
+						</button>
+						<button
+							type="button"
+							class="ambient-pill"
+							class:active={ambientMode === 'sunset'}
+							onclick={() => (ambientMode = 'sunset')}
+							title="Crépuscule orangé"
+						>
+							SOIR
+						</button>
+						<button
+							type="button"
+							class="ambient-pill"
+							class:active={ambientMode === 'night'}
+							onclick={() => (ambientMode = 'night')}
+							title="Nuit Cyberpunk avec néons"
+						>
+							NUIT
+						</button>
 					</div>
 				</div>
 
@@ -4309,5 +4436,126 @@
 		font-size: 8px !important;
 		padding: 8px 14px !important;
 		white-space: nowrap;
+	}
+
+	/* ========================================================
+	   PHASE 3 : CYCLE JOUR/NUIT & MODE KIOSK AUTO-HIDE
+	   ======================================================== */
+	/* SÉLECTEUR D'AMBIANCE LUMINEUSE DANS LE HEADER */
+	.ambient-theme-picker {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		background: #0f172a;
+		border: 1px solid #334155;
+		padding: 2px 6px;
+	}
+
+	.ambient-label {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 6px;
+		color: #64748b;
+		letter-spacing: 0.5px;
+	}
+
+	.ambient-btn-group {
+		display: flex;
+		gap: 3px;
+	}
+
+	.ambient-pill {
+		font-family: 'Silkscreen', monospace;
+		font-size: 7px;
+		background: transparent;
+		border: 1px solid transparent;
+		color: #94a3b8;
+		padding: 3px 6px;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.ambient-pill:hover {
+		color: #f8fafc;
+	}
+
+	.ambient-pill.active {
+		background: #1e293b;
+		border-color: #38bdf8;
+		color: #38bdf8;
+		font-weight: bold;
+	}
+
+	/* MODE KIOSK AMBIANT IMMERSIF (AUTO-HIDE) */
+	.btn-exit-kiosk {
+		position: fixed;
+		top: 14px;
+		right: 14px;
+		z-index: 100;
+		font-family: 'Press Start 2P', monospace;
+		font-size: 7px;
+		background: rgba(9, 17, 34, 0.92);
+		border: 2px solid #fbbf24;
+		color: #fbbf24;
+		padding: 8px 12px;
+		cursor: pointer;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+		transition: opacity 0.3s ease, transform 0.3s ease;
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(-8px);
+	}
+
+	.btn-exit-kiosk.visible {
+		opacity: 1;
+		pointer-events: auto;
+		transform: translateY(0);
+	}
+
+	.cockpit-shell.kiosk-mode .cockpit-sidebar,
+	.cockpit-shell.kiosk-mode .team-sidebar,
+	.cockpit-shell.kiosk-mode .dock-tab-handle,
+	.cockpit-shell.kiosk-mode .kpi-banner,
+	.cockpit-shell.kiosk-mode .cockpit-footer {
+		transition: opacity 0.4s ease, transform 0.4s ease;
+	}
+
+	.cockpit-shell.kiosk-mode.kiosk-hidden .cockpit-sidebar {
+		opacity: 0;
+		pointer-events: none;
+		transform: translateX(-40px);
+	}
+
+	.cockpit-shell.kiosk-mode.kiosk-hidden .team-sidebar {
+		opacity: 0;
+		pointer-events: none;
+		transform: translateX(40px);
+	}
+
+	.cockpit-shell.kiosk-mode.kiosk-hidden .dock-tab-handle {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.cockpit-shell.kiosk-mode.kiosk-hidden .kpi-banner {
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(-40px);
+	}
+
+	.cockpit-shell.kiosk-mode.kiosk-hidden .cockpit-footer {
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(40px);
+	}
+
+	.cockpit-shell.kiosk-mode .canvas-frame {
+		max-height: calc(100dvh - 120px);
+		width: min(96vw, calc((100dvh - 120px) * (20 / 13)));
+		transition: all 0.4s ease;
+	}
+
+	.cockpit-shell.kiosk-mode.kiosk-hidden .canvas-frame {
+		max-height: 94vh;
+		width: min(96vw, calc(94vh * (20 / 13)));
 	}
 </style>
