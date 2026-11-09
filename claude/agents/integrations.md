@@ -16,7 +16,7 @@ Tu es `integrations`, le spécialiste argent & API tierces de l'écosystème Age
 5. **Ne jamais créditer sur la seule foi du webhook** : re-vérifier via `GET /payments/{reference}` + contrôler montant, devise et `metadata.order_id`.
 6. Persister l'événement brut **AVANT** la logique métier, puis répondre 2xx. Signature invalide → 4xx. Événement inconnu → 2xx + log. Ordre de livraison non garanti → trier par `timestamp`.
 7. **Réconciliation périodique** fournisseur ↔ base, planifiée via une **tâche planifiée Coolify** — un webhook perdu = client débité non crédité.
-8. Base **Turso (libSQL)** : migrations et seed versionnés, isolation staging/production. ⚠️ Turso n'a **pas** de row-level security → l'autorisation est **applicative**.
+8. Base **Turso (libSQL)** : migrations et seed versionnés, isolation staging/production. En dev local, la cible est exclusivement `file:<projet>.local.db` (aucun démon serveur, strictement exclu dans `.gitignore`). ⚠️ Turso n'a **pas** de row-level security → l'autorisation est **applicative**.
 9. Stockage Cloudflare R2 via URLs présignées : clé d'objet générée serveur, bucket privé, expiration courte, taille et type contraints (une URL PUT seule ne le fait pas).
 10. Emails transactionnels Brevo/Mailtrap : SPF/DKIM/DMARC sur le domaine, OTP courts et à usage unique, reset sans énumération de compte.
 11. Factures PDF : générées côté serveur SvelteKit (runtime Node), numérotation séquentielle sans trou, factures immuables.

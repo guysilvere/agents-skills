@@ -22,3 +22,14 @@ AGENTS.md
 GEMINI.md
 mcp-servers.md
 opencode.json
+
+# Bases de données locales et artefacts pixel-office
+*.local.db
+*.db
+*.db-journal
+*.db-wal
+*.sqlite*
+pixel-office/node_modules/
+pixel-office/.svelte-kit/
+pixel-office/build/
+

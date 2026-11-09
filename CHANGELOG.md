@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## [2.8.0] — 2026-11-09
+
+### Ajouté
+- **Pixel Office v0.5.0 — Lancement Automatique Chrome & Découverte Dynamique** :
+  - **Auto-lancement Google Chrome sans doublon** : Démarrage automatique de `https://pixel-office.test/` dès qu'un agent ou une skill est sollicité dans Antigravity, OpenCode ou Claude Code via inspection AppleScript des onglets Chrome existants.
+  - **Découverte dynamique d'agents en temps réel** : Scan automatique des répertoires d'agents (`antigravity/agents/*.md`, `opencode/agents/*.md`, `claude/agents/*.md`), instanciation immédiate d'un sprite, attribution d'un poste de travail et insertion dans la Régie sans rechargement.
+  - **Catalogue dynamique des skills** : Détection temps réel de toutes les skills déclarées (`~/.gemini/config/skills/`, `opencode/skills/`) et affichage réactif de leurs libellés et métadonnées.
+
+## [2.7.0] — 2026-10-30
+
+### Modifié
+- **Standardisation de la base de données locale (`file:<projet>.local.db`)** :
+  - Abandon des instances de serveurs locaux (`turso dev`, conteneurs Docker `sqld`) au profit du mode fichier SQLite/libSQL direct `file:<projet>.local.db` isolé par projet.
+  - Zéro consommation de ressources (0% CPU / 0 Mo RAM) au repos, persistance automatique sur disque et réinitialisation instantanée (`rm -f <projet>.local.db && npm run db:migrate`).
+  - **Exclusion Git stricte** : Obligation d'inscrire les bases locales et leurs journaux (`*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*`) dans `.gitignore`. Intégration de cette vérification dans les checklists pré-commit et sécurité (`pwa-validation`, `ops-quality`).
+  - Alignement de tous les agents (`lead-dev`, `ops-quality`, `integrations` sous OpenCode, Antigravity et Claude) et des templates (`DATABASE.md`, `AGENTS.md`, `.env.example`, `docker-compose.dev.yml`, `project-mcp.json`).
+- **Partage systématique des accès locaux (Logins & Mots de passe)** :
+  - Obligation pour `lead-dev` et `ops-quality` de restituer à chaque démarrage local un tableau récapitulatif complet associant chaque rôle (visiteur, user, admin/QA), les URL `.test` en HTTPS, et les identifiants de test en clair (login/email + mot de passe).
+  - Ajout d'une section `## Accès locaux (Dev & Test)` dans le template `AGENTS.md` et formalisation dans `pwa-validation` (§ 1bis) et `pwa-developpement` (§ 1 & § 6).
+
 ## [2.6.0] — 2026-10-30
 
 ### Ajouté

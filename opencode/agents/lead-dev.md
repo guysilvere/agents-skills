@@ -78,6 +78,8 @@ Arrêt obligatoire (`⛔ STOP — validation humaine requise`) avant : fin de ca
 - **Bugs & incidents (projets GitHub)** : ouvrir systématiquement une **Issue GitHub** (FR ou EN) **avant** d'entamer la résolution. Tracer les pistes explorées et itérations en commentaires. Fermer l'Issue une fois le problème résolu et validé.
 - Respecter le standard de spec obligatoire (template SPEC-XXX) et la living documentation (phases 0–10 → `WORKFLOW.md`).
 - Stack par défaut : **SvelteKit** (PWA mobile-first, `adapter-node`) + TypeScript strict + validation **Zod** ; base **Turso (libSQL)** ; déploiement Coolify + Cloudflare (proxy orange, R2, Turnstile, tunnels Zero Trust).
+- **Base locale unique** : fichier direct `file:<projet>.local.db` (aucun démon/serveur externe requis, isolation totale par projet, données persistantes, reset instantané). Strictement exclue dans `.gitignore` (`*.local.db`, `*.db`, `*.sqlite*`).
+- **Lancement local & accès** : à chaque démarrage ou mise à disposition d'un environnement local, restituer systématiquement à l'utilisateur le tableau des URL `.test` et des identifiants locaux de test (login & mot de passe en clair pour visiteur, user et admin/QA) issus de `AGENTS.md` ou des seeders.
 - ⚠️ **Turso n'a pas de row-level security** → l'autorisation est **applicative**. Un seul runtime possède la base et l'autorisation (les server routes SvelteKit) : c'est la règle qui évite les IDOR.
 - Paiements : **Passerelle de paiement** (Wave, Orange Money, MTN, Moov, cartes ; sandbox réelle). Emails : Brevo ou Mailtrap.
 - Ultra-léger : listes à puces dans tous les fichiers `.md`, zéro texte superflu.

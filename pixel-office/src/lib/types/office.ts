@@ -259,4 +259,9 @@ export interface OfficeSnapshot {
 		totalEventsToday: number;
 		subagentsSpawnedToday: number;
 	};
+	catalog?: {
+		skills: Record<string, string>;
+		agents: Array<{ id: string; name: string; title: string; skills: string[] }>;
+	};
 }
+

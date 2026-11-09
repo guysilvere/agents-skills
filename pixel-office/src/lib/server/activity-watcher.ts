@@ -2,8 +2,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { officeState } from '$lib/server/office-state';
+import { ensurePixelOfficeBrowserOpen } from './browser-opener';
+import {
+	getAllKnownSkillsList,
+	scanAgentsCatalog,
+	scanSkillsCatalog
+} from './catalog-scanner';
 
-const KNOWN_SKILLS = [
+const FALLBACK_SKILLS = [
 	'shared-eco-tokens',
 	'pwa-cadrage',
 	'pwa-developpement',
@@ -23,6 +29,7 @@ const KNOWN_SKILLS = [
 
 let watcherInitialized = false;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
+let pollCycleCount = 0;
 
 /** Mémorise la taille du dernier transcript lu pour ne traiter que les nouvelles lignes */
 const fileOffsets = new Map<string, number>();
@@ -52,11 +59,16 @@ export function extractProjectFromPath(str: string): string | null {
 }
 
 function extractSkillFromPath(str: string): string | null {
-	for (const sk of KNOWN_SKILLS) {
+	const dynamicSkills = getAllKnownSkillsList();
+	for (const sk of dynamicSkills) {
+		if (str.includes(sk)) return sk;
+	}
+	for (const sk of FALLBACK_SKILLS) {
 		if (str.includes(sk)) return sk;
 	}
 	return null;
 }
+
 
 /**
  * Analyse les dernières lignes d'un fichier `transcript.jsonl` Antigravity ou Claude Code
@@ -397,7 +409,11 @@ export function ensureActivityWatcher(): void {
 		lastFileEventAt: Date.now()
 	};
 
-	// Scan initial
+	// Scan initial des catalogues d'agents et skills
+	scanSkillsCatalog();
+	scanAgentsCatalog();
+
+	// Scan initial des logs et sessions
 	if (hasAntigravity) {
 		scanActiveAntigravityTranscripts(antigravityDir, true);
 	}
@@ -409,6 +425,13 @@ export function ensureActivityWatcher(): void {
 	// Polling réactif toutes les 1200ms
 	if (pollTimer) clearInterval(pollTimer);
 	pollTimer = setInterval(() => {
+		pollCycleCount++;
+		// Rafraîchir le catalogue d'agents et skills toutes les ~3.6s
+		if (pollCycleCount % 3 === 0) {
+			scanSkillsCatalog();
+			scanAgentsCatalog();
+		}
+
 		if (hasAntigravity) {
 			scanActiveAntigravityTranscripts(antigravityDir, false);
 		}
@@ -418,3 +441,4 @@ export function ensureActivityWatcher(): void {
 		scanProjetsGitActivity();
 	}, 1200);
 }
+

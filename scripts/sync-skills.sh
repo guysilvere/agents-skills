@@ -205,6 +205,8 @@ for s in data["servers"]:
             k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", token_ref, v)
             for k, v in s["headers"].items()
         }
+    if "timeout" in s:
+        entry["timeout"] = s["timeout"]
     out[name] = entry
 print(json.dumps(out, ensure_ascii=False, indent=2))
 PY

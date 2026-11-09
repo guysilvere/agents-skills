@@ -1,4 +1,6 @@
 import { OFFICE_LOCATIONS } from '$lib/services/pathfinding';
+import { ensurePixelOfficeBrowserOpen } from './browser-opener';
+import { getSkillsCatalogDictionary } from './catalog-scanner';
 import type {
 	ActivityLogEntry,
 	IncomingOfficeEvent,
@@ -6,6 +8,7 @@ import type {
 	OfficePet,
 	OfficeSnapshot
 } from '$lib/types/office';
+
 
 type StateSubscriber = (snapshot: OfficeSnapshot) => void;
 
@@ -410,6 +413,17 @@ class OfficeStateManager {
 			agent = this.agents.get('lead-dev')!;
 		}
 		agent.lastActivityAt = now;
+		if (
+			event.source === 'antigravity' ||
+			event.source === 'opencode' ||
+			event.source === 'claude' ||
+			event.type === 'WORK_START' ||
+			event.type === 'SKILL_LOAD' ||
+			event.type === 'TOOL_USE' ||
+			event.type === 'WAITING_HUMAN'
+		) {
+			ensurePixelOfficeBrowserOpen('https://pixel-office.test/');
+		}
 		if (event.project) {
 			agent.currentProject = event.project;
 			const currentList = agent.activeProjects || [];
@@ -423,6 +437,7 @@ class OfficeStateManager {
 
 		switch (event.type) {
 			case 'WORK_START': {
+
 				agent.state = 'WORKING';
 				agent.targetPosition = { ...agent.deskPosition };
 				agent.targetAgentId = null;
@@ -1093,6 +1108,22 @@ class OfficeStateManager {
 		this.gateProvider = provider;
 	}
 
+	public registerDiscoveredAgent(agent: OfficeAgent): void {
+		if (!this.agents.has(agent.id)) {
+			this.agents.set(agent.id, agent);
+			this.addLog({
+				source: 'manual',
+				agentId: agent.id,
+				agentName: agent.name,
+				summary: `Nouvel agent découvert et installé au bureau : ${agent.title}`,
+				project: agent.currentProject,
+				skills: agent.activeSkills,
+				soundCue: 'spawn'
+			});
+			this.broadcast();
+		}
+	}
+
 	public getWaitingAgents(): OfficeAgent[] {
 		return Array.from(this.agents.values()).filter((a) => a.state === 'WAITING_HUMAN');
 	}
@@ -1104,7 +1135,16 @@ class OfficeStateManager {
 			logs: this.logs,
 			pendingGates: this.gateProvider ? this.gateProvider() : undefined,
 			watcherStatus: this.watcherStatus,
-			stats: this.stats
+			stats: this.stats,
+			catalog: {
+				skills: getSkillsCatalogDictionary(),
+				agents: Array.from(this.agents.values()).map((a) => ({
+					id: a.id,
+					name: a.name,
+					title: a.title,
+					skills: a.activeSkills
+				}))
+			}
 		};
 	}
 

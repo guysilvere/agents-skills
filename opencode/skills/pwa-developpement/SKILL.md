@@ -26,7 +26,8 @@ metadata:
 - Créer `docs/USER_GUIDE.md` depuis `assets/templates/USER_GUIDE.md` — guide **destiné aux utilisateurs finaux**, alimenté au fil des specs DONE (cf. § 8).
 - Créer `.github/PULL_REQUEST_TEMPLATE.md` et `.github/ISSUE_TEMPLATE/{bug,feature,chore}.md` depuis `shared-git-conventions/assets/templates/`.
 - **Indexer le projet avec graft** : vérifier `graft --version` (sinon notifier et demander l'installation), lancer `graft build` après le premier commit. Rien à ajouter au `.gitignore` : graft 0.19+ s'y inscrit lui-même. Skill `shared-graft`.
-- **`.gitignore` projet** : y ajouter `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
+- **`.gitignore` projet** : y ajouter obligatoirement les bases locales (`*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*`) et `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
+- **Comptes de test locaux** : toujours définir dans `AGENTS.md` (section « Accès locaux ») et dans les seeders `scripts/seed` les identifiants de dev (admin et utilisateur) afin qu'ils soient immédiatement disponibles et partagés dès le démarrage local.
 - Template : `assets/templates/AGENTS.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
 
 ## 1bis. Initialisation du Cockpit Specs & Banc de Tests QA
@@ -108,8 +109,9 @@ metadata:
   docker compose -f docker-compose.dev.yml up
   ```
   - Volumes montés pour le hot-reloading automatique (`src/`, `static/`, `migrations/`).
-  - Base locale (`file:local.db` ou `turso dev`) et micro-services isolés dans leur réseau Docker.
+  - Base locale SQLite directe (`file:<projet>.local.db`) sans aucun conteneur ni démon requis : isolation stricte par projet, données persistantes, reset instantané (`rm -f <projet>.local.db && npm run db:migrate`), obligatoirement gitignorée.
   - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs.
+  - **Restitution systématique des accès** : à chaque démarrage du projet en local (dev ou preview), afficher impérativement à l'utilisateur le tableau complet des URLs `.test` et des identifiants locaux de test (login/email + mot de passe pour chaque rôle : visiteur, user, admin/QA) issus de `AGENTS.md` (cf. skill `pwa-validation` § 1bis).
 
 ```
 projet/
@@ -133,6 +135,7 @@ projet/
 
 ## 7. Base de données (DATABASE.md)
 - Schéma relationnel succinct, **matrice d'autorisation** (obligatoire : Turso n'a pas de RLS), stratégie de migration, dictionnaire de données.
+- **Base locale unique** : fichier SQLite direct `file:<projet>.local.db` (aucun démon `turso dev` ni conteneur requis). Persistance automatique sur disque, réinitialisation instantanée par suppression du fichier (`rm -f <projet>.local.db`), et exclusion stricte obligatoire dans `.gitignore`.
 - Migration de la doc : toute modification de champs/tables/règles → mise à jour immédiate de `docs/DATABASE.md`.
 - Template : `assets/templates/DATABASE.md`.
 

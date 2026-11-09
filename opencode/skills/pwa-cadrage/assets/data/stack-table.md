@@ -17,7 +17,7 @@
 |-----|-------|
 | **Défaut** | **Turso (libSQL)** — répliques edge, compatible SQLite |
 | ORM TypeScript | **Drizzle ORM** + `@libsql/client` |
-| Dev local | `file:local.db` ou `turso dev` |
+| Dev local | `file:<projet>.local.db` (direct SQLite/libSQL, aucun démon, gitignoré) |
 | Relationnel complexe | PostgreSQL (Docker/Coolify) — cas rare |
 
 ⚠️ **Turso n'a pas de row-level security** → l'autorisation est **applicative**, concentrée dans un seul runtime. Voir `DATABASE.md`.

@@ -358,5 +358,55 @@ describe('Pont de Validation Bi-directionnel & Jalons Multi-Projets', () => {
 	});
 });
 
+describe('Découverte Dynamique d’Agents et de Skills', () => {
+	it('scanne les catalogues locaux et expose les skills et agents dynamiques dans le snapshot', async () => {
+		const { scanSkillsCatalog, scanAgentsCatalog } = await import(
+			'$lib/server/catalog-scanner'
+		);
+
+		const skills = scanSkillsCatalog();
+		expect(skills.size).toBeGreaterThanOrEqual(10);
+		expect(skills.has('shared-eco-tokens')).toBe(true);
+
+		const agents = scanAgentsCatalog();
+		expect(agents.size).toBeGreaterThanOrEqual(1);
+
+		const snap = officeState.getSnapshot();
+		expect(snap.catalog).toBeDefined();
+		expect(snap.catalog?.skills['shared-eco-tokens']).toBeDefined();
+		expect(snap.catalog?.agents.length).toBeGreaterThanOrEqual(3);
+
+		// Enregistrement dynamique d’un agent supplémentaire
+		officeState.registerDiscoveredAgent({
+			id: 'copywriter',
+			name: 'copywriter',
+			title: 'Copywriter & Rédacteur SEO',
+			role: 'subagent',
+			isTemporary: false,
+			state: 'IDLE_DESK',
+			currentProject: 'agents-skills',
+			activeProjects: ['agents-skills'],
+			activeSkills: ['shared-eco-tokens', 'pwa-cadrage'],
+			activityLabel: 'Prêt pour rédaction',
+			contextRatio: 0.05,
+			contextTokens: 5_000,
+			maxContextTokens: 200_000,
+			targetAgentId: null,
+			callMessage: null,
+			deskPosition: { x: 9, y: 7 },
+			position: { x: 9, y: 7 },
+			targetPosition: { x: 9, y: 7 },
+			direction: 'down',
+			palette: { hair: '#333', shirt: '#9C27B0', accent: '#E1BEE7', skin: '#F5CBA7' },
+			matrixEffect: null,
+			matrixStartedAt: null,
+			lastActivityAt: Date.now()
+		});
+
+		const updatedSnap = officeState.getSnapshot();
+		expect(updatedSnap.agents.some((a) => a.id === 'copywriter')).toBe(true);
+	});
+});
+
 
 

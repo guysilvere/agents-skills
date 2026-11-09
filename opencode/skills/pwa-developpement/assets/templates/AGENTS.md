@@ -25,6 +25,16 @@
 - DEV_CMD=`<commande_dev>`
 - HEALTH_CHECK=`curl -s -o /dev/null -w "%{http_code}" http://localhost:<PORT>`
 - KILL_CMD=`lsof -ti :<PORT> | xargs kill -9 2>/dev/null; echo "Port <PORT> freed"`
+- LOCAL_DB=`<projet>.local.db`
+- DB_RESET_CMD=`rm -f <projet>.local.db && npm run db:migrate`
+
+## Accès locaux (Dev & Test)
+> Identifiants factices de développement. À restituer obligatoirement à chaque lancement des serveurs locaux.
+| Rôle / Interface | URL d'accès | Login / Email | Mot de passe | Usage |
+| :--- | :--- | :--- | :--- | :--- |
+| **Front public** | `https://<projet>.test` | — | — | Parcours libre visiteur |
+| **Utilisateur standard** | `https://<projet>.test/login` | `user@<projet>.test` | `user123` | Compte de test avec données seed |
+| **Super Admin / QA** | `https://<projet>.test/admin` | `admin@<projet>.test` | `admin123` | Cockpit QA, Harness, Admin |
 
 ## Règle de chargement sélectif
 - Ne lire QUE le fichier `.md` requis pour la tâche en cours.
@@ -54,6 +64,7 @@
 - ❌ Aucun emoji dans l'interface (sauf demande explicite)
 - ❌ Aucune autre bibliothèque d'icônes que celle choisie (Lucide/Tabler/Phosphor/React/Remix)
 - ❌ Aucune image non compressée en AVIF/WebP avant upload R2
+- ❌ Aucune base de données locale commitée (`*.local.db`, `*.db`, `*.sqlite*` obligatoirement dans `.gitignore`)
 - ❌ Aucune modification directe sur `main` (travailler sur `testing`)
 - ❌ Aucun secret en clair (clés API, tokens, URLs de BDD)
 

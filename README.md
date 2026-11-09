@@ -10,12 +10,46 @@
 | Agents | `opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) — format OpenCode |
 | Agents AG | `antigravity/agents/` | Les 3 mêmes rôles — format Antigravity |
 | Agents Claude | `claude/agents/` | Les 3 mêmes rôles — format subagent Claude Code (pas de notion de « primary ») |
-| Skills | `opencode/skills/` | 14 skills versionnées (assets séparés 🟦/🟩/⚪), réutilisées telles quelles par Claude Code |
+| Skills | `opencode/skills/` | 15 skills versionnées (assets séparés 🟦/🟩/⚪), réutilisées telles quelles par Claude Code |
 | Assets | `opencode/assets/` | Templates, scripts, checklists, configs par skill |
 | Commandes | `opencode/commands/` | 10 commandes slash OpenCode (dont `/threat-model`) |
 | Workflows AG | `antigravity/workflows/` | 10 workflows Antigravity équivalents |
 | MCP | `opencode/mcp.servers.json` | Source de vérité serveurs MCP (sans secret en clair) |
 | Migration | `opencode/` | README-MIGRATION, PLAN, ARCHIVAGE, DIFF, opencode.jsonc.new |
+
+## Standards & Conventions clés
+
+- **Base de données locale (`file:<projet>.local.db`)** :
+  - Utilisation exclusive du fichier SQLite/libSQL direct nommé selon le projet : `file:<projet>.local.db`.
+  - Zéro démon serveur en tâche de fond (aucun `turso dev` ni conteneur Docker requis).
+  - Données persistantes sur disque et réinitialisation instantanée (`rm -f <projet>.local.db && npm run db:migrate`).
+  - **Exclusion Git stricte** : `*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*` obligatoirement dans `.gitignore`.
+- **Lancement local & Partage des accès** :
+  - Preview locale servie en HTTPS via Caddy (`https://<projet>.test`).
+  - **Restitution systématique des identifiants** : à chaque démarrage ou preview locale, les agents affichent obligatoirement le tableau complet des URLs `.test` et des identifiants de dev en clair (**Login / Email** et **Mot de passe**) pour les rôles visiteur, utilisateur standard et super admin / cockpit QA.
+- **Autorisation applicative** :
+  - Turso n'ayant pas de RLS (Row-Level Security), toute l'autorisation est applicative et centralisée dans les server routes SvelteKit (`src/lib/server/auth/authorize.ts`) pour éliminer tout risque d'IDOR.
+- **Paiements & Webhooks** :
+  - Passerelle unifiée (Wave, Orange Money, MTN, Moov, cartes bancaires) avec sandbox réelle obligatoire avant tout jalon `live`.
+  - Vérification de signature HMAC à temps constant (`crypto.timingSafeEqual`) et idempotence transactionnelle en base.
+
+## Skills (15)
+
+- `apple-design` — design physique & motion Apple appliqué au web (latence zéro, ressorts, direct manipulation, typographie optique)
+- `pwa-cadrage` — cadrage, naming, stack, blueprint, roadmap, modélisation des menaces STRIDE
+- `design-ux-flow` — méthodologie UX 10 étapes, problème chirurgical, micro-victoires, onboarding
+- `pwa-developpement` — scaffolding, AGENTS.md, SPEC-XXX, DATABASE.md (base locale direct file:<projet>.local.db), conventions
+- `pwa-test-harness` — cockpit specs & banc d'essai QA (Kanban/Liste, simulation, persistance Turso, sync Markdown)
+- `design-pwa-system` — direction artistique, design system, layout signature, brief inference + dials + bibliothèque DESIGN.md + stress-test UI
+- `design-3d` — visuels 3D procéduraux Three.js depuis une image (héros produits, objets animés)
+- `pwa-validation` — tests locaux Caddy (.test), partage obligatoire des logins/mdp de test, E2E Playwright, audit design, Lighthouse, a11y & motion, SEO, sécurité (OWASP, webhooks HMAC, anti-IDOR)
+- `pwa-deploiement` — Coolify, Cloudflare, R2, RUNBOOK
+- `api-paiements` — passerelle de paiement (sandbox + live), webhooks HMAC, dunning, factures, réconciliation
+- `api-best-practices` — design API REST
+- `shared-git-conventions` — git, SemVer, releases
+- `shared-graft` — indexation du code par graft (@nanonets/graft)
+- `shared-eco-tokens` — optimisation de tokens (toujours chargée)
+- `opencode-admin` — administration des outils IA (OC + AG)
 
 ## Installation & mise à jour
 
@@ -43,23 +77,6 @@ Le script :
 > ⚠️ Les agents OpenCode, Antigravity et Claude Code ont des formats **différents** : le script synchronise les agents OpenCode (`opencode/agents/`), les agents Antigravity (`antigravity/agents/`), les agents Claude Code (`claude/agents/`) et les workflows Antigravity (`antigravity/workflows/`).
 > ⚠️ Claude Code ne supporte pas la syntaxe `{file:...}` d'OpenCode pour les secrets MCP — voir `docs/CLAUDE.md` §3 pour `export-mcp-tokens.sh`.
 
-## Skills (15)
-
-- `apple-design` — design physique & motion Apple appliqué au web (latence zéro, ressorts, direct manipulation, typographie optique)
-- `pwa-cadrage` — cadrage, naming, stack, blueprint, roadmap, modélisation des menaces STRIDE
-- `design-ux-flow` — méthodologie UX 10 étapes, problème chirurgical, micro-victoires, onboarding
-- `pwa-developpement` — scaffolding, AGENTS.md, SPEC-XXX, DATABASE.md, conventions
-- `pwa-test-harness` — cockpit specs & banc d'essai QA (Kanban/Liste, simulation, persistance Turso, sync Markdown)
-- `design-pwa-system` — direction artistique, design system, layout signature, brief inference + dials + bibliothèque DESIGN.md + stress-test UI
-- `design-3d` — visuels 3D procéduraux Three.js depuis une image (héros produits, objets animés)
-- `pwa-validation` — tests locaux, E2E Playwright, audit design automatisé, Lighthouse, a11y & motion, SEO, sécurité (OWASP, webhooks HMAC, anti-IDOR)
-- `pwa-deploiement` — Coolify, Cloudflare, R2, RUNBOOK
-- `api-paiements` — passerelle de paiement (sandbox + live), webhooks HMAC, dunning, factures, réconciliation
-- `api-best-practices` — design API REST
-- `shared-git-conventions` — git, SemVer, releases
-- `shared-graft` — indexation du code par graft (@nanonets/graft)
-- `shared-eco-tokens` — optimisation de tokens (toujours chargée)
-- `opencode-admin` — administration des outils IA (OC + AG)
 
 ## Agents (3)
 

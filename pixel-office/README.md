@@ -1,4 +1,4 @@
-# Pixel Office v0.4.5 — Cockpit Virtuel Agents IA (Agence Bulles)
+# Pixel Office v0.5.0 — Cockpit Virtuel Agents IA (Agence Bulles)
 
 Supervision autonome et cockpit de pilotage bi-directionnel des agents IA en **Pixel Art Top-Down 2D rétro (JRPG / 16-bit)** pour écran secondaire ou mode Kiosk.
 
@@ -18,8 +18,17 @@ Supervision autonome et cockpit de pilotage bi-directionnel des agents IA en **P
 
 ---
 
-## Fonctionnalités Clés (v0.4.5)
+## Fonctionnalités Clés (v0.5.0)
 
+- **Auto-Lancement Intelligent dans Google Chrome (Anti-Doublon)** :
+  - Dès qu'un agent ou une skill est sollicité dans Antigravity, OpenCode ou Claude Code, `https://pixel-office.test/` se lance automatiquement dans Google Chrome.
+  - Grâce à un pont AppleScript macOS inspectant les onglets ouverts, aucun doublon n'est jamais créé si la page est déjà ouverte.
+- **Découverte Dynamique des Agents & Postes de Bureau Automatiques** :
+  - Scanne en continu les répertoires d'agents (`antigravity/agents/*.md`, `opencode/agents/*.md`, `claude/agents/*.md`).
+  - Dès qu'un nouvel agent est ajouté au système, un nouveau personnage avec sa palette, son poste de travail et son entrée dans la Régie est instancié sans nécessiter de redémarrage.
+- **Catalogue Vivant des Skills** :
+  - Détection automatique et temps réel de toutes les skills déclarées (`~/.gemini/config/skills/`, `opencode/skills/`).
+  - Affichage instantané des descriptions et tags actifs dans le HUD RPG et les infobulles.
 - **Pont Bi-directionnel Armé vs Observateur (Switch Sécurisé)** :
   - **Mode OBSERVATEUR (`[🔒 OBSERVATEUR : OFF]`)** : Visualisation en capsules d'information pures de lecture seule, sans boutons perturbateurs.
   - **Mode PILOTAGE (`[⚡ PILOTAGE : ON]`)** : Les clics sur `[✔ VALIDER]` ou `[↺ RÉVISION]` débloquent instantanément les agents dans leurs terminaux Antigravity, OpenCode ou Claude Code via le protocole partagé `~/.config/pixel-office/gates/`.
@@ -34,8 +43,7 @@ Supervision autonome et cockpit de pilotage bi-directionnel des agents IA en **P
 - **Audio Chiptune WebAudio & Foley 8-bit** :
   - Synthétiseur procédural Lo-Fi 72 BPM sans asset MP3 lourd.
   - Bruitages 8-bit rétro : ronronnement GitCat, chimes de validation, frappes claviers et alertes serveurs.
-- **Scénarios Réalistes & Idle Roaming Autonome** :
-  - Convocations de standup meeting au salon, alertes rack serveur Coolify, coups de fil intercom directs entre collègues, visites en binôme et pauses café.
+
 
 ---
 

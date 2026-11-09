@@ -489,6 +489,16 @@
 		'design-3d': '3D Procédural Three.js'
 	};
 
+	const dynamicSkillsMap = $derived.by<Record<string, string>>(() => {
+		const remoteSkills = (snapshot as OfficeSnapshot | null)?.catalog?.skills ?? {};
+		return {
+			...SKILL_LABELS,
+			...remoteSkills
+		};
+	});
+
+
+
 	const activeSkillsList = $derived.by(() => {
 		if (activeDialogueAgent?.activeSkills && activeDialogueAgent.activeSkills.length > 0) {
 			return activeDialogueAgent.activeSkills;
@@ -1534,7 +1544,7 @@
 										<span
 											class="rpg-skill-chip"
 											class:is-active-skill={idx === 0}
-											title="{skill} : {SKILL_LABELS[skill] ?? 'Skill certifiée Agence Bulles'}"
+											title="{skill} : {dynamicSkillsMap[skill] ?? 'Skill certifiée Agence Bulles'}"
 										>
 											<span class="skill-dot-neon"></span>
 											<span class="skill-chip-name">{skill}</span>
