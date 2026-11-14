@@ -14,19 +14,22 @@ metadata:
 - Exécute la séquence complète de validation d'une PWA avant commit.
 - Centralise l'ancienne skill pwa-tests-locaux + audits a11y/SEO/sécurité.
 
-## 1. Preview locale — Caddy + Docker & OrbStack (pas localhost)
+## 1. Preview locale — Caddy, Docker OrbStack & Registre des ports
 - **Lancement obligatoire** : Pour voir et tester le site en local, lancer **TOUJOURS via Docker et OrbStack** (`docker compose -f docker-compose.dev.yml up`). Jamais de serveur nu sur la machine hôte.
-- Caddy installé : `/opt/homebrew/bin/caddy`, config unique `~/.config/caddy/Caddyfile` (lancé via `caddy run --config ~/.config/caddy/Caddyfile`).
-- Ajouter un bloc par projet dans Caddyfile (mappage vers le port exposé par le conteneur Docker OrbStack) :
+- **Auto-démarrage forcé de Caddy** : Vérifier si Caddy tourne (`pgrep -f caddy`). S'il est arrêté, le démarrer automatiquement en arrière-plan :
+  ```bash
+  caddy run --config ~/.config/caddy/Caddyfile &
+  ```
+- **Registre des ports anti-doublon (`~/Projets/PROJECTS_REGISTRY.md`)** : Consulter systématiquement ce répertoire partagé pour identifier ou réserver le port hôte unique sans chevauchement.
+- **Création automatique du site local (.test & .local)** : Si le bloc n'existe pas dans `~/.config/caddy/Caddyfile`, l'ajouter automatiquement :
 ```caddy
-mon-projet.test, mon-projet.localhost {
+mon-projet.test, mon-projet.local, mon-projet.localhost {
     tls internal
-    reverse_proxy localhost:5173
+    reverse_proxy localhost:<PORT_RESERVE>
 }
 ```
 - Recharger après modification : `caddy reload --config ~/.config/caddy/Caddyfile`.
 - **Ne jamais tester via `http://localhost:<port>`** — toujours le domaine `.test` (HTTPS local automatique).
-- Vérifier qu'aucun service n'écoute déjà sur le port cible.
 - Config de référence : `assets/configs/Caddyfile.test`.
 
 ## 1bis. Restitution systématique des identifiants locaux (Logins & Mots de passe via docs/credentials.md)

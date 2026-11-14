@@ -84,14 +84,18 @@ Lors de la création d'un SaaS et tout au long du développement :
 - **Référence systématique** : à chaque fois que les accès sont demandés pour une tâche (lancement dev, preview, tests QA, validation), se référer obligatoirement à ce fichier.
 - **Création & maintenance continue** : si `docs/credentials.md` n'existe pas lors d'une tâche, **le créer immédiatement et le maintenir**. Le mettre à jour à chaque modification d'accès (ajout d'accès, suppression d'accès, modification de mot de passe).
 
-## Lancement & prévisualisation locale (Docker & OrbStack)
+## Lancement & prévisualisation locale (Docker, OrbStack & Caddy)
 
 - **Conteneurisation obligatoire via OrbStack** : pour voir, exécuter ou tester l'application ou le SaaS en local, toujours démarrer l'environnement via **Docker et OrbStack** :
   ```bash
   docker compose -f docker-compose.dev.yml up
   ```
 - **Zéro serveur nu sur la machine hôte** : ne jamais exécuter un serveur de dev directement sur l'hôte sans conteneurisation dès qu'il s'agit de voir ou tester le site.
-- **Reverse proxy Caddy HTTPS** : Caddy (`https://<projet>.test`) gère le chiffrement HTTPS local et redirige le trafic vers les ports exposés par les conteneurs OrbStack.
+- **Auto-démarrage forcé de Caddy** : dès qu'une prévisualisation ou un accès local est demandé, vérifier la présence du démon Caddy (`pgrep -f caddy`). S'il n'est pas actif, le démarrer automatiquement en arrière-plan (`caddy run --config ~/.config/caddy/Caddyfile &`).
+- **Création du site local Caddy (.test / .local)** : si le domaine `<projet>.test` (et son alias `<projet>.local`) n'est pas encore présent dans `~/.config/caddy/Caddyfile`, créer automatiquement le bloc avec `tls internal` et `reverse_proxy localhost:<PORT_RESERVE>`, puis appliquer via `caddy reload --config ~/.config/caddy/Caddyfile`.
+- **Répertoire central des ports anti-doublon (`~/Projets/PROJECTS_REGISTRY.md`)** :
+  - Emplacement unique et partagé : `~/Projets/PROJECTS_REGISTRY.md` (aucun fichier isolé par projet).
+  - Tout projet réserve obligatoirement son port hôte unique dans ce registre avant configuration Docker/Caddy pour garantir l'absence totale de chevauchement de ports.
 
 ## Indexation du code (graft)
 

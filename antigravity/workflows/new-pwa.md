@@ -35,6 +35,7 @@ Charge la skill `pwa-developpement` :
 - Créer le dossier de projet.
 - Scaffolder le projet, `npm install`, `git init`.
 - Configurer le `.gitignore` : inclure les bases locales (`*.local.db`, `*.db`, etc.) et obligatoirement `docs/credentials.md`.
+- **Réserver le port hôte** dans `~/Projets/PROJECTS_REGISTRY.md` (anti-doublon) et ajouter le site `<projet>.test` et `<projet>.local` dans `~/.config/caddy/Caddyfile`.
 - **Créer dès le départ `docs/credentials.md`** : lister les accès (login et mot de passe en clair pour visiteur, utilisateur standard, admin/QA). Ce sont les mêmes comptes de test qui serviront tout au long du développement. Fichier local uniquement, jamais commité.
 - Créer l'`AGENTS.md` (+ section compatibilité Antigravity → `.agents/rules/`).
 - Créer le `README.md` à partir du blueprint.

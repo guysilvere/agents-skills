@@ -24,12 +24,11 @@
   - Zéro démon serveur en tâche de fond (aucun `turso dev` ni conteneur Docker requis).
   - Données persistantes sur disque et réinitialisation instantanée (`rm -f <projet>.local.db && npm run db:migrate`).
   - **Exclusion Git stricte** : `*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*` obligatoirement dans `.gitignore`.
-- **Lancement local (Docker & OrbStack) & Partage des accès (`docs/credentials.md`)** :
+- **Lancement local (Docker, OrbStack & Caddy) & Registre des ports (`PROJECTS_REGISTRY.md`)** :
   - **Lancement obligatoire via Docker et OrbStack** : pour voir et tester le site en local, toujours démarrer l'application avec `docker compose -f docker-compose.dev.yml up` (aucun serveur nu sur l'hôte).
-  - Preview locale servie en HTTPS via Caddy (`https://<projet>.test`) pointant vers le conteneur OrbStack.
-  - **Mêmes comptes tests locaux** : dès le départ et tout au long du développement d'un SaaS, utiliser les mêmes comptes de test.
-  - **Fichier `docs/credentials.md`** : créé dès le scaffold, il liste les accès (login et mot de passe en clair pour visiteur, utilisateur standard, admin/cockpit QA). **Fichier local uniquement, obligatoirement exclu du versioning Git (`.gitignore`) et jamais commité**.
-  - **Référence & maintenance** : à chaque demande d'accès pour une tâche, se référer à ce fichier ; s'il n'existe pas, le créer et le maintenir (ajouts, suppressions, modifs de mot de passe). Restituer obligatoirement le tableau complet des URLs `.test` et identifiants à chaque démarrage ou preview locale.
+  - **Caddy auto-start & domaines `.test` / `.local`** : Caddy est démarré automatiquement s'il est inactif (`caddy run`). Si le site local n'existe pas dans `~/.config/caddy/Caddyfile`, il est créé automatiquement avec `tls internal`.
+  - **Registre unique des ports (`~/Projets/PROJECTS_REGISTRY.md`)** : répertorie tous les projets web locaux, leurs domaines et bloque les ports réservés sans doublon.
+  - **Mêmes comptes tests locaux & `docs/credentials.md`** : fichier local uniquement listant les identifiants (login/mdp en clair), obligatoirement exclu du versioning Git (`.gitignore`) et jamais commité. Restituer obligatoirement les accès et URLs à chaque lancement.
 - **Autorisation applicative** :
   - Turso n'ayant pas de RLS (Row-Level Security), toute l'autorisation est applicative et centralisée dans les server routes SvelteKit (`src/lib/server/auth/authorize.ts`) pour éliminer tout risque d'IDOR.
 - **Paiements & Webhooks** :

@@ -14,6 +14,7 @@ Lance la création d'une nouvelle PWA pour le projet mentionné (phases 0-5) :
    - Charge la skill `pwa-developpement` (`skill pwa-developpement`).
    - Scaffolde le projet dans son dossier, installe les dépendances, initialise Git (`testing`).
    - Configure `.gitignore` (excluant bases locales et `docs/credentials.md`).
+   - Réserve le port hôte dans `~/Projets/PROJECTS_REGISTRY.md` et déclare `<projet>.test` et `<projet>.local` dans `~/.config/caddy/Caddyfile`.
    - Crée dès le départ `docs/credentials.md` (comptes tests réutilisables tout au long du dev, local uniquement, jamais commité).
    - Crée `AGENTS.md` (+ section compatibilité Antigravity `.agents/rules/`) et `README.md`.
 3. Présente les livrables validés prêts pour le développement des fonctionnalités.

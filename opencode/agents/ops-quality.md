@@ -70,9 +70,9 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 
 ## Lancement des serveurs locaux (à la demande)
 - Si l'utilisateur demande de **lancer les serveurs locaux** :
-  1. Lire `AGENTS.md` du projet (PORT, DEV_CMD, KILL_CMD, services, mapping des fichiers).
+  1. Lire `AGENTS.md` du projet et consulter `~/Projets/PROJECTS_REGISTRY.md` pour le port réservé sans doublon.
   2. **Démarrer les services systématiquement via Docker et OrbStack** : lancer `docker compose -f docker-compose.dev.yml up` en arrière-plan (aucun serveur dev nu sur la machine hôte ; base locale fichier direct `file:<projet>.local.db` — aucun démon en tâche de fond pour la base locale), et services annexes décrits dans l'AGENTS.md.
-  3. **Activer Caddy** pour utiliser les URLs `.test` : ajouter/recharger le bloc `<projet>.test` dans `~/.config/caddy/Caddyfile` (`caddy reload --config ~/.config/caddy/Caddyfile`), démarrer Caddy si arrêté (`caddy run --config ~/.config/caddy/Caddyfile`).
+  3. **Activer et configurer Caddy pour les URLs `.test` et `.local`** : vérifier que Caddy tourne (`pgrep -f caddy`), le démarrer si arrêté (`caddy run --config ~/.config/caddy/Caddyfile &`), ajouter le bloc `<projet>.test, <projet>.local` dans `~/.config/caddy/Caddyfile` s'il n'existe pas encore, et recharger Caddy (`caddy reload --config ~/.config/caddy/Caddyfile`).
   4. Vérifier que chaque service répond (port ouvert / URL `.test` accessible en HTTPS local).
   5. **Afficher obligatoirement un tableau récapitulatif complet incluant les identifiants locaux (login & mot de passe)** :
      - Récupérer les identifiants de dev prioritairement dans `docs/credentials.md` (le créer et le maintenir si absent ; fallback `AGENTS.md` section « Accès locaux », `.env.local` ou `scripts/seed`) — jamais de secrets de production (`.env`, `.env.*` sont en `deny` de lecture).

@@ -12,7 +12,7 @@
 - Travailler sur la branche `testing`, jamais `main`.
 - Aucun secret en clair.
 - Comptes tests locaux : même comptes tout au long du dev, consignés dans `docs/credentials.md` (local uniquement, obligatoirement dans `.gitignore`, jamais commité). Se référer systématiquement à ce fichier ; le créer et le maintenir s'il n'existe pas.
-- Lancement local : pour voir/tester le site en local, toujours lancer via Docker et OrbStack (`docker compose -f docker-compose.dev.yml up`).
+- Lancement local (Docker, OrbStack & Caddy) : pour voir/tester le site en local, lancer toujours via Docker et OrbStack (`docker compose -f docker-compose.dev.yml up`). Démarrer automatiquement Caddy s'il est arrêté (`caddy run`), créer le site web local en `.test`/`.local` dans `~/.config/caddy/Caddyfile`, et bloquer les ports sans doublon via `~/Projets/PROJECTS_REGISTRY.md`.
 
 ## Liens
 - Rules projet : `.agents/rules/*.md`
