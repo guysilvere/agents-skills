@@ -12,6 +12,7 @@
 - Travailler sur la branche `testing`, jamais `main`.
 - Aucun secret en clair.
 - Comptes tests locaux : même comptes tout au long du dev, consignés dans `docs/credentials.md` (local uniquement, obligatoirement dans `.gitignore`, jamais commité). Se référer systématiquement à ce fichier ; le créer et le maintenir s'il n'existe pas.
+- Lancement local : pour voir/tester le site en local, toujours lancer via Docker et OrbStack (`docker compose -f docker-compose.dev.yml up`).
 
 ## Liens
 - Rules projet : `.agents/rules/*.md`

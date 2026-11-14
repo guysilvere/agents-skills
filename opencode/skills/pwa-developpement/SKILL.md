@@ -103,11 +103,12 @@ metadata:
 3. Ne PAS toucher aux fichiers générés, config ou code tiers.
 4. Recharger `pwa-validation` après nettoyage (lint + typecheck + build).
 
-## 6. Environnement & Structure de projet (Docker en 1er choix)
-- **Dev local conteneurisé (défaut)** : Lancement systématique via OrbStack :
+## 6. Environnement & Structure de projet (Docker & OrbStack obligatoires)
+- **Dev local conteneurisé obligatoire (OrbStack)** : Pour voir et tester le site en local, le lancement s'effectue **TOUJOURS via Docker et OrbStack** :
   ```bash
   docker compose -f docker-compose.dev.yml up
   ```
+  Interdiction formelle de lancer un serveur dev nu sur la machine hôte sans conteneurisation dès lors qu'il s'agit de prévisualiser l'application.
   - Volumes montés pour le hot-reloading automatique (`src/`, `static/`, `migrations/`).
   - Base locale SQLite directe (`file:<projet>.local.db`) sans aucun conteneur ni démon requis : isolation stricte par projet, données persistantes, reset instantané (`rm -f <projet>.local.db && npm run db:migrate`), obligatoirement gitignorée.
   - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs.

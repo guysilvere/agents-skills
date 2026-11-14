@@ -71,7 +71,7 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 ## Lancement des serveurs locaux (à la demande)
 - Si l'utilisateur demande de **lancer les serveurs locaux** :
   1. Lire `AGENTS.md` du projet (PORT, DEV_CMD, KILL_CMD, services, mapping des fichiers).
-  2. Démarrer les services nécessaires en arrière-plan : serveur dev (ex. `npm run dev`), base de données (Turso cloud ou fichier direct `file:<projet>.local.db` — aucun démon en tâche de fond pour la base locale), et services annexes décrits dans l'AGENTS.md.
+  2. **Démarrer les services systématiquement via Docker et OrbStack** : lancer `docker compose -f docker-compose.dev.yml up` en arrière-plan (aucun serveur dev nu sur la machine hôte ; base locale fichier direct `file:<projet>.local.db` — aucun démon en tâche de fond pour la base locale), et services annexes décrits dans l'AGENTS.md.
   3. **Activer Caddy** pour utiliser les URLs `.test` : ajouter/recharger le bloc `<projet>.test` dans `~/.config/caddy/Caddyfile` (`caddy reload --config ~/.config/caddy/Caddyfile`), démarrer Caddy si arrêté (`caddy run --config ~/.config/caddy/Caddyfile`).
   4. Vérifier que chaque service répond (port ouvert / URL `.test` accessible en HTTPS local).
   5. **Afficher obligatoirement un tableau récapitulatif complet incluant les identifiants locaux (login & mot de passe)** :

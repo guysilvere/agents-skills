@@ -14,10 +14,10 @@ metadata:
 - Exécute la séquence complète de validation d'une PWA avant commit.
 - Centralise l'ancienne skill pwa-tests-locaux + audits a11y/SEO/sécurité.
 
-## 1. Preview locale — Caddy + OrbStack (pas localhost)
+## 1. Preview locale — Caddy + Docker & OrbStack (pas localhost)
+- **Lancement obligatoire** : Pour voir et tester le site en local, lancer **TOUJOURS via Docker et OrbStack** (`docker compose -f docker-compose.dev.yml up`). Jamais de serveur nu sur la machine hôte.
 - Caddy installé : `/opt/homebrew/bin/caddy`, config unique `~/.config/caddy/Caddyfile` (lancé via `caddy run --config ~/.config/caddy/Caddyfile`).
-- App lancée via OrbStack (`docker compose -f docker-compose.dev.yml up`).
-- Ajouter un bloc par projet dans Caddyfile (mappage vers le port exposé par le conteneur Docker) :
+- Ajouter un bloc par projet dans Caddyfile (mappage vers le port exposé par le conteneur Docker OrbStack) :
 ```caddy
 mon-projet.test, mon-projet.localhost {
     tls internal

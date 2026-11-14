@@ -84,6 +84,15 @@ Lors de la création d'un SaaS et tout au long du développement :
 - **Référence systématique** : à chaque fois que les accès sont demandés pour une tâche (lancement dev, preview, tests QA, validation), se référer obligatoirement à ce fichier.
 - **Création & maintenance continue** : si `docs/credentials.md` n'existe pas lors d'une tâche, **le créer immédiatement et le maintenir**. Le mettre à jour à chaque modification d'accès (ajout d'accès, suppression d'accès, modification de mot de passe).
 
+## Lancement & prévisualisation locale (Docker & OrbStack)
+
+- **Conteneurisation obligatoire via OrbStack** : pour voir, exécuter ou tester l'application ou le SaaS en local, toujours démarrer l'environnement via **Docker et OrbStack** :
+  ```bash
+  docker compose -f docker-compose.dev.yml up
+  ```
+- **Zéro serveur nu sur la machine hôte** : ne jamais exécuter un serveur de dev directement sur l'hôte sans conteneurisation dès qu'il s'agit de voir ou tester le site.
+- **Reverse proxy Caddy HTTPS** : Caddy (`https://<projet>.test`) gère le chiffrement HTTPS local et redirige le trafic vers les ports exposés par les conteneurs OrbStack.
+
 ## Indexation du code (graft)
 
 - **Au démarrage** sur un projet existant : vérifier `graft --version` et `graft/INDEX.md`.

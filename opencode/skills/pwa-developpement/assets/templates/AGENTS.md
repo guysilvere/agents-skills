@@ -23,7 +23,7 @@
 
 ## Configuration projet
 - PORT=`<prochain_port>`
-- DEV_CMD=`<commande_dev>`
+- DEV_CMD=`docker compose -f docker-compose.dev.yml up`  # Toujours via Docker et OrbStack
 - HEALTH_CHECK=`curl -s -o /dev/null -w "%{http_code}" http://localhost:<PORT>`
 - KILL_CMD=`lsof -ti :<PORT> | xargs kill -9 2>/dev/null; echo "Port <PORT> freed"`
 - LOCAL_DB=`<projet>.local.db`

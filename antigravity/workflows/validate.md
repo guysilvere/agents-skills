@@ -11,7 +11,8 @@ Lance la validation complète du projet mentionné.
 
 Charge la skill `pwa-validation` :
 - Vérifier la branche (`testing` — jamais `main`).
-- Vérifier le setup Caddy local (`<projet>.test`) pour tester SW/offline/installation PWA.
+- Lancer systématiquement l'application via Docker et OrbStack (`docker compose -f docker-compose.dev.yml up`) — jamais de serveur nu sur l'hôte.
+- Vérifier le setup Caddy local (`<projet>.test`) pointant vers le conteneur OrbStack pour tester SW/offline/installation PWA.
 - Se référer à `docs/credentials.md` pour tous les accès tests requis (le créer et le maintenir s'il n'existe pas).
 
 ## Étape 2 — Exécution des checks

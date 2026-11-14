@@ -24,8 +24,9 @@
   - Zéro démon serveur en tâche de fond (aucun `turso dev` ni conteneur Docker requis).
   - Données persistantes sur disque et réinitialisation instantanée (`rm -f <projet>.local.db && npm run db:migrate`).
   - **Exclusion Git stricte** : `*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*` obligatoirement dans `.gitignore`.
-- **Lancement local & Partage des accès (`docs/credentials.md`)** :
-  - Preview locale servie en HTTPS via Caddy (`https://<projet>.test`).
+- **Lancement local (Docker & OrbStack) & Partage des accès (`docs/credentials.md`)** :
+  - **Lancement obligatoire via Docker et OrbStack** : pour voir et tester le site en local, toujours démarrer l'application avec `docker compose -f docker-compose.dev.yml up` (aucun serveur nu sur l'hôte).
+  - Preview locale servie en HTTPS via Caddy (`https://<projet>.test`) pointant vers le conteneur OrbStack.
   - **Mêmes comptes tests locaux** : dès le départ et tout au long du développement d'un SaaS, utiliser les mêmes comptes de test.
   - **Fichier `docs/credentials.md`** : créé dès le scaffold, il liste les accès (login et mot de passe en clair pour visiteur, utilisateur standard, admin/cockpit QA). **Fichier local uniquement, obligatoirement exclu du versioning Git (`.gitignore`) et jamais commité**.
   - **Référence & maintenance** : à chaque demande d'accès pour une tâche, se référer à ce fichier ; s'il n'existe pas, le créer et le maintenir (ajouts, suppressions, modifs de mot de passe). Restituer obligatoirement le tableau complet des URLs `.test` et identifiants à chaque démarrage ou preview locale.
