@@ -75,6 +75,15 @@ Sur tout projet hébergé sur GitHub :
 - **Clôture après résolution** : une fois le problème résolu et validé par les tests, fermer l'Issue avec un commentaire de synthèse ou via le mot-clé de liaison de la PR (`Fixes #<id>` ou `Closes #<id>`).
 - Outils : MCP GitHub (`issue_write`, `add_issue_comment`) ou CLI `gh` (`gh issue create`, `gh issue comment`, `gh issue close`).
 
+## Comptes de test locaux & accès (docs/credentials.md)
+
+Lors de la création d'un SaaS et tout au long du développement :
+- **Mêmes comptes de test en local** : utiliser impérativement les mêmes comptes de test locaux (visiteur, utilisateur standard, admin/QA) tout au long du cycle de vie du projet, synchronisés avec les seeders `scripts/seed`.
+- **Création dès le départ (`docs/credentials.md`)** : dès la phase d'initialisation/scaffold, créer obligatoirement le fichier `docs/credentials.md` (template `credentials.md`) listant tous les accès pour l'application (URL `.test`, rôles, login/email et mot de passe en clair).
+- **Fichier local uniquement — JAMAIS commité** : `docs/credentials.md` est un fichier local uniquement et **ne doit jamais être commité**. Il doit être inscrit obligatoirement dans le `.gitignore` du projet dès l'initialisation.
+- **Référence systématique** : à chaque fois que les accès sont demandés pour une tâche (lancement dev, preview, tests QA, validation), se référer obligatoirement à ce fichier.
+- **Création & maintenance continue** : si `docs/credentials.md` n'existe pas lors d'une tâche, **le créer immédiatement et le maintenir**. Le mettre à jour à chaque modification d'accès (ajout d'accès, suppression d'accès, modification de mot de passe).
+
 ## Indexation du code (graft)
 
 - **Au démarrage** sur un projet existant : vérifier `graft --version` et `graft/INDEX.md`.

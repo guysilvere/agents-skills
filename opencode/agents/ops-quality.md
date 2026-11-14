@@ -75,7 +75,7 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
   3. **Activer Caddy** pour utiliser les URLs `.test` : ajouter/recharger le bloc `<projet>.test` dans `~/.config/caddy/Caddyfile` (`caddy reload --config ~/.config/caddy/Caddyfile`), démarrer Caddy si arrêté (`caddy run --config ~/.config/caddy/Caddyfile`).
   4. Vérifier que chaque service répond (port ouvert / URL `.test` accessible en HTTPS local).
   5. **Afficher obligatoirement un tableau récapitulatif complet incluant les identifiants locaux (login & mot de passe)** :
-     - Récupérer les identifiants de dev dans `AGENTS.md` (section « Accès locaux »), `.env.local` ou `scripts/seed` — jamais de secrets de production (`.env`, `.env.*` sont en `deny` de lecture).
+     - Récupérer les identifiants de dev prioritairement dans `docs/credentials.md` (le créer et le maintenir si absent ; fallback `AGENTS.md` section « Accès locaux », `.env.local` ou `scripts/seed`) — jamais de secrets de production (`.env`, `.env.*` sont en `deny` de lecture).
      - **Ne jamais laisser les accès protégés vides** : fournir toujours login ET mot de passe pour chaque rôle (visiteur, utilisateur standard, admin/QA).
      - Toujours privilégier les URLs `.test` (pas `localhost`).
 - Exemple de tableau attendu :
@@ -90,7 +90,7 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 
 ## Workflow de validation (dans l'ordre)
 1. Lire l'`AGENTS.md` du projet (PORT, DEV_CMD, KILL_CMD, mapping des fichiers).
-2. **Sécurité D'ABORD** : `gitleaks detect --source . --redact` (fallback grep `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN`), `.env` et base locale (`*.local.db`, `*.db`, `*.sqlite*`) non commités (vérifier `.gitignore`), `npm audit --audit-level=high` + lockfile commité. Bloquant et bon marché — inutile de lancer Lighthouse si une clé ou une base locale est commitée.
+2. **Sécurité D'ABORD** : `gitleaks detect --source . --redact` (fallback grep `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN`), `.env`, `docs/credentials.md` et base locale (`*.local.db`, `*.db`, `*.sqlite*`) non commités (vérifier `.gitignore`), `npm audit --audit-level=high` + lockfile commité. Bloquant et bon marché — inutile de lancer Lighthouse si une clé, des identifiants ou une base locale sont commités.
 3. **Qualité code** : `npm run lint` puis `npm run typecheck`.
 4. **Tests** : `npm test` — exécute les tests écrits par `lead-dev` / `integrations` et juge la couverture (n'en écrit pas).
 5. **Build** : `npm run build` sans erreur ni warning bloquant.

@@ -72,6 +72,7 @@ metadata:
 ## Sécurité
 - `git push`, merge de PR et création de release nécessitent l'accord explicite de l'utilisateur.
 - `git push --force` et `git rebase -i` : interdits (permissions deny sur ops-quality).
+- **Exclusion stricte Git (`.gitignore`)** : `.env`, `docs/credentials.md` (identifiants locaux de test) et les bases SQLite directes (`*.local.db`, `*.db`, `*.sqlite*`) ne doivent **JAMAIS** être commités ni suivis par Git. Vérifier avant tout commit.
 
 ## Assets
 - `assets/templates/PR-template.md`

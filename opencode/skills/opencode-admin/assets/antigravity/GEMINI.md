@@ -11,6 +11,7 @@
 - Images compressées AVIF/WebP avant upload R2.
 - Travailler sur la branche `testing`, jamais `main`.
 - Aucun secret en clair.
+- Comptes tests locaux : même comptes tout au long du dev, consignés dans `docs/credentials.md` (local uniquement, obligatoirement dans `.gitignore`, jamais commité). Se référer systématiquement à ce fichier ; le créer et le maintenir s'il n'existe pas.
 
 ## Liens
 - Rules projet : `.agents/rules/*.md`

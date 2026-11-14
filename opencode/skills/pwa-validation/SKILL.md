@@ -29,9 +29,11 @@ mon-projet.test, mon-projet.localhost {
 - Vérifier qu'aucun service n'écoute déjà sur le port cible.
 - Config de référence : `assets/configs/Caddyfile.test`.
 
-## 1bis. Restitution systématique des identifiants locaux (Logins & Mots de passe)
-- **Règle absolue à chaque lancement local** : Dès que les serveurs locaux ou le build de preview sont démarrés, **l'agent doit obligatoirement restituer à l'utilisateur un tableau clair contenant l'URL `.test` ET les identifiants de connexion locaux (login/email + mot de passe en clair)**.
-- Ne jamais laisser le champ login/mdp vide ou omis : les identifiants doivent être extraits de `AGENTS.md` (section « Accès locaux »), de `.env.local` ou des seeders `scripts/seed`.
+## 1bis. Restitution systématique des identifiants locaux (Logins & Mots de passe via docs/credentials.md)
+- **Règle absolue à chaque lancement local ou demande d'accès** : Dès que les serveurs locaux ou le build de preview sont démarrés, ou dès qu'une tâche nécessite des accès, **se référer obligatoirement à `docs/credentials.md`**. L'agent doit obligatoirement restituer à l'utilisateur un tableau clair contenant l'URL `.test` ET les identifiants de connexion locaux (login/email + mot de passe en clair).
+- **Mêmes comptes de test tout au long du dev** : utiliser impérativement les mêmes comptes de test locaux.
+- **Si `docs/credentials.md` n'existe pas** : le créer immédiatement (template `credentials.md`) et le maintenir à jour à chaque modification d'accès.
+- **Ne jamais laisser le champ login/mdp vide ou omis** : les identifiants doivent être extraits prioritairement de `docs/credentials.md` (ou à défaut de `AGENTS.md` section « Accès locaux », `.env.local` ou `scripts/seed`).
 - Tableau standard attendu en réponse :
 
 | Interface / Rôle | URL `.test` | Login / Email | Mot de passe | Usage / Périmètre |
@@ -41,7 +43,7 @@ mon-projet.test, mon-projet.localhost {
 | **Super Admin / QA** | `https://<projet>.test/admin` | `admin@<projet>.test` | `admin123` | Cockpit QA, Harness, Admin |
 | **Banc QA direct** | `https://<projet>.test/admin/test` | *(session admin)* | *(session admin)* | Exécution des scénarios QA |
 
-- *Sécurité* : Ces identifiants concernent exclusivement des comptes de dev/test locaux factices générés par seed. Aucun secret de production ne doit jamais être affiché.
+- *Sécurité* : `docs/credentials.md` est un **fichier local uniquement, obligatoirement exclu du versioning Git (`.gitignore`) et JAMAIS commité**. Ces identifiants concernent exclusivement des comptes de dev/test locaux factices. Aucun secret de production ne doit jamais être affiché.
 
 ## 2. Séquence de validation (dans l'ordre, chaque étape doit passer)
 0. **Détection de secrets EN PREMIER** — bloquante et bon marché : inutile de lancer Lighthouse si une clé est commitée.
@@ -77,7 +79,7 @@ mon-projet.test, mon-projet.localhost {
 - Checklist : `assets/checklists/seo.md`
 
 ## 5. Audit sécurité (complète l'étape 0)
-- **Secrets & Dépôt** : `gitleaks` (historique Git inclus) ; `.env` et base locale (`*.local.db`, `*.db`, `*.sqlite*`) non commités (vérifier `.gitignore`) ; aucun token dans logs/commentaires
+- **Secrets & Dépôt** : `gitleaks` (historique Git inclus) ; `.env`, `docs/credentials.md` et base locale (`*.local.db`, `*.db`, `*.sqlite*`) non commités (vérifier `.gitignore`) ; aucun token dans logs/commentaires
 - **Dépendances** : `npm audit` + lockfile commité
 - **OWASP Top 10 & STRIDE** : injection (SQL/shell/NoSQL), XSS, IDOR (Turso sans RLS → vérification propriétaire serveur systématique), modélisation des menaces (`pwa-cadrage/assets/templates/THREAT_MODEL.md`)
 - **Paiements & Webhooks** : signature HMAC vérifiée avec `crypto.timingSafeEqual`, idempotence transactionnelle (`processed_events`)

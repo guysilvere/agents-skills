@@ -13,6 +13,8 @@ Lance la création d'une nouvelle PWA pour le projet mentionné (phases 0-5) :
 2. Phase 2 — Construction & Scaffold :
    - Charge la skill `pwa-developpement` (`skill pwa-developpement`).
    - Scaffolde le projet dans son dossier, installe les dépendances, initialise Git (`testing`).
+   - Configure `.gitignore` (excluant bases locales et `docs/credentials.md`).
+   - Crée dès le départ `docs/credentials.md` (comptes tests réutilisables tout au long du dev, local uniquement, jamais commité).
    - Crée `AGENTS.md` (+ section compatibilité Antigravity `.agents/rules/`) et `README.md`.
 3. Présente les livrables validés prêts pour le développement des fonctionnalités.
 

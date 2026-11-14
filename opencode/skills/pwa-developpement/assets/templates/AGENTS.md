@@ -16,6 +16,7 @@
 | ROADMAP.md | Racine | Jalons court/moyen/long terme |
 | README.md | Racine | Build, setup Caddy local, variables, lancement |
 | CHANGELOG.md | Racine | Versions sémantiques + notes de release |
+| credentials.md | docs/credentials.md | Accès & comptes tests locaux (**fichier local non commité, exclu git**) |
 | USER_GUIDE.md | docs/USER_GUIDE.md | Guide **utilisateur final** — tâches, hors ligne, FAQ |
 | RUNBOOK.md | docs/RUNBOOK.md | Déploiement Coolify, proxy Cloudflare, backups R2, migrations, rollback, monitoring |
 | ci.yml | .github/workflows/ci.yml | CI bloquante sur PR (secrets, lint, typecheck, tests, build) |
@@ -29,7 +30,7 @@
 - DB_RESET_CMD=`rm -f <projet>.local.db && npm run db:migrate`
 
 ## Accès locaux (Dev & Test)
-> Identifiants factices de développement. À restituer obligatoirement à chaque lancement des serveurs locaux.
+> Identifiants factices de développement. Référence absolue : `docs/credentials.md` (local uniquement, non commité). À restituer obligatoirement à chaque lancement des serveurs locaux.
 | Rôle / Interface | URL d'accès | Login / Email | Mot de passe | Usage |
 | :--- | :--- | :--- | :--- | :--- |
 | **Front public** | `https://<projet>.test` | — | — | Parcours libre visiteur |
@@ -65,6 +66,7 @@
 - ❌ Aucune autre bibliothèque d'icônes que celle choisie (Lucide/Tabler/Phosphor/React/Remix)
 - ❌ Aucune image non compressée en AVIF/WebP avant upload R2
 - ❌ Aucune base de données locale commitée (`*.local.db`, `*.db`, `*.sqlite*` obligatoirement dans `.gitignore`)
+- ❌ Aucun fichier d'identifiants commité (`docs/credentials.md` obligatoirement dans `.gitignore`)
 - ❌ Aucune modification directe sur `main` (travailler sur `testing`)
 - ❌ Aucun secret en clair (clés API, tokens, URLs de BDD)
 

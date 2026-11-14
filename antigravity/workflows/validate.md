@@ -12,6 +12,7 @@ Lance la validation complète du projet mentionné.
 Charge la skill `pwa-validation` :
 - Vérifier la branche (`testing` — jamais `main`).
 - Vérifier le setup Caddy local (`<projet>.test`) pour tester SW/offline/installation PWA.
+- Se référer à `docs/credentials.md` pour tous les accès tests requis (le créer et le maintenir s'il n'existe pas).
 
 ## Étape 2 — Exécution des checks
 
@@ -22,7 +23,7 @@ Charge la skill `pwa-validation` :
 
 ## Étape 3 — Audit sécurité
 
-- OWASP Top 10, secrets exposés, en-têtes HTTP (CSP, HSTS), CORS, Turnstile.
+- OWASP Top 10, secrets exposés, exclusion Git stricte (`.env`, `docs/credentials.md`, bases locales `*.local.db` dans `.gitignore`), en-têtes HTTP (CSP, HSTS), CORS, Turnstile.
 
 ## Étape 4 — Verdict
 

@@ -26,9 +26,9 @@ metadata:
 - Créer `docs/USER_GUIDE.md` depuis `assets/templates/USER_GUIDE.md` — guide **destiné aux utilisateurs finaux**, alimenté au fil des specs DONE (cf. § 8).
 - Créer `.github/PULL_REQUEST_TEMPLATE.md` et `.github/ISSUE_TEMPLATE/{bug,feature,chore}.md` depuis `shared-git-conventions/assets/templates/`.
 - **Indexer le projet avec graft** : vérifier `graft --version` (sinon notifier et demander l'installation), lancer `graft build` après le premier commit. Rien à ajouter au `.gitignore` : graft 0.19+ s'y inscrit lui-même. Skill `shared-graft`.
-- **`.gitignore` projet** : y ajouter obligatoirement les bases locales (`*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*`) et `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
-- **Comptes de test locaux** : toujours définir dans `AGENTS.md` (section « Accès locaux ») et dans les seeders `scripts/seed` les identifiants de dev (admin et utilisateur) afin qu'ils soient immédiatement disponibles et partagés dès le démarrage local.
-- Template : `assets/templates/AGENTS.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
+- **`.gitignore` projet** : y ajouter obligatoirement les bases locales (`*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*`), `docs/credentials.md` (identifiants locaux, jamais commités) et `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
+- **Comptes de test locaux (`docs/credentials.md`)** : dès la création d'un SaaS et tout au long du développement, utiliser impérativement les mêmes comptes de test locaux (synchronisés avec les seeders `scripts/seed` et `AGENTS.md`). Créer dès le départ `docs/credentials.md` (template `assets/templates/credentials.md`) listant tous les accès (URL, rôle, login/email et mot de passe en clair). Ce fichier est **local uniquement et ne doit JAMAIS être commité** (strictement exclu dans `.gitignore`). À chaque fois que les accès sont demandés pour une tâche, se référer à ce fichier ; s'il n'existe pas, le créer immédiatement et le maintenir à jour (ajouts, suppressions, modifications de mots de passe).
+- Template : `assets/templates/AGENTS.md`, `assets/templates/credentials.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
 
 ## 1bis. Initialisation du Cockpit Specs & Banc de Tests QA
 - **Dès la mise en place du projet** : initialiser les pages de suivi des Specs et de Tests QA (`/admin/specs` et `/admin/test` ou `/admin/harness`).
@@ -111,7 +111,7 @@ metadata:
   - Volumes montés pour le hot-reloading automatique (`src/`, `static/`, `migrations/`).
   - Base locale SQLite directe (`file:<projet>.local.db`) sans aucun conteneur ni démon requis : isolation stricte par projet, données persistantes, reset instantané (`rm -f <projet>.local.db && npm run db:migrate`), obligatoirement gitignorée.
   - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs.
-  - **Restitution systématique des accès** : à chaque démarrage du projet en local (dev ou preview), afficher impérativement à l'utilisateur le tableau complet des URLs `.test` et des identifiants locaux de test (login/email + mot de passe pour chaque rôle : visiteur, user, admin/QA) issus de `AGENTS.md` (cf. skill `pwa-validation` § 1bis).
+  - **Restitution systématique des accès** : à chaque démarrage du projet en local (dev ou preview), afficher impérativement à l'utilisateur le tableau complet des URLs `.test` et des identifiants locaux de test (login/email + mot de passe pour chaque rôle : visiteur, user, admin/QA) extraits de `docs/credentials.md` (ou `AGENTS.md` / `scripts/seed`) — s'il n'existe pas, le créer et le maintenir (cf. skill `pwa-validation` § 1bis).
 
 ```
 projet/
@@ -151,6 +151,7 @@ projet/
 | Variable d'environnement | `.env.example` + mapping `AGENTS.md` |
 | Endpoint d'API | registre **OpenAPI** (généré depuis les schémas Zod — skill `api-best-practices`) |
 | **Parcours visible par l'utilisateur** | **`docs/USER_GUIDE.md`** |
+| **Accès local, compte test, mot de passe modifié** | **`docs/credentials.md`** (local uniquement, non commité) |
 | Décision structurelle | nouvel **ADR** (§ 3bis, immuable) |
 
 **Le guide utilisateur** (`docs/USER_GUIDE.md`, template `assets/templates/USER_GUIDE.md`) :

@@ -24,9 +24,11 @@
   - Zéro démon serveur en tâche de fond (aucun `turso dev` ni conteneur Docker requis).
   - Données persistantes sur disque et réinitialisation instantanée (`rm -f <projet>.local.db && npm run db:migrate`).
   - **Exclusion Git stricte** : `*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*` obligatoirement dans `.gitignore`.
-- **Lancement local & Partage des accès** :
+- **Lancement local & Partage des accès (`docs/credentials.md`)** :
   - Preview locale servie en HTTPS via Caddy (`https://<projet>.test`).
-  - **Restitution systématique des identifiants** : à chaque démarrage ou preview locale, les agents affichent obligatoirement le tableau complet des URLs `.test` et des identifiants de dev en clair (**Login / Email** et **Mot de passe**) pour les rôles visiteur, utilisateur standard et super admin / cockpit QA.
+  - **Mêmes comptes tests locaux** : dès le départ et tout au long du développement d'un SaaS, utiliser les mêmes comptes de test.
+  - **Fichier `docs/credentials.md`** : créé dès le scaffold, il liste les accès (login et mot de passe en clair pour visiteur, utilisateur standard, admin/cockpit QA). **Fichier local uniquement, obligatoirement exclu du versioning Git (`.gitignore`) et jamais commité**.
+  - **Référence & maintenance** : à chaque demande d'accès pour une tâche, se référer à ce fichier ; s'il n'existe pas, le créer et le maintenir (ajouts, suppressions, modifs de mot de passe). Restituer obligatoirement le tableau complet des URLs `.test` et identifiants à chaque démarrage ou preview locale.
 - **Autorisation applicative** :
   - Turso n'ayant pas de RLS (Row-Level Security), toute l'autorisation est applicative et centralisée dans les server routes SvelteKit (`src/lib/server/auth/authorize.ts`) pour éliminer tout risque d'IDOR.
 - **Paiements & Webhooks** :
