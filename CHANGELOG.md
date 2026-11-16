@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## [2.9.0] — 2026-11-16
+
+### Ajouté
+- **Gestion des comptes tests locaux (`docs/credentials.md`)** :
+  - Obligation d'utiliser les mêmes comptes de test locaux tout au long du cycle de vie du projet.
+  - Création dès le scaffold de `docs/credentials.md` (identifiants login/email et mot de passe en clair pour tous les rôles).
+  - Fichier local uniquement, strictement exclu du versioning Git (`.gitignore`) et jamais commité.
+- **Lancement conteneurisé obligatoire (Docker & OrbStack)** :
+  - Obligation de lancer les applications en dev local via `docker compose -f docker-compose.dev.yml up` (aucun serveur nu sur l'hôte).
+- **Auto-démarrage de Caddy & Domaines locaux (.test / .local)** :
+  - Détection automatique et lancement de Caddy en arrière-plan s'il est inactif.
+  - Configuration automatique du bloc `<projet>.test` et `<projet>.local` avec `tls internal` et `reverse_proxy`.
+- **Répertoire central des ports & Verrouillage anti-doublon (`~/Projets/PROJECTS_REGISTRY.md`)** :
+  - Registre partagé unique à la racine de `~/Projets/` répertoriant tous les projets, domaines, conteneurs et ports réservés sans chevauchement.
+  - Template officiel `assets/templates/PROJECTS_REGISTRY.md`.
+- **Vérification et assainissement préalable de `/etc/hosts`** :
+  - Inspection obligatoire avant tout démarrage local pour s'assurer que les domaines locaux pointent vers `127.0.0.1` et `::1`.
+  - Inscription immédiate et élimination des erreurs de syntaxe, lignes orphelines et conflits d'adresses.
+
 ## [2.8.0] — 2026-11-09
 
 ### Ajouté
