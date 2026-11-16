@@ -84,7 +84,7 @@ Arrêt obligatoire (`⛔ STOP — validation humaine requise`) avant : fin de ca
 - ⚠️ **Turso n'a pas de row-level security** → l'autorisation est **applicative**. Un seul runtime possède la base et l'autorisation (les server routes SvelteKit) : c'est la règle qui évite les IDOR.
 - Paiements : **Passerelle de paiement** (Wave, Orange Money, MTN, Moov, cartes ; sandbox réelle). Emails : Brevo ou Mailtrap.
 - Ultra-léger : listes à puces dans tous les fichiers `.md`, zéro texte superflu.
-- **Animations** : sur demande d'animation, se référer à la doc officielle **GSAP** (https://gsap.com/docs/v3/) et **Three.js** (https://threejs.org/docs/). Aucune bibliothèque n'est imposée.
+- **Animations & Landings** : pour une landing page scroll-driven premium, charger `scroll-craft` (en dérivant les tokens de `DESIGN_SYSTEM.md`). Hors scroll-craft, se référer à la doc officielle **GSAP** (https://gsap.com/docs/v3/) et **Three.js** (https://threejs.org/docs/). Aucune bibliothèque n'est imposée.
 
 ## Relais & skills
 - Format de passage à `ops-quality` / `integrations` + limite de **3 allers-retours** puis escalade humaine : `WORKFLOW.md`.

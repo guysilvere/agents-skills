@@ -9,7 +9,7 @@
 | 0 | Cadrage | `docs/CADRAGE.md` | `lead-dev` |
 | 1 | Naming | nom validé + repo GitHub | `lead-dev` |
 | 2 | Stack | `docs/BLUEPRINT.md` | `lead-dev` |
-| 3 | Design | `docs/DESIGN_SYSTEM.md` | `lead-dev` |
+| 3 | Design | `docs/DESIGN_SYSTEM.md` (`design-pwa-system` + `scroll-craft` si landing premium) | `lead-dev` |
 | 4 | Données | `docs/DATABASE.md` + schéma harness | `lead-dev` |
 | 5 | Specs & Cockpit QA | `docs/specs/SPEC-XXX.md` + `/admin/specs` & `/admin/test` (Kanban/QA) | `lead-dev` |
 | 6 | Développement | code fonctionnel guidé par tests au vert | `lead-dev` (+ `integrations` si externe) |

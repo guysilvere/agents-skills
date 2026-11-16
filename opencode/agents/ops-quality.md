@@ -96,7 +96,7 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 5. **Build** : `npm run build` sans erreur ni warning bloquant.
 6. **Preview locale** : servir le **build de production** via Caddy (`~/.config/caddy/Caddyfile`, `https://<projet>.test` — jamais `localhost`, jamais le serveur de dev, scores non représentatifs). `caddy reload --config ~/.config/caddy/Caddyfile` si besoin.
 7. **Tests E2E** : `playwright-cli` (paquet `@playwright/cli`) — parcours réels (auth, paiement, CRUD, hors-ligne), screenshots succès/échec. Skill `pwa-validation` pour la checklist.
-8. **Audit design** : `impeccable detect <src>` — épinglé en devDependency, jamais en `npx` à la volée.
+8. **Audit design** : `impeccable detect <src>` — épinglé en devDependency, jamais en `npx` à la volée. Si la landing utilise `scroll-craft`, exécuter `shoot.mjs --url https://<projet>.test` (desktop, mobile `390×844`, `reduced-motion`) pour vérifier *dead scroll*, *cues*, contraste sur vidéo et `sheet.png`.
 9. **Lighthouse** : `npx lighthouse https://<projet>.test --view --chrome-flags="--ignore-certificate-errors"` — cibles : Performance ≥ 80 (LCP < 2.5 s), Accessibilité ≥ 90, CLS < 0.1, **TBT < 200 ms**. La catégorie PWA n'existe plus (Lighthouse ≥ 12) → DevTools → Application. L'**INP** est une métrique terrain, non mesurable en labo.
 10. **Audit a11y** : contraste WCAG AA, focus visible, navigation clavier, ARIA, `prefers-reduced-motion`.
 11. **Audit SEO** : title/meta uniques, OpenGraph/Twitter Cards, robots.txt, sitemap.xml, données structurées.
