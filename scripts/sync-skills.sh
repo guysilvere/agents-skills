@@ -105,12 +105,14 @@ SRC_WORKFLOWS="${BASE_SRC}/antigravity/workflows"
 SRC_AG_AGENTS="${BASE_SRC}/antigravity/agents"
 SRC_CL_AGENTS="${BASE_SRC}/claude/agents"
 SRC_MCP="${BASE_SRC}/opencode/mcp.servers.json"
+SRC_WORKFLOW_MD="${BASE_SRC}/opencode/WORKFLOW.md"
 
 # Cibles
 OC_SKILLS="${HOME}/.config/opencode/skills"
 OC_AGENTS="${HOME}/.config/opencode/agents"
 OC_COMMANDS="${HOME}/.config/opencode/commands"
 OC_CONFIG="${HOME}/.config/opencode/opencode.jsonc"
+OC_WORKFLOW_MD="${HOME}/.config/opencode/WORKFLOW.md"
 AG_SKILLS="${HOME}/.gemini/config/skills"
 AG_AGENTS="${HOME}/.gemini/config/agents"
 AG_WORKFLOWS="${HOME}/.gemini/workflows"
@@ -205,6 +207,8 @@ for s in data["servers"]:
             k: re.sub(r"\{\{TOKEN:([^}]+)\}\}", token_ref, v)
             for k, v in s["headers"].items()
         }
+    if "timeout" in s:
+        entry["timeout"] = s["timeout"]
     out[name] = entry
 print(json.dumps(out, ensure_ascii=False, indent=2))
 PY
@@ -374,6 +378,7 @@ if (( DO_BACKUP )) && (( ! DRY_RUN )); then
     [[ -d "$OC_AGENTS" ]] && cp -R "$OC_AGENTS" "$BACKUP_DIR/opencode-agents" 2>/dev/null || true
     [[ -d "$OC_COMMANDS" ]] && cp -R "$OC_COMMANDS" "$BACKUP_DIR/opencode-commands" 2>/dev/null || true
     [[ -f "$OC_CONFIG" ]] && cp -R "$OC_CONFIG" "$BACKUP_DIR/opencode-opencode.jsonc" 2>/dev/null || true
+    [[ -f "$OC_WORKFLOW_MD" ]] && cp "$OC_WORKFLOW_MD" "$BACKUP_DIR/opencode-WORKFLOW.md" 2>/dev/null || true
   fi
   if (( DO_ANTIGRAVITY )); then
     [[ -d "$AG_SKILLS" ]] && cp -R "$AG_SKILLS" "$BACKUP_DIR/antigravity-skills" 2>/dev/null || true
@@ -400,6 +405,14 @@ if (( DO_OPENCODE )); then
   purge_and_copy "$SRC_SKILLS"   "$OC_SKILLS"   "Skills OpenCode (12)"
   purge_and_copy "$SRC_AGENTS"   "$OC_AGENTS"   "Agents OpenCode (3)"
   purge_and_copy "$SRC_COMMANDS" "$OC_COMMANDS" "Commandes OpenCode (8)"
+  if [[ -f "$SRC_WORKFLOW_MD" ]]; then
+    if (( DRY_RUN )); then
+      log "[dry-run] Copie WORKFLOW.md → $OC_WORKFLOW_MD"
+    else
+      cp "$SRC_WORKFLOW_MD" "$OC_WORKFLOW_MD"
+      ok "WORKFLOW.md OpenCode synchronisé"
+    fi
+  fi
   if [[ -f "$SRC_MCP" ]]; then
     MCP_OC="$(resolve_mcp_oc)"
     if (( DRY_RUN )); then

@@ -1,5 +1,44 @@
 # CHANGELOG
 
+## [2.9.0] — 2026-11-16
+
+### Ajouté
+- **Gestion des comptes tests locaux (`docs/credentials.md`)** :
+  - Obligation d'utiliser les mêmes comptes de test locaux tout au long du cycle de vie du projet.
+  - Création dès le scaffold de `docs/credentials.md` (identifiants login/email et mot de passe en clair pour tous les rôles).
+  - Fichier local uniquement, strictement exclu du versioning Git (`.gitignore`) et jamais commité.
+- **Lancement conteneurisé obligatoire (Docker & OrbStack)** :
+  - Obligation de lancer les applications en dev local via `docker compose -f docker-compose.dev.yml up` (aucun serveur nu sur l'hôte).
+- **Auto-démarrage de Caddy & Domaines locaux (.test / .local)** :
+  - Détection automatique et lancement de Caddy en arrière-plan s'il est inactif.
+  - Configuration automatique du bloc `<projet>.test` et `<projet>.local` avec `tls internal` et `reverse_proxy`.
+- **Répertoire central des ports & Verrouillage anti-doublon (`~/Projets/PROJECTS_REGISTRY.md`)** :
+  - Registre partagé unique à la racine de `~/Projets/` répertoriant tous les projets, domaines, conteneurs et ports réservés sans chevauchement.
+  - Template officiel `assets/templates/PROJECTS_REGISTRY.md`.
+- **Vérification et assainissement préalable de `/etc/hosts`** :
+  - Inspection obligatoire avant tout démarrage local pour s'assurer que les domaines locaux pointent vers `127.0.0.1` et `::1`.
+  - Inscription immédiate et élimination des erreurs de syntaxe, lignes orphelines et conflits d'adresses.
+
+## [2.8.0] — 2026-11-09
+
+### Ajouté
+- **Pixel Office v0.5.0 — Lancement Automatique Chrome & Découverte Dynamique** :
+  - **Auto-lancement Google Chrome sans doublon** : Démarrage automatique de `https://pixel-office.test/` dès qu'un agent ou une skill est sollicité dans Antigravity, OpenCode ou Claude Code via inspection AppleScript des onglets Chrome existants.
+  - **Découverte dynamique d'agents en temps réel** : Scan automatique des répertoires d'agents (`antigravity/agents/*.md`, `opencode/agents/*.md`, `claude/agents/*.md`), instanciation immédiate d'un sprite, attribution d'un poste de travail et insertion dans la Régie sans rechargement.
+  - **Catalogue dynamique des skills** : Détection temps réel de toutes les skills déclarées (`~/.gemini/config/skills/`, `opencode/skills/`) et affichage réactif de leurs libellés et métadonnées.
+
+## [2.7.0] — 2026-10-30
+
+### Modifié
+- **Standardisation de la base de données locale (`file:<projet>.local.db`)** :
+  - Abandon des instances de serveurs locaux (`turso dev`, conteneurs Docker `sqld`) au profit du mode fichier SQLite/libSQL direct `file:<projet>.local.db` isolé par projet.
+  - Zéro consommation de ressources (0% CPU / 0 Mo RAM) au repos, persistance automatique sur disque et réinitialisation instantanée (`rm -f <projet>.local.db && npm run db:migrate`).
+  - **Exclusion Git stricte** : Obligation d'inscrire les bases locales et leurs journaux (`*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*`) dans `.gitignore`. Intégration de cette vérification dans les checklists pré-commit et sécurité (`pwa-validation`, `ops-quality`).
+  - Alignement de tous les agents (`lead-dev`, `ops-quality`, `integrations` sous OpenCode, Antigravity et Claude) et des templates (`DATABASE.md`, `AGENTS.md`, `.env.example`, `docker-compose.dev.yml`, `project-mcp.json`).
+- **Partage systématique des accès locaux (Logins & Mots de passe)** :
+  - Obligation pour `lead-dev` et `ops-quality` de restituer à chaque démarrage local un tableau récapitulatif complet associant chaque rôle (visiteur, user, admin/QA), les URL `.test` en HTTPS, et les identifiants de test en clair (login/email + mot de passe).
+  - Ajout d'une section `## Accès locaux (Dev & Test)` dans le template `AGENTS.md` et formalisation dans `pwa-validation` (§ 1bis) et `pwa-developpement` (§ 1 & § 6).
+
 ## [2.6.0] — 2026-10-30
 
 ### Ajouté

@@ -14,20 +14,40 @@ metadata:
 - Exécute la séquence complète de validation d'une PWA avant commit.
 - Centralise l'ancienne skill pwa-tests-locaux + audits a11y/SEO/sécurité.
 
-## 1. Preview locale — Caddy + OrbStack (pas localhost)
-- Caddy installé : `/opt/homebrew/bin/caddy`, config unique `~/.config/caddy/Caddyfile` (lancé via `caddy run --config ~/.config/caddy/Caddyfile`).
-- App lancée via OrbStack (`docker compose -f docker-compose.dev.yml up`).
-- Ajouter un bloc par projet dans Caddyfile (mappage vers le port exposé par le conteneur Docker) :
+## 1. Preview locale — Caddy, Docker OrbStack & Registre des ports
+- **Lancement obligatoire** : Pour voir et tester le site en local, lancer **TOUJOURS via Docker et OrbStack** (`docker compose -f docker-compose.dev.yml up`). Jamais de serveur nu sur la machine hôte.
+- **Auto-démarrage forcé de Caddy** : Vérifier si Caddy tourne (`pgrep -f caddy`). S'il est arrêté, le démarrer automatiquement en arrière-plan :
+  ```bash
+  caddy run --config ~/.config/caddy/Caddyfile &
+  ```
+- **Vérification et assainissement de `/etc/hosts`** : Avant tout démarrage ou test local, vérifier impérativement que les hôtes (`<projet>.test`, `<projet>.local`, et sous-domaines) sont enregistrés dans `/etc/hosts` (sur `127.0.0.1` et `::1`). Si un host manque, l'ajouter et s'assurer que le fichier `/etc/hosts` ne présente aucune erreur de syntaxe ni conflit d'adresses.
+- **Registre des ports anti-doublon (`~/Projets/PROJECTS_REGISTRY.md`)** : Consulter systématiquement ce répertoire partagé pour identifier ou réserver le port hôte unique sans chevauchement.
+- **Création automatique du site local (.test & .local)** : Si le bloc n'existe pas dans `~/.config/caddy/Caddyfile`, l'ajouter automatiquement :
 ```caddy
-mon-projet.test, mon-projet.localhost {
+mon-projet.test, mon-projet.local, mon-projet.localhost {
     tls internal
-    reverse_proxy localhost:5173
+    reverse_proxy localhost:<PORT_RESERVE>
 }
 ```
 - Recharger après modification : `caddy reload --config ~/.config/caddy/Caddyfile`.
 - **Ne jamais tester via `http://localhost:<port>`** — toujours le domaine `.test` (HTTPS local automatique).
-- Vérifier qu'aucun service n'écoute déjà sur le port cible.
 - Config de référence : `assets/configs/Caddyfile.test`.
+
+## 1bis. Restitution systématique des identifiants locaux (Logins & Mots de passe via docs/credentials.md)
+- **Règle absolue à chaque lancement local ou demande d'accès** : Dès que les serveurs locaux ou le build de preview sont démarrés, ou dès qu'une tâche nécessite des accès, **se référer obligatoirement à `docs/credentials.md`**. L'agent doit obligatoirement restituer à l'utilisateur un tableau clair contenant l'URL `.test` ET les identifiants de connexion locaux (login/email + mot de passe en clair).
+- **Mêmes comptes de test tout au long du dev** : utiliser impérativement les mêmes comptes de test locaux.
+- **Si `docs/credentials.md` n'existe pas** : le créer immédiatement (template `credentials.md`) et le maintenir à jour à chaque modification d'accès.
+- **Ne jamais laisser le champ login/mdp vide ou omis** : les identifiants doivent être extraits prioritairement de `docs/credentials.md` (ou à défaut de `AGENTS.md` section « Accès locaux », `.env.local` ou `scripts/seed`).
+- Tableau standard attendu en réponse :
+
+| Interface / Rôle | URL `.test` | Login / Email | Mot de passe | Usage / Périmètre |
+| :--- | :--- | :--- | :--- | :--- |
+| **Front public** | `https://<projet>.test` | — | — | Parcours visiteur / public |
+| **Utilisateur standard** | `https://<projet>.test/login` | `user@<projet>.test` | `user123` | Compte de test avec seed |
+| **Super Admin / QA** | `https://<projet>.test/admin` | `admin@<projet>.test` | `admin123` | Cockpit QA, Harness, Admin |
+| **Banc QA direct** | `https://<projet>.test/admin/test` | *(session admin)* | *(session admin)* | Exécution des scénarios QA |
+
+- *Sécurité* : `docs/credentials.md` est un **fichier local uniquement, obligatoirement exclu du versioning Git (`.gitignore`) et JAMAIS commité**. Ces identifiants concernent exclusivement des comptes de dev/test locaux factices. Aucun secret de production ne doit jamais être affiché.
 
 ## 2. Séquence de validation (dans l'ordre, chaque étape doit passer)
 0. **Détection de secrets EN PREMIER** — bloquante et bon marché : inutile de lancer Lighthouse si une clé est commitée.
@@ -63,7 +83,7 @@ mon-projet.test, mon-projet.localhost {
 - Checklist : `assets/checklists/seo.md`
 
 ## 5. Audit sécurité (complète l'étape 0)
-- **Secrets** : `gitleaks` (historique Git inclus) ; `.env` non commité (vérifier .gitignore) ; aucun token dans logs/commentaires
+- **Secrets & Dépôt** : `gitleaks` (historique Git inclus) ; `.env`, `docs/credentials.md` et base locale (`*.local.db`, `*.db`, `*.sqlite*`) non commités (vérifier `.gitignore`) ; aucun token dans logs/commentaires
 - **Dépendances** : `npm audit` + lockfile commité
 - **OWASP Top 10 & STRIDE** : injection (SQL/shell/NoSQL), XSS, IDOR (Turso sans RLS → vérification propriétaire serveur systématique), modélisation des menaces (`pwa-cadrage/assets/templates/THREAT_MODEL.md`)
 - **Paiements & Webhooks** : signature HMAC vérifiée avec `crypto.timingSafeEqual`, idempotence transactionnelle (`processed_events`)

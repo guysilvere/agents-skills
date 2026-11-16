@@ -4,6 +4,7 @@
 - [ ] `gitleaks detect --source . --redact` sans résultat (historique Git inclus)
 - [ ] Fallback grep sans résultat : `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN`
 - [ ] `.env` non commité (présent dans .gitignore)
+- [ ] Base de données locale (`*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*`) absente de Git et présente dans .gitignore
 - [ ] Aucune URL de BDD / clé API en clair dans le code
 - [ ] `npm audit --audit-level=high` sans CVE bloquante + lockfile commité
 - [ ] CSP + headers de sécurité présents

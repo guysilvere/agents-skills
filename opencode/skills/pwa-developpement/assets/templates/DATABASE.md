@@ -3,7 +3,9 @@
 > Schéma + **règles d'autorisation**. Mis à jour à chaque modification de schéma. Ultra-léger.
 
 ## Moteur
-- **Turso (libSQL)** — base principale.
+- **Turso (libSQL)** — base managée (cloud staging / production).
+- **Dev local** : base locale SQLite directe via fichier unique `file:<projet>.local.db` (aucun démon `turso dev` ni conteneur requis, isolation stricte par projet, données persistantes sur disque). Réinitialisation instantanée : `rm -f <projet>.local.db && npm run db:migrate`.
+- **Git & exclusion** : `<projet>.local.db` et tous les artefacts de base (`*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*`) sont **strictement exclus dans `.gitignore`**.
 - ⚠️ **Turso n'a pas de row-level security.** Contrairement à PocketBase (API rules) ou PostgreSQL (RLS), **aucune règle d'accès n'est déclarée dans la base** : toute l'autorisation est **applicative**.
 
 ## Autorisation — règle structurante

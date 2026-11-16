@@ -1,0 +1,20 @@
+# ==============================================================================
+#           CADDYFILE LOCAL — PIXEL OFFICE (AGENCE BULLES)
+# ==============================================================================
+# Lancement autonome :
+#   sudo caddy run --config Caddyfile
+# Ou rechargement global :
+#   sudo caddy reload --config ~/.config/caddy/Caddyfile
+# ==============================================================================
+
+{
+    auto_https disable_redirects
+}
+
+pixel-office.test, www.pixel-office.test, pixel-office.localhost, www.pixel-office.localhost, pixeloffice.test {
+    tls internal
+    reverse_proxy 127.0.0.1:5173 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+}

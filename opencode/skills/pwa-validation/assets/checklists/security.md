@@ -3,6 +3,7 @@
 ## Secrets & credentials
 - [ ] Aucune variable d'env exposée dans le code (.env hardcodé, clés API en clair)
 - [ ] `.env` absent du dépôt Git (vérifier .gitignore)
+- [ ] Base de données locale (`*.local.db`, `*.db`, `*.sqlite*`) absente du dépôt Git (vérifier .gitignore)
 - [ ] Aucun token/credential dans les logs ou commentaires
 - [ ] Secrets stockés via `{file:...}` ou variables d'environnement, jamais en clair
 

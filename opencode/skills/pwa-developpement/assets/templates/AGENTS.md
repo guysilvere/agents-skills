@@ -16,15 +16,28 @@
 | ROADMAP.md | Racine | Jalons court/moyen/long terme |
 | README.md | Racine | Build, setup Caddy local, variables, lancement |
 | CHANGELOG.md | Racine | Versions sémantiques + notes de release |
+| credentials.md | docs/credentials.md | Accès & comptes tests locaux (**fichier local non commité, exclu git**) |
 | USER_GUIDE.md | docs/USER_GUIDE.md | Guide **utilisateur final** — tâches, hors ligne, FAQ |
 | RUNBOOK.md | docs/RUNBOOK.md | Déploiement Coolify, proxy Cloudflare, backups R2, migrations, rollback, monitoring |
 | ci.yml | .github/workflows/ci.yml | CI bloquante sur PR (secrets, lint, typecheck, tests, build) |
 
 ## Configuration projet
-- PORT=`<prochain_port>`
-- DEV_CMD=`<commande_dev>`
+- PORT=`<port_reserve_issu_de_PROJECTS_REGISTRY.md>`
+- CADDY_URL=`https://<projet>.test` (alias `https://<projet>.local`)
+- HOSTS_MAPPING=`127.0.0.1 <projet>.test <projet>.local` (inscription obligatoire dans /etc/hosts)
+- DEV_CMD=`docker compose -f docker-compose.dev.yml up`  # Toujours via Docker et OrbStack
 - HEALTH_CHECK=`curl -s -o /dev/null -w "%{http_code}" http://localhost:<PORT>`
 - KILL_CMD=`lsof -ti :<PORT> | xargs kill -9 2>/dev/null; echo "Port <PORT> freed"`
+- LOCAL_DB=`<projet>.local.db`
+- DB_RESET_CMD=`rm -f <projet>.local.db && npm run db:migrate`
+
+## Accès locaux (Dev & Test)
+> Identifiants factices de développement. Référence absolue : `docs/credentials.md` (local uniquement, non commité). À restituer obligatoirement à chaque lancement des serveurs locaux.
+| Rôle / Interface | URL d'accès | Login / Email | Mot de passe | Usage |
+| :--- | :--- | :--- | :--- | :--- |
+| **Front public** | `https://<projet>.test` | — | — | Parcours libre visiteur |
+| **Utilisateur standard** | `https://<projet>.test/login` | `user@<projet>.test` | `user123` | Compte de test avec données seed |
+| **Super Admin / QA** | `https://<projet>.test/admin` | `admin@<projet>.test` | `admin123` | Cockpit QA, Harness, Admin |
 
 ## Règle de chargement sélectif
 - Ne lire QUE le fichier `.md` requis pour la tâche en cours.
@@ -54,6 +67,8 @@
 - ❌ Aucun emoji dans l'interface (sauf demande explicite)
 - ❌ Aucune autre bibliothèque d'icônes que celle choisie (Lucide/Tabler/Phosphor/React/Remix)
 - ❌ Aucune image non compressée en AVIF/WebP avant upload R2
+- ❌ Aucune base de données locale commitée (`*.local.db`, `*.db`, `*.sqlite*` obligatoirement dans `.gitignore`)
+- ❌ Aucun fichier d'identifiants commité (`docs/credentials.md` obligatoirement dans `.gitignore`)
 - ❌ Aucune modification directe sur `main` (travailler sur `testing`)
 - ❌ Aucun secret en clair (clés API, tokens, URLs de BDD)
 

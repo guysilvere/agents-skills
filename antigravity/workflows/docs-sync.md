@@ -19,6 +19,7 @@ Vérifier les écarts :
 - Schéma (champs, tables, relations, RLS) → `docs/DATABASE.md`
 - API (routes, payloads, webhooks, jobs) → `docs/BLUEPRINT.md`
 - Variables d'env → `.env.example` + mapping AGENTS.md
+- Accès & comptes tests locaux → `docs/credentials.md` (vérifier l'existence, créer s'il manque, mettre à jour les accès/mdp, confirmer l'exclusion dans `.gitignore`)
 
 ## Étape 3 — Mise à jour
 

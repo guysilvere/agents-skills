@@ -13,7 +13,7 @@ services:
       - "5173:5173"
     environment:
       - CHOKIDAR_USEPOLLING=true
-      - DATABASE_URL=file:local.db          # ou libsql://<db>.turso.io (base de test Turso)
+      - DATABASE_URL=file:<projet>.local.db  # Base locale SQLite directe (aucun démon/conteneur requis)
       - TURSO_AUTH_TOKEN=
       - PAYMENT_BASE_URL=https://api.paiement.test
       - PAYMENT_API_KEY=pk_sandbox_xxx    # SANDBOX uniquement en dev
@@ -21,19 +21,5 @@ services:
       - ORIGIN=http://localhost:5173
     command: npm run dev -- --host 0.0.0.0
 
-  # libSQL local (optionnel) — alternative à `file:local.db`.
-  # Utile pour tester les migrations et les requêtes dans des conditions proches de la prod.
-  # libsql:
-  #   image: ghcr.io/tursodatabase/libsql-server:latest
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     - SQLD_NODE=primary
-  #   volumes:
-  #     - libsql_data:/var/lib/sqld
-
-# Aucun conteneur de base n'est obligatoire : Turso est un service cloud,
-# et `file:local.db` suffit pour développer.
-# volumes:
-#   libsql_data:
+# Aucun conteneur de base n'est requis : Turso est managé en prod/staging,
+# et le fichier direct `file:<projet>.local.db` suffit pour développer en local.

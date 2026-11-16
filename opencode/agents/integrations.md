@@ -47,7 +47,7 @@ Argent & intégrations. Toute interaction avec un service externe du SaaS Agence
    - **Factures PDF** : numérotation séquentielle sans trou, factures immuables. Générées côté serveur SvelteKit (runtime Node).
 2. **Emails transactionnels** : Brevo (ou Mailtrap en dev) — liens magiques, réinitialisations, OTP, reçus.
 3. **Stockage Cloudflare R2** : URLs présignées pour upload direct, médias compressés AVIF/WebP, sauvegardes.
-4. **Base de données Turso (libSQL)** : scripts seed (jeu de données réalistes) et migrations versionnées. ⚠️ **Turso n'a pas de row-level security** → l'autorisation est applicative (voir `DATABASE.md` et la section Autorisations des specs).
+4. **Base de données Turso (libSQL)** : scripts seed (jeu de données réalistes) et migrations versionnées. En dev local, la cible est exclusivement le fichier SQLite `file:<projet>.local.db` (aucun démon, fichier exclu dans `.gitignore`). ⚠️ **Turso n'a pas de row-level security** → l'autorisation est applicative (voir `DATABASE.md` et la section Autorisations des specs).
 5. **n8n** (contexte SaaS) : workflows liés à l'application (automatisations, exports, webhooks sortants). **Hors MVP par défaut.**
 
 ## Règles d'implémentation

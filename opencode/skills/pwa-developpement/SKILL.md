@@ -26,8 +26,10 @@ metadata:
 - Créer `docs/USER_GUIDE.md` depuis `assets/templates/USER_GUIDE.md` — guide **destiné aux utilisateurs finaux**, alimenté au fil des specs DONE (cf. § 8).
 - Créer `.github/PULL_REQUEST_TEMPLATE.md` et `.github/ISSUE_TEMPLATE/{bug,feature,chore}.md` depuis `shared-git-conventions/assets/templates/`.
 - **Indexer le projet avec graft** : vérifier `graft --version` (sinon notifier et demander l'installation), lancer `graft build` après le premier commit. Rien à ajouter au `.gitignore` : graft 0.19+ s'y inscrit lui-même. Skill `shared-graft`.
-- **`.gitignore` projet** : y ajouter `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
-- Template : `assets/templates/AGENTS.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
+- **`.gitignore` projet** : y ajouter obligatoirement les bases locales (`*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*`), `docs/credentials.md` (identifiants locaux, jamais commités) et `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
+- **Comptes de test locaux (`docs/credentials.md`)** : dès la création d'un SaaS et tout au long du développement, utiliser impérativement les mêmes comptes de test locaux (synchronisés avec les seeders `scripts/seed` et `AGENTS.md`). Créer dès le départ `docs/credentials.md` (template `assets/templates/credentials.md`) listant tous les accès (URL, rôle, login/email et mot de passe en clair). Ce fichier est **local uniquement et ne doit JAMAIS être commité** (strictement exclu dans `.gitignore`). À chaque fois que les accès sont demandés pour une tâche, se référer à ce fichier ; s'il n'existe pas, le créer immédiatement et le maintenir à jour (ajouts, suppressions, modifications de mots de passe).
+- **Attribution du port, Caddy & `/etc/hosts` (`~/Projets/PROJECTS_REGISTRY.md`)** : réserver impérativement un port hôte unique dans le registre central `~/Projets/PROJECTS_REGISTRY.md` (aucun doublon de port autorisé). Configurer le site local `<projet>.test` et `<projet>.local` dans `~/.config/caddy/Caddyfile` (recharger Caddy) et vérifier/inscrire impérativement les hôtes dans `/etc/hosts` (sur `127.0.0.1` et `::1`) en s'assurant de l'absence d'erreurs ou de conflits.
+- Template : `assets/templates/AGENTS.md`, `assets/templates/credentials.md`, `assets/templates/PROJECTS_REGISTRY.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
 
 ## 1bis. Initialisation du Cockpit Specs & Banc de Tests QA
 - **Dès la mise en place du projet** : initialiser les pages de suivi des Specs et de Tests QA (`/admin/specs` et `/admin/test` ou `/admin/harness`).
@@ -102,14 +104,16 @@ metadata:
 3. Ne PAS toucher aux fichiers générés, config ou code tiers.
 4. Recharger `pwa-validation` après nettoyage (lint + typecheck + build).
 
-## 6. Environnement & Structure de projet (Docker en 1er choix)
-- **Dev local conteneurisé (défaut)** : Lancement systématique via OrbStack :
+## 6. Environnement & Structure de projet (Docker & OrbStack obligatoires)
+- **Dev local conteneurisé obligatoire (OrbStack)** : Pour voir et tester le site en local, le lancement s'effectue **TOUJOURS via Docker et OrbStack** :
   ```bash
   docker compose -f docker-compose.dev.yml up
   ```
+  Interdiction formelle de lancer un serveur dev nu sur la machine hôte sans conteneurisation dès lors qu'il s'agit de prévisualiser l'application.
   - Volumes montés pour le hot-reloading automatique (`src/`, `static/`, `migrations/`).
-  - Base locale (`file:local.db` ou `turso dev`) et micro-services isolés dans leur réseau Docker.
-  - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs.
+  - Base locale SQLite directe (`file:<projet>.local.db`) sans aucun conteneur ni démon requis : isolation stricte par projet, données persistantes, reset instantané (`rm -f <projet>.local.db && npm run db:migrate`), obligatoirement gitignorée.
+  - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs, après vérification systématique de l'inscription des hosts dans `/etc/hosts`.
+  - **Restitution systématique des accès** : à chaque démarrage du projet en local (dev ou preview), afficher impérativement à l'utilisateur le tableau complet des URLs `.test` et des identifiants locaux de test (login/email + mot de passe pour chaque rôle : visiteur, user, admin/QA) extraits de `docs/credentials.md` (ou `AGENTS.md` / `scripts/seed`) — s'il n'existe pas, le créer et le maintenir (cf. skill `pwa-validation` § 1bis).
 
 ```
 projet/
@@ -133,6 +137,7 @@ projet/
 
 ## 7. Base de données (DATABASE.md)
 - Schéma relationnel succinct, **matrice d'autorisation** (obligatoire : Turso n'a pas de RLS), stratégie de migration, dictionnaire de données.
+- **Base locale unique** : fichier SQLite direct `file:<projet>.local.db` (aucun démon `turso dev` ni conteneur requis). Persistance automatique sur disque, réinitialisation instantanée par suppression du fichier (`rm -f <projet>.local.db`), et exclusion stricte obligatoire dans `.gitignore`.
 - Migration de la doc : toute modification de champs/tables/règles → mise à jour immédiate de `docs/DATABASE.md`.
 - Template : `assets/templates/DATABASE.md`.
 
@@ -148,6 +153,7 @@ projet/
 | Variable d'environnement | `.env.example` + mapping `AGENTS.md` |
 | Endpoint d'API | registre **OpenAPI** (généré depuis les schémas Zod — skill `api-best-practices`) |
 | **Parcours visible par l'utilisateur** | **`docs/USER_GUIDE.md`** |
+| **Accès local, compte test, mot de passe modifié** | **`docs/credentials.md`** (local uniquement, non commité) |
 | Décision structurelle | nouvel **ADR** (§ 3bis, immuable) |
 
 **Le guide utilisateur** (`docs/USER_GUIDE.md`, template `assets/templates/USER_GUIDE.md`) :

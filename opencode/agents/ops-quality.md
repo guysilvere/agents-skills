@@ -70,25 +70,27 @@ Validation & livraison. Intervient en fin de cycle de développement : il vérif
 
 ## Lancement des serveurs locaux (à la demande)
 - Si l'utilisateur demande de **lancer les serveurs locaux** :
-  1. Lire `AGENTS.md` du projet (PORT, DEV_CMD, KILL_CMD, services, mapping des fichiers).
-  2. Démarrer les services nécessaires en arrière-plan : serveur dev (ex. `npm run dev`), base de données (Turso — cloud ou `turso dev` en local), et services annexes décrits dans l'AGENTS.md.
-  3. **Activer Caddy** pour utiliser les URLs `.test` : ajouter/recharger le bloc `<projet>.test` dans `~/.config/caddy/Caddyfile` (`caddy reload --config ~/.config/caddy/Caddyfile`), démarrer Caddy si arrêté (`caddy run --config ~/.config/caddy/Caddyfile`).
+  1. Lire `AGENTS.md` du projet et consulter `~/Projets/PROJECTS_REGISTRY.md` pour le port réservé sans doublon.
+  2. **Démarrer les services systématiquement via Docker et OrbStack** : lancer `docker compose -f docker-compose.dev.yml up` en arrière-plan (aucun serveur dev nu sur la machine hôte ; base locale fichier direct `file:<projet>.local.db` — aucun démon en tâche de fond pour la base locale), et services annexes décrits dans l'AGENTS.md.
+  3. **Vérifier `/etc/hosts` et activer/configurer Caddy pour les URLs `.test` et `.local`** : vérifier obligatoirement que les hôtes (`<projet>.test`, `<projet>.local`) sont déclarés dans `/etc/hosts` (les inscrire si manquants, en s'assurant de l'absence d'erreurs ou de conflits) ; vérifier que Caddy tourne (`pgrep -f caddy`), le démarrer si arrêté (`caddy run --config ~/.config/caddy/Caddyfile &`), ajouter le bloc `<projet>.test, <projet>.local` dans `~/.config/caddy/Caddyfile` s'il n'existe pas encore, et recharger Caddy (`caddy reload --config ~/.config/caddy/Caddyfile`).
   4. Vérifier que chaque service répond (port ouvert / URL `.test` accessible en HTTPS local).
-  5. **Afficher un tableau récapitulatif** avec : services ouverts, liens à utiliser, accès (login + mot de passe), description.
-     - Récupérer les identifiants de dev dans `.env.local` / `RUNBOOK.md` / `AGENTS.md` — jamais les secrets de production (`.env`, `.env.*` sont en `deny` de lecture).
+  5. **Afficher obligatoirement un tableau récapitulatif complet incluant les identifiants locaux (login & mot de passe)** :
+     - Récupérer les identifiants de dev prioritairement dans `docs/credentials.md` (le créer et le maintenir si absent ; fallback `AGENTS.md` section « Accès locaux », `.env.local` ou `scripts/seed`) — jamais de secrets de production (`.env`, `.env.*` sont en `deny` de lecture).
+     - **Ne jamais laisser les accès protégés vides** : fournir toujours login ET mot de passe pour chaque rôle (visiteur, utilisateur standard, admin/QA).
      - Toujours privilégier les URLs `.test` (pas `localhost`).
 - Exemple de tableau attendu :
 
-| Service | Lien à utiliser | Accès (login / mdp) | Description |
-| --- | --- | --- | --- |
-| App (front) | `https://<projet>.test` | — | Application PWA locale |
-| API (server routes) | `https://<projet>.test/api/` | — | Endpoints SvelteKit |
-| Base Turso | (cloud — pas d'UI locale) | token de dev | `turso db shell <db>` pour inspecter |
-| Caddy | `caddy run --config ~/.config/caddy/Caddyfile` | — | Reverse proxy HTTPS `.test` |
+| Rôle / Service | URL d'accès | Login / Email | Mot de passe | Description |
+| --- | --- | --- | --- | --- |
+| Front public | `https://<projet>.test` | — | — | Application PWA locale libre |
+| Utilisateur standard | `https://<projet>.test/login` | `user@<projet>.test` | `user123` | Compte test utilisateur (données seed) |
+| Cockpit QA / Admin | `https://<projet>.test/admin` | `admin@<projet>.test` | `admin123` | Accès Super Admin & banc QA `/admin/test` |
+| Base locale | `file:<projet>.local.db` | — | — | SQLite local direct (aucun démon, persistant, gitignoré) |
+| Caddy | `caddy run --config ~/.config/caddy/Caddyfile` | — | — | Reverse proxy HTTPS `.test` |
 
 ## Workflow de validation (dans l'ordre)
 1. Lire l'`AGENTS.md` du projet (PORT, DEV_CMD, KILL_CMD, mapping des fichiers).
-2. **Sécurité D'ABORD** : `gitleaks detect --source . --redact` (fallback grep `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN`), `.env` non commité, `npm audit --audit-level=high` + lockfile commité. Bloquant et bon marché — inutile de lancer Lighthouse si une clé est commitée.
+2. **Sécurité D'ABORD** : `gitleaks detect --source . --redact` (fallback grep `sk-`, `AKIA`, `ghp_`, `password=`, `SECRET`, `TOKEN`), `.env`, `docs/credentials.md` et base locale (`*.local.db`, `*.db`, `*.sqlite*`) non commités (vérifier `.gitignore`), `npm audit --audit-level=high` + lockfile commité. Bloquant et bon marché — inutile de lancer Lighthouse si une clé, des identifiants ou une base locale sont commités.
 3. **Qualité code** : `npm run lint` puis `npm run typecheck`.
 4. **Tests** : `npm test` — exécute les tests écrits par `lead-dev` / `integrations` et juge la couverture (n'en écrit pas).
 5. **Build** : `npm run build` sans erreur ni warning bloquant.

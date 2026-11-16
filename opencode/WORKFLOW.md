@@ -75,6 +75,29 @@ Sur tout projet hébergé sur GitHub :
 - **Clôture après résolution** : une fois le problème résolu et validé par les tests, fermer l'Issue avec un commentaire de synthèse ou via le mot-clé de liaison de la PR (`Fixes #<id>` ou `Closes #<id>`).
 - Outils : MCP GitHub (`issue_write`, `add_issue_comment`) ou CLI `gh` (`gh issue create`, `gh issue comment`, `gh issue close`).
 
+## Comptes de test locaux & accès (docs/credentials.md)
+
+Lors de la création d'un SaaS et tout au long du développement :
+- **Mêmes comptes de test en local** : utiliser impérativement les mêmes comptes de test locaux (visiteur, utilisateur standard, admin/QA) tout au long du cycle de vie du projet, synchronisés avec les seeders `scripts/seed`.
+- **Création dès le départ (`docs/credentials.md`)** : dès la phase d'initialisation/scaffold, créer obligatoirement le fichier `docs/credentials.md` (template `credentials.md`) listant tous les accès pour l'application (URL `.test`, rôles, login/email et mot de passe en clair).
+- **Fichier local uniquement — JAMAIS commité** : `docs/credentials.md` est un fichier local uniquement et **ne doit jamais être commité**. Il doit être inscrit obligatoirement dans le `.gitignore` du projet dès l'initialisation.
+- **Référence systématique** : à chaque fois que les accès sont demandés pour une tâche (lancement dev, preview, tests QA, validation), se référer obligatoirement à ce fichier.
+- **Création & maintenance continue** : si `docs/credentials.md` n'existe pas lors d'une tâche, **le créer immédiatement et le maintenir**. Le mettre à jour à chaque modification d'accès (ajout d'accès, suppression d'accès, modification de mot de passe).
+
+## Lancement & prévisualisation locale (Docker, OrbStack & Caddy)
+
+- **Conteneurisation obligatoire via OrbStack** : pour voir, exécuter ou tester l'application ou le SaaS en local, toujours démarrer l'environnement via **Docker et OrbStack** :
+  ```bash
+  docker compose -f docker-compose.dev.yml up
+  ```
+- **Zéro serveur nu sur la machine hôte** : ne jamais exécuter un serveur de dev directement sur l'hôte sans conteneurisation dès qu'il s'agit de voir ou tester le site.
+- **Auto-démarrage forcé de Caddy** : dès qu'une prévisualisation ou un accès local est demandé, vérifier la présence du démon Caddy (`pgrep -f caddy`). S'il n'est pas actif, le démarrer automatiquement en arrière-plan (`caddy run --config ~/.config/caddy/Caddyfile &`).
+- **Vérification et assainissement préalable de `/etc/hosts`** : avant tout lancement local, inspecter obligatoirement `/etc/hosts` pour s'assurer que les domaines locaux du projet (`<projet>.test`, `<projet>.local`, etc.) sont bien configurés vers `127.0.0.1` et `::1`. Si un host n'est pas enregistré, l'ajouter et vérifier que `/etc/hosts` est exempt d'erreurs, de lignes orphelines ou de conflits.
+- **Création du site local Caddy (.test / .local)** : si le domaine `<projet>.test` (et son alias `<projet>.local`) n'est pas encore présent dans `~/.config/caddy/Caddyfile`, créer automatiquement le bloc avec `tls internal` et `reverse_proxy localhost:<PORT_RESERVE>`, puis appliquer via `caddy reload --config ~/.config/caddy/Caddyfile`.
+- **Répertoire central des ports anti-doublon (`~/Projets/PROJECTS_REGISTRY.md`)** :
+  - Emplacement unique et partagé : `~/Projets/PROJECTS_REGISTRY.md` (aucun fichier isolé par projet).
+  - Tout projet réserve obligatoirement son port hôte unique dans ce registre avant configuration Docker/Caddy pour garantir l'absence totale de chevauchement de ports.
+
 ## Indexation du code (graft)
 
 - **Au démarrage** sur un projet existant : vérifier `graft --version` et `graft/INDEX.md`.

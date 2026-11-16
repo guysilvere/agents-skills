@@ -11,6 +11,7 @@ Vérifie la cohérence de la living documentation du projet (workflow phases 0-1
 4. Vérifie `.env.example` : toutes les clés utilisées dans le code y sont-elles listées ?
 5. Vérifie `/api/openapi.json` : les endpoints exposés y figurent-ils tous (ils sont générés depuis les schémas Zod — un endpoint absent = schéma non enregistré) ? `/api/docs` est-il protégé en production ?
 6. Vérifie `docs/USER_GUIDE.md` : les parcours **visibles par l'utilisateur** ajoutés ou modifiés par les specs DONE récentes y sont-ils décrits ?
-7. Produis un rapport : fichiers à jour / fichiers à mettre à jour / manquants, avec la liste des corrections nécessaires.
+7. Vérifie `docs/credentials.md` : existe-t-il ? Si absent, le créer avec les accès tests de dev. Est-il à jour des accès/mdp actuels ? Est-il bien exclu dans `.gitignore` (jamais commité) ?
+8. Produis un rapport : fichiers à jour / fichiers à mettre à jour / manquants, avec la liste des corrections nécessaires.
 
 Contexte : $ARGUMENTS
