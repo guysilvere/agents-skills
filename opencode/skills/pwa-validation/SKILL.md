@@ -20,6 +20,7 @@ metadata:
   ```bash
   caddy run --config ~/.config/caddy/Caddyfile &
   ```
+- **Vérification et assainissement de `/etc/hosts`** : Avant tout démarrage ou test local, vérifier impérativement que les hôtes (`<projet>.test`, `<projet>.local`, et sous-domaines) sont enregistrés dans `/etc/hosts` (sur `127.0.0.1` et `::1`). Si un host manque, l'ajouter et s'assurer que le fichier `/etc/hosts` ne présente aucune erreur de syntaxe ni conflit d'adresses.
 - **Registre des ports anti-doublon (`~/Projets/PROJECTS_REGISTRY.md`)** : Consulter systématiquement ce répertoire partagé pour identifier ou réserver le port hôte unique sans chevauchement.
 - **Création automatique du site local (.test & .local)** : Si le bloc n'existe pas dans `~/.config/caddy/Caddyfile`, l'ajouter automatiquement :
 ```caddy

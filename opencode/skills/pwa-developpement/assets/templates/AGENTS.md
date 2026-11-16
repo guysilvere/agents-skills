@@ -24,6 +24,7 @@
 ## Configuration projet
 - PORT=`<port_reserve_issu_de_PROJECTS_REGISTRY.md>`
 - CADDY_URL=`https://<projet>.test` (alias `https://<projet>.local`)
+- HOSTS_MAPPING=`127.0.0.1 <projet>.test <projet>.local` (inscription obligatoire dans /etc/hosts)
 - DEV_CMD=`docker compose -f docker-compose.dev.yml up`  # Toujours via Docker et OrbStack
 - HEALTH_CHECK=`curl -s -o /dev/null -w "%{http_code}" http://localhost:<PORT>`
 - KILL_CMD=`lsof -ti :<PORT> | xargs kill -9 2>/dev/null; echo "Port <PORT> freed"`

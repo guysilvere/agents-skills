@@ -92,6 +92,7 @@ Lors de la création d'un SaaS et tout au long du développement :
   ```
 - **Zéro serveur nu sur la machine hôte** : ne jamais exécuter un serveur de dev directement sur l'hôte sans conteneurisation dès qu'il s'agit de voir ou tester le site.
 - **Auto-démarrage forcé de Caddy** : dès qu'une prévisualisation ou un accès local est demandé, vérifier la présence du démon Caddy (`pgrep -f caddy`). S'il n'est pas actif, le démarrer automatiquement en arrière-plan (`caddy run --config ~/.config/caddy/Caddyfile &`).
+- **Vérification et assainissement préalable de `/etc/hosts`** : avant tout lancement local, inspecter obligatoirement `/etc/hosts` pour s'assurer que les domaines locaux du projet (`<projet>.test`, `<projet>.local`, etc.) sont bien configurés vers `127.0.0.1` et `::1`. Si un host n'est pas enregistré, l'ajouter et vérifier que `/etc/hosts` est exempt d'erreurs, de lignes orphelines ou de conflits.
 - **Création du site local Caddy (.test / .local)** : si le domaine `<projet>.test` (et son alias `<projet>.local`) n'est pas encore présent dans `~/.config/caddy/Caddyfile`, créer automatiquement le bloc avec `tls internal` et `reverse_proxy localhost:<PORT_RESERVE>`, puis appliquer via `caddy reload --config ~/.config/caddy/Caddyfile`.
 - **Répertoire central des ports anti-doublon (`~/Projets/PROJECTS_REGISTRY.md`)** :
   - Emplacement unique et partagé : `~/Projets/PROJECTS_REGISTRY.md` (aucun fichier isolé par projet).

@@ -12,6 +12,7 @@ Lance la validation complète du projet mentionné.
 Charge la skill `pwa-validation` :
 - Vérifier la branche (`testing` — jamais `main`).
 - Consulter `~/Projets/PROJECTS_REGISTRY.md` pour le port réservé du projet.
+- Vérifier obligatoirement `/etc/hosts` (s'assurer que `<projet>.test` et `<projet>.local` sont bien inscrits sans conflit, ajouter si manquant).
 - Démarrer Caddy s'il est inactif (`pgrep -f caddy` / `caddy run`) et vérifier le site local (`<projet>.test` et `<projet>.local`) dans `~/.config/caddy/Caddyfile`.
 - Lancer systématiquement l'application via Docker et OrbStack (`docker compose -f docker-compose.dev.yml up`) — jamais de serveur nu sur l'hôte.
 - Se référer à `docs/credentials.md` pour tous les accès tests requis (le créer et le maintenir s'il n'existe pas).

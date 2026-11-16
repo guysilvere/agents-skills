@@ -26,6 +26,7 @@
   - **Exclusion Git stricte** : `*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*` obligatoirement dans `.gitignore`.
 - **Lancement local (Docker, OrbStack & Caddy) & Registre des ports (`PROJECTS_REGISTRY.md`)** :
   - **Lancement obligatoire via Docker et OrbStack** : pour voir et tester le site en local, toujours démarrer l'application avec `docker compose -f docker-compose.dev.yml up` (aucun serveur nu sur l'hôte).
+  - **Vérification `/etc/hosts` obligatoire** : vérification systématique avant lancement que le host (`<projet>.test`, `<projet>.local`) est résolu localement (`127.0.0.1` et `::1`) sans conflit ni erreur dans `/etc/hosts` ; inscription immédiate si absent.
   - **Caddy auto-start & domaines `.test` / `.local`** : Caddy est démarré automatiquement s'il est inactif (`caddy run`). Si le site local n'existe pas dans `~/.config/caddy/Caddyfile`, il est créé automatiquement avec `tls internal`.
   - **Registre unique des ports (`~/Projets/PROJECTS_REGISTRY.md`)** : répertorie tous les projets web locaux, leurs domaines et bloque les ports réservés sans doublon.
   - **Mêmes comptes tests locaux & `docs/credentials.md`** : fichier local uniquement listant les identifiants (login/mdp en clair), obligatoirement exclu du versioning Git (`.gitignore`) et jamais commité. Restituer obligatoirement les accès et URLs à chaque lancement.

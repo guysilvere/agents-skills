@@ -28,7 +28,7 @@ metadata:
 - **Indexer le projet avec graft** : vérifier `graft --version` (sinon notifier et demander l'installation), lancer `graft build` après le premier commit. Rien à ajouter au `.gitignore` : graft 0.19+ s'y inscrit lui-même. Skill `shared-graft`.
 - **`.gitignore` projet** : y ajouter obligatoirement les bases locales (`*.local.db`, `*.db`, `*.db-journal`, `*.db-wal`, `*.sqlite*`), `docs/credentials.md` (identifiants locaux, jamais commités) et `.playwright-mcp/` (snapshots régénérables du MCP Playwright, actif à la demande).
 - **Comptes de test locaux (`docs/credentials.md`)** : dès la création d'un SaaS et tout au long du développement, utiliser impérativement les mêmes comptes de test locaux (synchronisés avec les seeders `scripts/seed` et `AGENTS.md`). Créer dès le départ `docs/credentials.md` (template `assets/templates/credentials.md`) listant tous les accès (URL, rôle, login/email et mot de passe en clair). Ce fichier est **local uniquement et ne doit JAMAIS être commité** (strictement exclu dans `.gitignore`). À chaque fois que les accès sont demandés pour une tâche, se référer à ce fichier ; s'il n'existe pas, le créer immédiatement et le maintenir à jour (ajouts, suppressions, modifications de mots de passe).
-- **Attribution du port & Caddy (`~/Projets/PROJECTS_REGISTRY.md`)** : réserver impérativement un port hôte unique dans le registre central `~/Projets/PROJECTS_REGISTRY.md` (aucun doublon de port autorisé). Configurer le site local `<projet>.test` et `<projet>.local` dans `~/.config/caddy/Caddyfile` et recharger Caddy.
+- **Attribution du port, Caddy & `/etc/hosts` (`~/Projets/PROJECTS_REGISTRY.md`)** : réserver impérativement un port hôte unique dans le registre central `~/Projets/PROJECTS_REGISTRY.md` (aucun doublon de port autorisé). Configurer le site local `<projet>.test` et `<projet>.local` dans `~/.config/caddy/Caddyfile` (recharger Caddy) et vérifier/inscrire impérativement les hôtes dans `/etc/hosts` (sur `127.0.0.1` et `::1`) en s'assurant de l'absence d'erreurs ou de conflits.
 - Template : `assets/templates/AGENTS.md`, `assets/templates/credentials.md`, `assets/templates/PROJECTS_REGISTRY.md`, `assets/templates/README.md`, `assets/configs/.env.example`.
 
 ## 1bis. Initialisation du Cockpit Specs & Banc de Tests QA
@@ -112,7 +112,7 @@ metadata:
   Interdiction formelle de lancer un serveur dev nu sur la machine hôte sans conteneurisation dès lors qu'il s'agit de prévisualiser l'application.
   - Volumes montés pour le hot-reloading automatique (`src/`, `static/`, `migrations/`).
   - Base locale SQLite directe (`file:<projet>.local.db`) sans aucun conteneur ni démon requis : isolation stricte par projet, données persistantes, reset instantané (`rm -f <projet>.local.db && npm run db:migrate`), obligatoirement gitignorée.
-  - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs.
+  - Proxy local Caddy (`https://projet.test`) pointant vers les ports exposés par les conteneurs, après vérification systématique de l'inscription des hosts dans `/etc/hosts`.
   - **Restitution systématique des accès** : à chaque démarrage du projet en local (dev ou preview), afficher impérativement à l'utilisateur le tableau complet des URLs `.test` et des identifiants locaux de test (login/email + mot de passe pour chaque rôle : visiteur, user, admin/QA) extraits de `docs/credentials.md` (ou `AGENTS.md` / `scripts/seed`) — s'il n'existe pas, le créer et le maintenir (cf. skill `pwa-validation` § 1bis).
 
 ```
