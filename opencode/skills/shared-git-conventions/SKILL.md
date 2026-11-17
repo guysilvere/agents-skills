@@ -56,14 +56,13 @@ metadata:
 - Enchaînement automatique : dès qu'une release ou un merge vers `main` est demandé, exécuter le cycle complet (PR → merge GitHub → pull `main` → tag → release GitHub → réalignement `testing`).
 
 ## Gestion des bugs & incidents (GitHub Issues)
-- **Règle absolue sur les projets GitHub** : tout bug, régression ou problème technique doit être consigné dans une **Issue GitHub** **avant** d'entamer sa résolution.
-- **Langue** : français ou anglais (selon le projet ou la demande utilisateur).
-- **Format initial** : utiliser le template d'issue correspondant au type — `issue-bug.md`, `issue-feature.md` ou `issue-chore.md` (déployés dans `.github/ISSUE_TEMPLATE/`).
-- **Traçabilité & itérations** :
-  - Consigner dans les **commentaires de l'Issue** les pistes explorées, les découvertes au fil de l'investigation, les itérations successives et le parcours de résolution.
-- **Clôture après résolution** :
-  - Dès que le problème est résolu et vérifié (tests au vert), fermer l'Issue avec un commentaire récapitulatif de la solution ou via le mot-clé de liaison dans la PR (`Fixes #<id>` ou `Closes #<id>`).
-  - Outils à privilégier : MCP GitHub (`issue_write`, `add_issue_comment`) ou CLI `gh` (`gh issue create`, `gh issue comment`, `gh issue close`).
+- **Seuil (quand ouvrir)** :
+  - **Obligatoire** : bug/régression signalé (utilisateur ou `/admin/test`), `⛔` ou `⚠️` récurrent lors de `/validate`, erreur non résolue dès la **1re tentative**, incident staging/prod.
+  - **Exclu** : micro-erreurs locales corrigées immédiatement pendant l'édition (lint, typo, typecheck).
+- **Workflow `/fix`** : ouvrir/rattacher l'Issue **avant** de modifier le code ; utiliser `.github/ISSUE_TEMPLATE/{bug,feature,chore}.md` si présents.
+- **Traçabilité** : consigner en commentaires les pistes explorées, échecs intermédiaires et cause racine.
+- **Clôture** : fermer après validation (`Closes #<id>` dans la PR ou commentaire de synthèse).
+- **Outils** : MCP GitHub (`issue_write`, `add_issue_comment`) en priorité, sinon CLI `gh` (`gh issue create`, `gh issue comment`, `gh issue close`).
 
 ## GitHub MCP (privilégié sur la CLI gh)
 - Le MCP GitHub est authentifié : créer repos/branches/PR/issues/releases, lister, lire/écrire, commenter.

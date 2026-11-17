@@ -24,6 +24,7 @@ permission:
     "**/scripts/**": allow
   bash:
     "*": ask
+    "gh issue *": allow
   skill: allow
   webfetch: allow
   task: deny
@@ -85,6 +86,7 @@ Signature valide / invalide / absente · rejeu du même événement · montant i
 Appel à une API de paiement hors sandbox, migration non locale, suppression de ressource : validation explicite obligatoire (`⛔ STOP`). Liste complète : `WORKFLOW.md`.
 
 ## Relais & skills
+- **Bugs & incidents (projets GitHub)** : ouvrir/rattacher une **Issue GitHub** avant résolution pour tout bug, échec webhook/paiement récurrent ou erreur > 1 tentative ; tracer les pistes en commentaires ; fermer après validation (`/fix`, `WORKFLOW.md`).
 - Format de relais vers `ops-quality`, limite de 3 allers-retours : `WORKFLOW.md`.
 - Skills : `api-paiements`, `api-best-practices` (REST, retry, idempotence). Pour en ajouter une : `WORKFLOW.md`.
 - **Jetons d'agent** : emplacement, nommage (global vs `turso-<projet>-<env>`) et procédures → `WORKFLOW.md` § « Jetons & secrets d'agent ».

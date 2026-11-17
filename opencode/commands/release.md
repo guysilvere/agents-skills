@@ -10,7 +10,7 @@ Enregistre la version courante du projet (skill `shared-git-conventions`) :
 3. Calcul du bump SemVer (MAJOR/MINOR/PATCH) + mise à jour du `CHANGELOG.md`.
 4. Commit en Conventional Commits (`type(scope): résumé + corps = pourquoi`).
 5. Push de la branche : `git push origin testing`.
-6. Création de la Pull Request `testing` → `main` (MCP GitHub ou `gh pr create`).
+6. Création de la Pull Request `testing` → `main` (MCP GitHub ou `gh pr create`) — lister les Issues ouvertes liées (`gh issue list --state open`) et inclure `Closes #<id>` dans le corps.
 7. Merge de la PR sur GitHub (accord utilisateur requis avant merge si non explicite).
 8. Récupération locale : `git checkout main && git pull origin main`.
 9. Tag `git tag -a v<X.Y.Z>` + push du tag + création de la release GitHub (MCP GitHub ou `gh release create`).

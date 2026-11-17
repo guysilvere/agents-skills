@@ -28,12 +28,12 @@ Charge la skill `pwa-validation` :
 
 - OWASP Top 10, secrets exposés, exclusion Git stricte (`.env`, `docs/credentials.md`, bases locales `*.local.db` dans `.gitignore`), en-têtes HTTP (CSP, HSTS), CORS, Turnstile.
 
-## Étape 4 — Verdict
+## Étape 4 — Verdict & traçabilité GitHub
 
 - ✅ Prêt pour commit/release
-- ⚠️ Corrections listées (priorisées) — ne pas commiter sans accord
-- ⛔ Bloquant — retourner à `pwa-developpement` pour correction
+- ⚠️ Corrections listées (priorisées) — ne pas commiter sans accord ; ouvrir/mettre à jour une Issue GitHub si récurrent
+- ⛔ Bloquant — **ouvrir (ou commenter) l'Issue GitHub** (`issue_write` / `gh issue create`) avec commande échouée + sortie d'erreur avant de retourner à `pwa-developpement` (`/fix`)
 
 ## Étape 5 — Rapport
 
-Livre le rapport : checks exécutés, scores, verdict, liste de corrections priorisée.
+Livre le rapport : checks exécutés, scores, verdict, `Issue : #<id>` (si `⛔`/`⚠️`) et liste de corrections priorisée.
