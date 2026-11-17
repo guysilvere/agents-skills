@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [2.10.0] — 2026-11-17
+
+### Ajouté
+- **Traçabilité des bugs & incidents dans GitHub Issues** :
+  - Nouveau workflow `/fix` ([antigravity/workflows/fix.md](antigravity/workflows/fix.md), [opencode/commands/fix.md](opencode/commands/fix.md)) avec verrou d'Issue GitHub obligatoire avant modification du code.
+  - Seuil explicite dans `WORKFLOW.md` et `shared-git-conventions` (micro-erreurs locales exclues ; obligatoire pour bugs QA, `⛔`/`⚠️` récurrents de `/validate`, erreurs > 1 tentative, incidents).
+  - Champ `Issue` ajouté au format de relais inter-agents et au rapport fixe `ops-quality`.
+  - Câblage de `/validate` (ouverture/commentaire d'Issue sur blocage) et `/release` (liaison `Closes #<id>` en PR).
+  - Règle GitHub Issues et permission `gh issue *` ajoutées à l'agent `integrations`.
+- **Skill `scroll-craft`** :
+  - Intégration et adaptation pour les landing pages premium pilotées par le scroll (moteur, références, scripts de vérification `shoot.mjs` / `doctor.mjs`).
+
 ## [2.9.0] — 2026-11-16
 
 ### Ajouté
