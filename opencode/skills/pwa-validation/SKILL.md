@@ -63,6 +63,7 @@ mon-projet.test, mon-projet.local, mon-projet.localhost {
 6. **Banc QA & Validation Scénarios** : exécuter la campagne de tests sur `https://mon-projet.test/admin/test` (ou `/test`) : dérouler les formulaires interactifs, certifier les scénarios au vert (`passed`), consigner les éventuels bugs en base (`failed`).
 7. **Tests E2E** : `playwright-cli` — parcours réels (auth, paiement, CRUD, hors-ligne), screenshots succès/échec. Checklist : `assets/checklists/e2e.md`
 8. **Audit design automatisé** : `impeccable detect <src>` — 59 règles déterministes anti-slop ; sortie `--json` CI-friendly. **Épingler en devDependency** (`npm i -D impeccable`) — pas de `npx` à la volée sur un paquet non épinglé.
+   - Si la landing utilise `scroll-craft` : exécuter `shoot.mjs --url https://mon-projet.test` (desktop, mobile `390×844`, `reduced-motion`) pour vérifier *dead scroll*, *cues*, contraste sur vidéo et générer `sheet.png`.
 9. **Lighthouse**, sur le build de prod servi en **HTTPS** :
    `npx lighthouse https://mon-projet.test --view --chrome-flags="--ignore-certificate-errors"`
    - Le Chrome lancé par Lighthouse doit accepter le certificat `tls internal` de Caddy, sinon l'audit échoue.

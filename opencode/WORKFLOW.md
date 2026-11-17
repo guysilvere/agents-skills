@@ -9,7 +9,7 @@
 | 0 | Cadrage | `docs/CADRAGE.md` | `lead-dev` |
 | 1 | Naming | nom validé + repo GitHub | `lead-dev` |
 | 2 | Stack | `docs/BLUEPRINT.md` | `lead-dev` |
-| 3 | Design | `docs/DESIGN_SYSTEM.md` | `lead-dev` |
+| 3 | Design | `docs/DESIGN_SYSTEM.md` (`design-pwa-system` + `scroll-craft` si landing premium) | `lead-dev` |
 | 4 | Données | `docs/DATABASE.md` + schéma harness | `lead-dev` |
 | 5 | Specs & Cockpit QA | `docs/specs/SPEC-XXX.md` + `/admin/specs` & `/admin/test` (Kanban/QA) | `lead-dev` |
 | 6 | Développement | code fonctionnel guidé par tests au vert | `lead-dev` (+ `integrations` si externe) |
@@ -48,6 +48,7 @@ Format d'arrêt attendu : `⛔ STOP — validation humaine requise : <action> / 
 
 ```
 Spec      : SPEC-XXX (ou « hors spec »)
+Issue     : #<id> (ou N/A hors bug)
 Fichiers  : <liste des fichiers modifiés>
 Commandes : <commandes lancées>
 Résultat  : ✅ / ⚠️ / ⛔ + preuve (sortie, score, capture)
@@ -66,14 +67,18 @@ Bloquants : <liste priorisée, vide si aucun>
 | build | ✅ ⚠️ ⛔ | taille des bundles |
 | Lighthouse | ✅ ⚠️ ⛔ | scores + TBT |
 | a11y / SEO / sécurité | ✅ ⚠️ ⛔ | points relevés |
+| Issue GitHub | ✅ / N/A | `#<id>` si `⛔` ou `⚠️` |
 
 ## Gestion des bugs & incidents (GitHub Issues)
 
 Sur tout projet hébergé sur GitHub :
-- **Issue obligatoire avant résolution** : tout bug, régression ou problème technique doit impérativement faire l'objet d'une **Issue GitHub** (en français ou en anglais) **avant** d'entamer sa résolution.
-- **Traçabilité & itérations** : consigner en commentaires de l'Issue les pistes investiguées, les résultats intermédiaires, les obstacles rencontrés et le parcours de résolution.
-- **Clôture après résolution** : une fois le problème résolu et validé par les tests, fermer l'Issue avec un commentaire de synthèse ou via le mot-clé de liaison de la PR (`Fixes #<id>` ou `Closes #<id>`).
-- Outils : MCP GitHub (`issue_write`, `add_issue_comment`) ou CLI `gh` (`gh issue create`, `gh issue comment`, `gh issue close`).
+- **Seuil (quand ouvrir)** :
+  - **Obligatoire** : bug/régression signalé (utilisateur ou `/admin/test`), verdict `⛔` ou `⚠️` récurrent de `/validate`, erreur non résolue dès la **1re tentative**, incident staging/prod.
+  - **Exclu** : micro-erreurs locales corrigées immédiatement en cours d'édition (lint, typo, typecheck).
+- **Verrou avant résolution** : ouvrir ou rattacher l'Issue **avant** d'entamer le correctif (workflow `/fix`).
+- **Traçabilité** : consigner en commentaires les pistes investiguées, échecs intermédiaires et cause racine.
+- **Clôture** : fermer après validation (`Closes #<id>` dans la PR ou commentaire de synthèse).
+- **Outils** : MCP GitHub (`issue_write`, `add_issue_comment`) ou CLI `gh` (`gh issue create`, `gh issue comment`, `gh issue close`).
 
 ## Comptes de test locaux & accès (docs/credentials.md)
 

@@ -14,6 +14,7 @@ metadata:
 - Fusionne les anciennes skills design-pwa, design-pwa-direction, design-pwa-data et responsive-design.
 - Fixe une direction esthétique distinctive (anti-générique) et la persiste en design system.
 - En amont du design visuel : définir le parcours UX avec `design-ux-flow` (10 étapes).
+- Pour une landing page / vitrine scroll-driven premium : charger `scroll-craft` en complément (tokens `--sc-*` dérivés du `MASTER.md`).
 
 ## 1. Direction artistique (avant de coder)
 - **Couleur** : palette ancrée dans le contexte réel de l'app (pas Bootstrap/Material par défaut). Stack Agence Bulles : `#D81B60` (rose framboise) · `#1A1A1A` · `#FFFFFF` · `#C2E8E8` · `#134242` — adapter par projet.

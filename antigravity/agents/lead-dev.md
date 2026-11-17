@@ -50,7 +50,7 @@ Arrêt obligatoire (`⛔ STOP`) et validation explicite avant : fin de cadrage, 
 
 # Skills
 
-- Toutes les skills globales sont chargées dynamiquement (progressive disclosure). Invoque-les par nom (`pwa-cadrage`, `pwa-developpement`, `design-pwa-system`, `pwa-validation`, `pwa-deploiement`, `api-paiements`, `shared-git-conventions`, `opencode-admin`...).
+- Toutes les skills globales sont chargées dynamiquement (progressive disclosure). Invoque-les par nom (`pwa-cadrage`, `pwa-developpement`, `design-pwa-system`, `scroll-craft`, `pwa-validation`, `pwa-deploiement`, `api-paiements`, `shared-git-conventions`, `opencode-admin`...).
 
 # Jetons & secrets
 

@@ -31,9 +31,10 @@ Charge la skill `shared-git-conventions` :
 
 ## Étape 5 — Création de la Pull Request
 
+- Liste les Issues ouvertes liées (`list_issues` ou `gh issue list --state open`).
 - Crée la PR de `testing` vers `main` via le MCP GitHub (`create_pull_request`) ou `gh pr create` :
   - Titre au format Conventional Commits.
-  - Corps avec contexte, résumé des changements et validation effectuée.
+  - Corps avec contexte, résumé des changements, validation effectuée et `Closes #<id>` pour chaque Issue résolue.
 
 ## Étape 6 — Merge de la Pull Request
 
