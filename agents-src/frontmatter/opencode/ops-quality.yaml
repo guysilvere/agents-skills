@@ -1,0 +1,6 @@
+description: "Validation et livraison : tests locaux, lint, build, Lighthouse, a11y, cycle Git, déploiement"
+mode: subagent
+model: deepseek/deepseek-v4-flash
+steps: 25
+tools:
+  "agent:*": deny

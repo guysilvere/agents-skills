@@ -18,8 +18,8 @@ __pycache__/
 .gemini/
 .ignore
 .mcp.json
-AGENTS.md
-GEMINI.md
+/AGENTS.md
+/GEMINI.md
 mcp-servers.md
 opencode.json
 

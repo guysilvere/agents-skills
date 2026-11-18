@@ -57,7 +57,8 @@
       "transport": "local",
       "command": "npx",
       "args": ["-y", "@hinha/libsql-mcp"],
-      "enabled": true,
+      "enabled": false,
+      "note": "DESACTIVE EN GLOBAL (SPEC-002) : Sécurité de production. En dev local, utiliser file:<projet>.local.db. Pour inspecter la base prod, utiliser un .mcp.json local au projet ~/Projets/lodgi/ ou activation ponctuelle avec ./scripts/sync-skills.sh --mcp-server=turso-lodgi-prod.",
       "environment": {
         "LIBSQL_URL": "libsql://lodgi-prod-guysilvere.aws-us-east-1.turso.io",
         "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-lodgi-prod}}"
@@ -84,7 +85,8 @@
       "transport": "local",
       "command": "npx",
       "args": ["-y", "@hinha/libsql-mcp"],
-      "enabled": true,
+      "enabled": false,
+      "note": "DESACTIVE EN GLOBAL (SPEC-002) : Sécurité de production. En dev local, utiliser file:<projet>.local.db. Pour inspecter la base prod, utiliser un .mcp.json local au projet ~/Projets/brvm-radar/ ou activation ponctuelle avec ./scripts/sync-skills.sh --mcp-server=turso-brvm-radar-prod.",
       "environment": {
         "LIBSQL_URL": "libsql://brvm-radar-prod-guysilvere.aws-us-east-1.turso.io",
         "LIBSQL_AUTH_TOKEN": "{{TOKEN:turso-brvm-radar-prod}}"

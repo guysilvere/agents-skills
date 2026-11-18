@@ -2,6 +2,14 @@
 
 > Charger à la demande. Les 3 agents renvoient ici : ne pas dupliquer ce contenu ailleurs.
 
+## Économie de tokens (5 réflexes continus)
+
+- **Localiser avant de lire** : `graft` ou `grep`/`glob` ciblé, lire une plage précise, ne jamais relire un fichier entier déjà chargé.
+- **Zéro recopie inutile** : cibler les deltas et lignes exactes ; éviter de déverser de longs blocs de code ou logs bruts.
+- **Délégation ciblée** : isoler les validations et intégrations dans les sous-agents (`ops-quality`, `integrations`) pour protéger le contexte principal.
+- **Concision stricte** : réponses directes sans politesse ni préambule verbeux ; livrer des fichiers uniquement quand demandé.
+- **Référence à la demande** : charger la skill `shared-eco-tokens` uniquement pour un arbitrage de modèle ou l'audit d'une tâche lourde.
+
 ## Phases
 
 | Phase | Nom | Livrable | Agent |
@@ -116,6 +124,11 @@ Lors de la création d'un SaaS et tout au long du développement :
 ## Serveurs MCP — activer / désactiver
 
 - **Source de vérité unique** : `opencode/mcp.servers.json`. Ne jamais éditer les configs cibles à la main.
+- **Transverses vs Par projet (SPEC-002)** :
+  - **Transverses globaux** : `github`, `coolify`, `graft` restent activés en global (`enabled: true`) car communs à tous les SaaS.
+  - **Bases de production** : les serveurs `turso-*-prod` sont **désactivés en global** (`enabled: false`) pour éviter tout risque de mutation accidentelle ou pollution de contexte dans les autres projets.
+  - **Dev local** : toujours utiliser le fichier direct `file:<projet>.local.db` (zéro MCP requis).
+  - **Accès ponctuel à une prod** : configurer un `.mcp.json` local au projet (template : `opencode/skills/pwa-developpement/assets/configs/mcp.project.example.json`) ou activer temporairement via `./scripts/sync-skills.sh --local --mcp-server=turso-<projet>-prod`.
 - **Activer un serveur désactivé** : passer `enabled` à `true` dans la source, puis `./scripts/sync-skills.sh --local`.
 - **Un serveur désactivé se déclare différemment selon la cible** — comportement à connaître :
   - **OpenCode** → déclaré avec `enabled: false` (visible en `opencode mcp list`, non chargé) ;

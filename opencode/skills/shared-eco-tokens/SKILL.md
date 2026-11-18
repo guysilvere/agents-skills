@@ -1,8 +1,8 @@
 ---
 name: shared-eco-tokens
-description: Optimise la consommation de tokens et le choix du modèle pour gagner du temps et réduire les coûts tout en restant efficace avec les modèles IA. À utiliser en continu dans toutes les sessions, et particulièrement sur les tâches longues, répétitives ou impliquant de gros fichiers.
+description: Référence d'arbitrage de modèles et optimisation de coût pour sessions longues ou traitements par lots. Utiliser à la demande lorsqu'une tâche nécessite de choisir le modèle le plus adapté (flash vs capable) ou d'auditer la consommation de tokens.
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: tous
   domain: productivite
@@ -10,37 +10,26 @@ metadata:
 
 # shared-eco-tokens
 
-## Ce que je fais
-- Réduit la consommation de tokens : même résultat, plus vite, moins cher.
+> Cette skill est une **référence à la demande**. Les 5 réflexes continus d'économie de tokens sont intégrés directement dans les règles globales et n'exigent pas de lire ce fichier à chaque tour.
 
-## Contexte : ne charger que le nécessaire
-- Localiser avant de lire : `grep`/`glob` pour trouver l'endroit exact, puis lire une plage précise.
-- Ne pas relire un fichier déjà lu dans la session ; ne pas recopier de longs blocs.
-- S'appuyer sur l'`AGENTS.md` du dépôt pour les règles récurrentes.
+## Quand me charger ?
+- Arbitrage explicite de modèle pour une sous-tâche (`assets/reference/model-selection.md`).
+- Audit de consommation ou d'explosion de tokens sur une session longue.
+- Optimisation d'un lot de prompts ou automatisation récurrente.
 
-## Choisir le modèle selon la tâche
-- Tâches simples / planification / revue : modèle rapide et peu coûteux.
-- Implémentation complexe : modèle plus capable, mais seulement une fois le plan clair.
-- Fixer une limite d'itérations (`steps`) sur les sous-agents.
-- Référence : `assets/reference/model-selection.md`.
+## 1. Choisir le modèle selon la tâche
+- Tâches simples / planification / revue / résumé : modèle rapide et peu coûteux (`flash`).
+- Implémentation complexe, architecture délicate : modèle plus capable (`pro` / `sonnet`), uniquement une fois le plan validé.
+- Fixer une limite d'itérations (`steps` / `maxTurns`) sur chaque sous-agent.
+- Table détaillée : `assets/reference/model-selection.md`.
 
-## Découper et déléguer
-- Sous-tâches isolées → sous-agents (`ops-quality`, `integrations`) : contexte séparé, n'alourdit pas la session.
-- Skills = charges ponctuelles d'instructions, invoquées via `skill <nom>`.
+## 2. Découper et déléguer
+- Sous-tâches isolées → sous-agents (`ops-quality`, `integrations`) pour maintenir un contexte principal léger.
+- Skills = chargements ponctuels d'instructions, invoquées uniquement quand l'étape l'exige.
 - Laisser la compaction automatique résumer les longues sessions.
 
-## Prompts réutilisables
-- Garder un **prompt template** pour les tâches récurrentes (revues de PR, AGENTS.md, logs) — économise ~40 % de tokens.
-
-## Mode streaming & cancellation
-- Préférer le mode streaming : permet d'interrompre dès que la sortie dévie.
-
-## Sortie
-- Réponses concises, sans préambule ni redite.
-- Ne générer code/fichiers que lorsqu'ils sont demandés.
-
-## Réflexe
-- Avant une action coûteuse, se demander : « existe-t-il un chemin moins coûteux pour le même résultat ? »
+## 3. Prompts réutilisables & templates
+- Garder un template stable pour les tâches récurrentes (revues de PR, specs, rapports QA) — économise ~40 % de tokens.
 
 ## Assets
 - `assets/reference/model-selection.md`

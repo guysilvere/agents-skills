@@ -1,0 +1,14 @@
+{
+  "$comment": "Template de configuration MCP par projet — à placer à la racine du projet sous .mcp.json (Claude Code / OpenCode) ou .agents/mcp_config.json (Antigravity). NE JAMAIS COMMITTER DE SECRET EN CLAIR. En dev local usuel, utiliser exclusivement file:<projet>.local.db sans MCP.",
+  "mcpServers": {
+    "turso-prod": {
+      "command": "npx",
+      "args": ["-y", "@hinha/libsql-mcp"],
+      "env": {
+        "LIBSQL_URL": "libsql://<votre-projet>-prod-<team>.turso.io",
+        "LIBSQL_AUTH_TOKEN": "${MCP_TURSO_PROD_TOKEN}"
+      },
+      "note": "⛔ STOP — Base de données distante. Aucune mutation non locale (UPDATE/DELETE/DROP/MIGRATE) sans validation humaine explicite."
+    }
+  }
+}

@@ -103,7 +103,10 @@ SRC_AGENTS="${BASE_SRC}/opencode/agents"
 SRC_COMMANDS="${BASE_SRC}/opencode/commands"
 SRC_WORKFLOWS="${BASE_SRC}/antigravity/workflows"
 SRC_AG_AGENTS="${BASE_SRC}/antigravity/agents"
+SRC_AG_RULES="${BASE_SRC}/antigravity/GEMINI.md"
 SRC_CL_AGENTS="${BASE_SRC}/claude/agents"
+SRC_HOOKS="${BASE_SRC}/hooks"
+SRC_CL_HOOKS_FRAG="${BASE_SRC}/claude/hooks.fragment.json"
 SRC_MCP="${BASE_SRC}/opencode/mcp.servers.json"
 SRC_WORKFLOW_MD="${BASE_SRC}/opencode/WORKFLOW.md"
 
@@ -121,11 +124,18 @@ AG_RULES="${HOME}/.gemini/GEMINI.md"
 AG_CLI_PLUGIN="${HOME}/.gemini/antigravity-cli/plugins/agence-bulles"
 CL_SKILLS="${HOME}/.claude/skills"
 CL_AGENTS="${HOME}/.claude/agents"
+CL_HOOKS="${HOME}/.claude/hooks"
+CL_SETTINGS="${HOME}/.claude/settings.json"
 
 # Tokens locaux (jamais commités)
 TOKENS_DIR="${HOME}/.config/opencode/.tokens"
 
 [[ -d "$SRC_SKILLS" ]] || die "Sources skills introuvables dans $BASE_SRC"
+
+# ---- Pré-vol : vérification de parité des agents (SPEC-010 REQ-05) ----------
+if [[ -f "${BASE_SRC}/scripts/build-agents.mjs" ]]; then
+  node "${BASE_SRC}/scripts/build-agents.mjs" --check || die "Agents désynchronisés de agents-src/. Exécutez 'node scripts/build-agents.mjs'."
+fi
 
 # --mcp-server=NOM : source MCP réduite à un seul serveur (les resolvers restent inchangés)
 if [[ -n "$MCP_SERVER" ]]; then
@@ -384,12 +394,15 @@ if (( DO_BACKUP )) && (( ! DRY_RUN )); then
     [[ -d "$AG_SKILLS" ]] && cp -R "$AG_SKILLS" "$BACKUP_DIR/antigravity-skills" 2>/dev/null || true
     [[ -d "$AG_AGENTS" ]] && cp -R "$AG_AGENTS" "$BACKUP_DIR/antigravity-agents" 2>/dev/null || true
     [[ -d "$AG_WORKFLOWS" ]] && cp -R "$AG_WORKFLOWS" "$BACKUP_DIR/antigravity-workflows" 2>/dev/null || true
+    [[ -f "$AG_RULES" ]] && cp "$AG_RULES" "$BACKUP_DIR/antigravity-GEMINI.md" 2>/dev/null || true
     [[ -f "$AG_MCP" ]] && cp -R "$AG_MCP" "$BACKUP_DIR/antigravity-mcp_config.json" 2>/dev/null || true
     [[ -d "$AG_CLI_PLUGIN" ]] && cp -R "$AG_CLI_PLUGIN" "$BACKUP_DIR/antigravity-cli-plugin-agence-bulles" 2>/dev/null || true
   fi
   if (( DO_CLAUDE )); then
     [[ -d "$CL_SKILLS" ]] && cp -R "$CL_SKILLS" "$BACKUP_DIR/claude-skills" 2>/dev/null || true
     [[ -d "$CL_AGENTS" ]] && cp -R "$CL_AGENTS" "$BACKUP_DIR/claude-agents" 2>/dev/null || true
+    [[ -d "$CL_HOOKS" ]] && cp -R "$CL_HOOKS" "$BACKUP_DIR/claude-hooks" 2>/dev/null || true
+    [[ -f "$CL_SETTINGS" ]] && cp "$CL_SETTINGS" "$BACKUP_DIR/claude-settings.json" 2>/dev/null || true
     if command -v claude >/dev/null 2>&1; then
       claude mcp list > "$BACKUP_DIR/claude-mcp-list.txt" 2>/dev/null || true
     fi
@@ -400,12 +413,17 @@ elif (( DRY_RUN )); then
 fi
 
 # ---- 3+4. Purge & copie ----------------------------------------------------
+COUNT_SKILLS="$(find "$SRC_SKILLS" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')"
+COUNT_AGENTS="$(find "$SRC_AGENTS" -mindepth 1 -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')"
+COUNT_COMMANDS="$(find "$SRC_COMMANDS" -mindepth 1 -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')"
+COUNT_WORKFLOWS="$(find "$SRC_WORKFLOWS" -mindepth 1 -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')"
+
 if (( DO_OPENCODE )); then
   log "── OpenCode ─────────────────────────────────────────"
-  purge_and_copy "$SRC_SKILLS"   "$OC_SKILLS"   "Skills OpenCode (12)"
-  purge_and_copy "$SRC_AGENTS"   "$OC_AGENTS"   "Agents OpenCode (3)"
-  purge_and_copy "$SRC_COMMANDS" "$OC_COMMANDS" "Commandes OpenCode (8)"
-  if [[ -f "$SRC_WORKFLOW_MD" ]]; then
+  purge_and_copy "$SRC_SKILLS"   "$OC_SKILLS"   "Skills OpenCode (${COUNT_SKILLS})"
+  purge_and_copy "$SRC_AGENTS"   "$OC_AGENTS"   "Agents OpenCode (${COUNT_AGENTS})"
+  purge_and_copy "$SRC_COMMANDS" "$OC_COMMANDS" "Commandes OpenCode (${COUNT_COMMANDS})"
+  if (( ! MCP_ONLY )) && [[ -f "$SRC_WORKFLOW_MD" ]]; then
     if (( DRY_RUN )); then
       log "[dry-run] Copie WORKFLOW.md → $OC_WORKFLOW_MD"
     else
@@ -428,9 +446,18 @@ fi
 
 if (( DO_ANTIGRAVITY )); then
   log "── Antigravity ──────────────────────────────────────"
-  purge_and_copy "$SRC_SKILLS"    "$AG_SKILLS"    "Skills Antigravity (12)"
-  purge_and_copy "$SRC_AG_AGENTS" "$AG_AGENTS"    "Agents Antigravity (3)"
-  purge_and_copy "$SRC_WORKFLOWS" "$AG_WORKFLOWS" "Workflows Antigravity (8)"
+  purge_and_copy "$SRC_SKILLS"    "$AG_SKILLS"    "Skills Antigravity (${COUNT_SKILLS})"
+  purge_and_copy "$SRC_AG_AGENTS" "$AG_AGENTS"    "Agents Antigravity (${COUNT_AGENTS})"
+  purge_and_copy "$SRC_WORKFLOWS" "$AG_WORKFLOWS" "Workflows Antigravity (${COUNT_WORKFLOWS})"
+  if (( ! MCP_ONLY )) && [[ -f "$SRC_AG_RULES" ]]; then
+    if (( DRY_RUN )); then
+      log "[dry-run] Copie GEMINI.md → $AG_RULES"
+    else
+      mkdir -p "$(dirname "$AG_RULES")"
+      cp "$SRC_AG_RULES" "$AG_RULES"
+      ok "Règles Antigravity : GEMINI.md synchronisé"
+    fi
+  fi
   if [[ -f "$SRC_MCP" ]]; then
     MCP_AG="$(resolve_mcp_ag)"
     if (( DRY_RUN )); then
@@ -447,28 +474,77 @@ if (( DO_ANTIGRAVITY )); then
   # Alignement Antigravity CLI Plugin (agence-bulles)
   if (( ! MCP_ONLY )) && [[ -d "$(dirname "$AG_CLI_PLUGIN")" ]]; then
     log "Alignement du plugin Antigravity CLI (agence-bulles)…"
-    mkdir -p "${AG_CLI_PLUGIN}/agents" "${AG_CLI_PLUGIN}/skills" "${AG_CLI_PLUGIN}/rules"
-    purge_and_copy "$SRC_AG_AGENTS" "${AG_CLI_PLUGIN}/agents" "Agents Antigravity CLI (3)"
-    purge_and_copy "$SRC_SKILLS"    "${AG_CLI_PLUGIN}/skills" "Skills Antigravity CLI (12)"
-    if [[ -f "$AG_RULES" ]]; then
-      cp "$AG_RULES" "${AG_CLI_PLUGIN}/rules/GEMINI.md"
-      ok "Règles Antigravity CLI : rules/GEMINI.md synchronisé"
+    if (( ! DRY_RUN )); then
+      mkdir -p "${AG_CLI_PLUGIN}/agents" "${AG_CLI_PLUGIN}/skills" "${AG_CLI_PLUGIN}/rules"
     fi
-    cat > "${AG_CLI_PLUGIN}/plugin.json" <<'EOF'
+    purge_and_copy "$SRC_AG_AGENTS" "${AG_CLI_PLUGIN}/agents" "Agents Antigravity CLI (${COUNT_AGENTS})"
+    purge_and_copy "$SRC_SKILLS"    "${AG_CLI_PLUGIN}/skills" "Skills Antigravity CLI (${COUNT_SKILLS})"
+    if [[ -f "$SRC_AG_RULES" ]]; then
+      if (( DRY_RUN )); then
+        log "[dry-run] Copie GEMINI.md → ${AG_CLI_PLUGIN}/rules/GEMINI.md"
+      else
+        cp "$SRC_AG_RULES" "${AG_CLI_PLUGIN}/rules/GEMINI.md"
+        ok "Règles Antigravity CLI : rules/GEMINI.md synchronisé"
+      fi
+    elif [[ -f "$AG_RULES" ]]; then
+      if (( DRY_RUN )); then
+        log "[dry-run] Copie GEMINI.md → ${AG_CLI_PLUGIN}/rules/GEMINI.md"
+      else
+        cp "$AG_RULES" "${AG_CLI_PLUGIN}/rules/GEMINI.md"
+        ok "Règles Antigravity CLI : rules/GEMINI.md synchronisé"
+      fi
+    fi
+    if (( DRY_RUN )); then
+      log "[dry-run] Écriture manifeste → ${AG_CLI_PLUGIN}/plugin.json (${COUNT_SKILLS} skills, ${COUNT_WORKFLOWS} workflows)"
+    else
+      cat > "${AG_CLI_PLUGIN}/plugin.json" <<EOF
 {
-  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "\$schema": "https://antigravity.google/schemas/v1/plugin.json",
   "name": "agence-bulles",
-  "description": "Écosystème Agence Bulles : lead-dev, ops-quality, integrations, 12 skills PWA et workflows."
+  "description": "Écosystème Agence Bulles : lead-dev, ops-quality, integrations, ${COUNT_SKILLS} skills PWA et ${COUNT_WORKFLOWS} workflows."
 }
 EOF
-    ok "Manifest Antigravity CLI : plugin.json à jour"
+      ok "Manifest Antigravity CLI : plugin.json à jour"
+    fi
   fi
 fi
 
 if (( DO_CLAUDE )); then
   log "── Claude Code ──────────────────────────────────────"
-  purge_and_copy "$SRC_SKILLS"    "$CL_SKILLS" "Skills Claude Code (12)"
-  purge_and_copy "$SRC_CL_AGENTS" "$CL_AGENTS" "Agents Claude Code (3)"
+  purge_and_copy "$SRC_SKILLS"    "$CL_SKILLS" "Skills Claude Code (${COUNT_SKILLS})"
+  purge_and_copy "$SRC_CL_AGENTS" "$CL_AGENTS" "Agents Claude Code (${COUNT_AGENTS})"
+
+  # Déploiement des hooks déterministes (SPEC-009)
+  if (( ! MCP_ONLY )) && [[ -d "$SRC_HOOKS" ]]; then
+    mkdir -p "$CL_HOOKS"
+    cp -R "$SRC_HOOKS"/* "$CL_HOOKS"/
+    chmod +x "$CL_HOOKS"/*.mjs 2>/dev/null || true
+    ok "Hooks Claude Code synchronisés → $CL_HOOKS"
+
+    if [[ -f "$SRC_CL_HOOKS_FRAG" && -f "$CL_SETTINGS" ]]; then
+      if (( DRY_RUN )); then
+        log "[dry-run] Fusion des hooks dans $CL_SETTINGS"
+      else
+        python3 - <<PY
+import json
+with open("$CL_SETTINGS", "r") as f:
+    settings = json.load(f)
+with open("$SRC_CL_HOOKS_FRAG", "r") as f:
+    frag = json.load(f)
+
+if "hooks" not in settings:
+    settings["hooks"] = {}
+settings["hooks"].update(frag.get("hooks", {}))
+
+with open("$CL_SETTINGS", "w") as f:
+    json.dump(settings, f, indent=2, ensure_ascii=False)
+print("Hooks fusionnés avec succès dans $CL_SETTINGS")
+PY
+        ok "Hooks enregistrés dans ~/.claude/settings.json"
+      fi
+    fi
+  fi
+
   if [[ -f "$SRC_MCP" ]]; then
     sync_claude_mcp
   else

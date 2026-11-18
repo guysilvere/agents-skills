@@ -2,7 +2,7 @@
 name: pwa-deploiement
 description: Déploiement et exploitation d'une PWA Agence Bulles — RUNBOOK, déploiement Coolify + Cloudflare (proxy orange, tunnels Zero Trust), sauvegardes Cloudflare R2 (backup/restore), compression AVIF/WebP, docker-compose, staging. Charger (via ops-quality) dès qu'un déploiement, une sauvegarde, une restauration ou une mise en production est en jeu (Phase 8 du workflow).
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: ops-quality
   domain: deploiement
@@ -85,7 +85,6 @@ metadata:
 ## Règles
 - Ne jamais exposer les ports d'admin publiquement (tunnels ou firewall).
 - Chaque déploiement doit être documenté dans RUNBOOK.md (Living Documentation).
-- Toujours charger `shared-eco-tokens` en parallèle.
 
 ## Assets
 - `assets/templates/RUNBOOK.md`

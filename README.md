@@ -7,13 +7,16 @@
 
 | Élément | Emplacement | Description |
 |---------|-------------|-------------|
-| Agents | `opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) — format OpenCode |
-| Agents AG | `antigravity/agents/` | Les 3 mêmes rôles — format Antigravity |
-| Agents Claude | `claude/agents/` | Les 3 mêmes rôles — format subagent Claude Code (pas de notion de « primary ») |
-| Skills | `opencode/skills/` | 15 skills versionnées (assets séparés 🟦/🟩/⚪), réutilisées telles quelles par Claude Code |
+| Source agents | `agents-src/` | 3 corps canoniques + frontmatters par outil (source unique des 9 agents) |
+| Agents | `opencode/agents/` | `lead-dev` (primary) + `ops-quality`, `integrations` (subagents) — format OpenCode (générés) |
+| Agents AG | `antigravity/agents/` | Les 3 mêmes rôles — format Antigravity (générés) |
+| Agents Claude | `claude/agents/` | Les 3 mêmes rôles — format subagent Claude Code (générés) |
+| Règles AG | `antigravity/GEMINI.md` | Règles globales Antigravity Desktop & CLI (source de vérité) |
+| Skills | `opencode/skills/` | 16 skills versionnées (assets séparés 🟦/🟩/⚪), réutilisées telles quelles par Claude Code |
 | Assets | `opencode/assets/` | Templates, scripts, checklists, configs par skill |
-| Commandes | `opencode/commands/` | 10 commandes slash OpenCode (dont `/threat-model`) |
-| Workflows AG | `antigravity/workflows/` | 10 workflows Antigravity équivalents |
+| Commandes | `opencode/commands/` | 12 commandes slash OpenCode (dont `/adr`, `/threat-model` et `/agents-skills-update`) |
+| Workflows AG | `antigravity/workflows/` | 12 workflows Antigravity équivalents |
+| Evals | `evals/` | Dataset d'évaluation du routage et clauses d'exclusion des 16 skills |
 | MCP | `opencode/mcp.servers.json` | Source de vérité serveurs MCP (sans secret en clair) |
 | Migration | `opencode/` | README-MIGRATION, PLAN, ARCHIVAGE, DIFF, opencode.jsonc.new |
 
@@ -36,7 +39,7 @@
   - Passerelle unifiée (Wave, Orange Money, MTN, Moov, cartes bancaires) avec sandbox réelle obligatoire avant tout jalon `live`.
   - Vérification de signature HMAC à temps constant (`crypto.timingSafeEqual`) et idempotence transactionnelle en base.
 
-## Skills (15)
+## Skills (16)
 
 - `apple-design` — design physique & motion Apple appliqué au web (latence zéro, ressorts, direct manipulation, typographie optique)
 - `pwa-cadrage` — cadrage, naming, stack, blueprint, roadmap, modélisation des menaces STRIDE
@@ -44,6 +47,7 @@
 - `pwa-developpement` — scaffolding, AGENTS.md, SPEC-XXX, DATABASE.md (base locale direct file:<projet>.local.db), conventions
 - `pwa-test-harness` — cockpit specs & banc d'essai QA (Kanban/Liste, simulation, persistance Turso, sync Markdown)
 - `design-pwa-system` — direction artistique, design system, layout signature, brief inference + dials + bibliothèque DESIGN.md + stress-test UI
+- `scroll-craft` — landing pages et sites vitrines premium pilotés par le scroll (scrollytelling, 8 grammaires, vérification frame-by-frame Playwright)
 - `design-3d` — visuels 3D procéduraux Three.js depuis une image (héros produits, objets animés)
 - `pwa-validation` — tests locaux Caddy (.test), partage obligatoire des logins/mdp de test, E2E Playwright, audit design, Lighthouse, a11y & motion, SEO, sécurité (OWASP, webhooks HMAC, anti-IDOR)
 - `pwa-deploiement` — Coolify, Cloudflare, R2, RUNBOOK
@@ -51,8 +55,8 @@
 - `api-best-practices` — design API REST
 - `shared-git-conventions` — git, SemVer, releases
 - `shared-graft` — indexation du code par graft (@nanonets/graft)
-- `shared-eco-tokens` — optimisation de tokens (toujours chargée)
-- `opencode-admin` — administration des outils IA (OC + AG)
+- `shared-eco-tokens` — arbitrage de modèles et optimisation de coût (à la demande)
+- `agents-skills-admin` — administration des outils IA (OpenCode, Antigravity, Claude Code) et mise à jour des agents/skills via agents-src
 
 ## Installation & mise à jour
 
@@ -88,6 +92,17 @@ Le script :
 | `lead-dev` | primary | subagent (pas de « primary » chez Claude) | Cycle produit complet (cadrage → dev → doc) |
 | `ops-quality` | subagent | subagent | Validation, Git, déploiement, RUNBOOK |
 | `integrations` | subagent | subagent | Paiements, webhooks, emails, R2, n8n |
+
+## Industrialisation « Agents-as-Code » & CI
+
+Les 9 fichiers agents ne sont plus édités à la main : ils sont compilés depuis une **source canonique unique** pour garantir une parité stricte sans dérive.
+
+- **Source unique** : `agents-src/{role}.body.md` + `agents-src/frontmatter/{outil}/{role}.yaml`
+- **Générateur** : `node scripts/build-agents.mjs` (supporte `--check` pour la CI)
+- **Validateur déterministe** : `node scripts/validate-setup.mjs` (85 contrôles statiques : syntaxe YAML, règles CSO, plafonds tokens, parité workflows/commandes, zéro terme banni, zéro secret)
+- **Evals de routage** : `evals/skill-triggers.json` + `node scripts/eval-triggers.mjs` (18 cas de tests couvrant 100 % des 16 skills et leurs exclusions)
+- **CI GitHub Actions** : `.github/workflows/validate-setup.yml` exécuté sur chaque push et PR
+- **Garde-fous hooks** : hooks déterministes Claude Code dans `hooks/` et synchronisés dans `~/.claude/settings.json`
 
 ## Documentation détaillée
 

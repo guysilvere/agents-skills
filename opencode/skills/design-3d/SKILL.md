@@ -1,8 +1,8 @@
 ---
 name: design-3d
-description: Création de visuels 3D procéduraux Three.js à partir d'une image de référence (héros produits, objets animés, dioramas) pour landings et SaaS Agence Bulles. Wrapper léger du pipeline img2threejs — reconstruction par code (primitives + shaders procéduraux), pas de meshes téléchargés. Charger quand un visuel 3D est requis.
+description: Creation de visuels 3D proceduraux Three.js a partir d'une image de reference (objets animes, heros proceduraux sans meshes lourds). Utiliser exclusivement quand une scene ou un composant 3D Three.js est demande. Ne pas utiliser pour la conception UI standard (voir design-pwa-system) ni pour le scrollytelling pur (voir scroll-craft).
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: lead-dev
   domain: design
@@ -44,7 +44,6 @@ metadata:
 - **Fidélité honnête** : une image ne révèle pas les faces cachées → inférer par miroir, signaler les zones non vues comme basse confiance. « Impossible d'atteindre cette fidélité depuis cette image » est un résultat valide.
 - **Token-efficient** : les scripts Python valident/gatent, le modèle ne juge que visuellement (une sheet de comparaison par passe). Ne pas re-lire tout le modèle à chaque itération.
 - **Fail-closed** : le générateur bloque (`BLOCKED` + métriques + cause) plutôt que d'écrire une factory non conforme. `--allow-nonstrict` uniquement pour fixtures de test.
-- Charger `shared-eco-tokens` en parallèle.
 - Le modèle généré est du TypeScript diffable + spec JSON — versionnable, pas de binaires multi-Mo.
 
 ## Assets

@@ -20,7 +20,7 @@ const FALLBACK_SKILLS = [
 	'api-paiements',
 	'api-best-practices',
 	'shared-git-conventions',
-	'opencode-admin',
+	'agents-skills-admin',
 	'pwa-test-harness',
 	'shared-graft',
 	'apple-design',

@@ -1,0 +1,11 @@
+name: integrations
+description: "Argent et intégrations : passerelle de paiement unifiée (sandbox réelle, webhooks signés, dunning, factures PDF), Brevo/Mailtrap, Cloudflare R2, scripts DB Turso, workflows n8n."
+model: sonnet
+maxTurns: 25
+tools:
+  - Bash
+  - Read
+  - Edit
+  - Write
+  - Glob
+  - Grep

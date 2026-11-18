@@ -1,0 +1,11 @@
+name: ops-quality
+description: "Garde-fou et livreur : validation (tests locaux Caddy https, lint, build, Lighthouse, a11y, SEO, sécurité), cycle Git et déploiement Coolify/Cloudflare. Ne corrige PAS le code : signale puis livre."
+model: sonnet
+maxTurns: 25
+tools:
+  - Bash
+  - Read
+  - Edit
+  - Write
+  - Glob
+  - Grep

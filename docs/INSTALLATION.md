@@ -56,7 +56,7 @@ mkdir -p ~/.config/opencode
 
 ## 4. Config Antigravity
 
-- 🟩 Règles globales : copier le template `~/.gemini/GEMINI.md` fourni par la skill `opencode-admin` (`opencode-admin/assets/antigravity/GEMINI.md`).
+- 🟩 Règles globales : copier le template `~/.gemini/GEMINI.md` fourni par la skill `agents-skills-admin` (`agents-skills-admin/assets/antigravity/GEMINI.md`).
 - 🟩 Règles projet : dans chaque repo, `.agents/rules/*.md` (AGENTS.md n'est pas lu par Antigravity).
 - 🟩 Permissions : via l'UI Antigravity (Customizations → Permissions), syntaxe `action(target)`.
 

@@ -1,8 +1,8 @@
 ---
 name: design-pwa-system
-description: Intelligence de design UI/UX pour PWA mobiles Agence Bulles — direction artistique anti-générique, recherche de références (palettes, styles, typographies, responsive), persistance d'un design system (MASTER.md + overrides) et checklist qualité mobile/PWA. Charger pour concevoir, construire ou revoir toute interface (landing + SaaS).
+description: Design system UI pour PWA mobiles (direction artistique, palettes, typographies, tokens CSS MASTER.md, composants et stress-test visuel). Utiliser pour concevoir ou styliser des interfaces applicatives SaaS. Ne pas utiliser pour la cinématique de scroll de landing pages (voir scroll-craft) ni pour le parcours fonctionnel (voir design-ux-flow).
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: lead-dev
   domain: design
@@ -65,7 +65,6 @@ metadata:
 - Checklists : `assets/checklists/mobile-pwa.md` et `assets/checklists/ui-stress-test.md` (stress-test données extrêmes, inspiré de `break-ui`).
 
 ## Règles
-- Toujours charger `shared-eco-tokens` en parallèle.
 - Harmonie absolue landing + SaaS : mêmes couleurs, polices, icônes.
 - Une seule bibliothèque d'icônes : Lucide, Tabler, Phosphor, React Icons ou Remix.
 - Aucun emoji dans l'interface sauf demande explicite.

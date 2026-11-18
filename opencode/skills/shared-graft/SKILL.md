@@ -2,7 +2,7 @@
 name: shared-graft
 description: Indexation du code par graft (@nanonets/graft) — vérifier que le projet est indexé, interroger le graphe au lieu de grep/read, et rafraîchir l'index après des changements. Charger au début de toute session sur un projet existant, et après toute modification de code significative.
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: tous
   domain: productivite
@@ -95,5 +95,4 @@ Lors de la création d'un projet (`pwa-developpement`, phase de scaffold) :
 - Le graphe **avant** grep/read. Toujours.
 - Un index périmé est trompeur : le rafraîchir plutôt que s'en méfier.
 - Pas d'installation silencieuse — notifier et demander.
-- Toujours charger `shared-eco-tokens` en parallèle : interroger le graphe **est** une optimisation
   de tokens (une requête au lieu de plusieurs lectures).

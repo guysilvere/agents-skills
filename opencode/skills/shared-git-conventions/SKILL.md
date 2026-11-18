@@ -2,7 +2,7 @@
 name: shared-git-conventions
 description: Conventions Git/GitHub Agence Bulles — branche testing unique, commits Conventional Commits, versioning SemVer, gestion des bugs via GitHub Issues (création avant fix, suivi, clôture), notes de release et descriptions de PR, merge et pull, MCP GitHub. À utiliser pour toute opération de versioning (via ops-quality).
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: ops-quality
   domain: git

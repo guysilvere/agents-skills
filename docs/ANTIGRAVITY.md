@@ -4,13 +4,14 @@
 
 ## 1. Principe de parité Desktop ↔ CLI
 
-Dans l'écosystème Agence Bulles, Antigravity Desktop et Antigravity CLI partagent rigoureusement **les mêmes 3 agents**, **les mêmes 12 skills**, **les mêmes 8 workflows** et **les mêmes règles globales**.
+Dans l'écosystème Agence Bulles, Antigravity Desktop et Antigravity CLI partagent rigoureusement **les mêmes 3 agents**, **les mêmes 16 skills**, **les mêmes 11 workflows** et **les mêmes règles globales** (`antigravity/GEMINI.md`).
 
 ```
                            Source de vérité (agents-skills)
-                             ├── antigravity/agents/ (3 agents)
-                             ├── opencode/skills/    (12 skills)
-                             ├── antigravity/workflows/ (8 workflows)
+                             ├── antigravity/agents/    (3 agents)
+                             ├── antigravity/GEMINI.md  (règles globales)
+                             ├── opencode/skills/       (16 skills)
+                             ├── antigravity/workflows/ (11 workflows)
                              └── opencode/mcp.servers.json
                                           │
                   ┌───────────────────────┴───────────────────────┐
@@ -27,16 +28,16 @@ Dans l'écosystème Agence Bulles, Antigravity Desktop et Antigravity CLI partag
 
 ### Antigravity Desktop / IDE
 - **Agents (3)** : `~/.gemini/config/agents/` (`lead-dev.md`, `ops-quality.md`, `integrations.md`)
-- **Skills (12)** : `~/.gemini/config/skills/`
-- **Workflows (8)** : `~/.gemini/workflows/` (`audit.md`, `cadrage.md`, `deploy.md`, `docs-sync.md`, `new-pwa.md`, `release.md`, `spec.md`, `validate.md`)
-- **Règles globales** : `~/.gemini/GEMINI.md`
+- **Skills (16)** : `~/.gemini/config/skills/`
+- **Workflows (11)** : `~/.gemini/workflows/` (`adr.md`, `audit.md`, `cadrage.md`, `deploy.md`, `docs-sync.md`, `fix.md`, `new-pwa.md`, `release.md`, `spec.md`, `threat-model.md`, `validate.md`)
+- **Règles globales** : `~/.gemini/GEMINI.md` (synchronisé depuis `antigravity/GEMINI.md`)
 - **MCP Servers** : `~/.gemini/config/mcp_config.json`
 
 ### Antigravity CLI (`agy`)
 - **Plugin agence-bulles** : `~/.gemini/antigravity-cli/plugins/agence-bulles/`
   - **Agents (3)** : `agents/` (identiques à `~/.gemini/config/agents/`)
-  - **Skills (12)** : `skills/` (identiques à `~/.gemini/config/skills/`)
-  - **Règles globales** : `rules/GEMINI.md` (identique à `~/.gemini/GEMINI.md`)
+  - **Skills (16)** : `skills/` (identiques à `~/.gemini/config/skills/`)
+  - **Règles globales** : `rules/GEMINI.md` (synchronisé depuis `antigravity/GEMINI.md`)
   - **Manifest** : `plugin.json`
 - **Configuration générale CLI** : `~/.gemini/antigravity-cli/settings.json`
 

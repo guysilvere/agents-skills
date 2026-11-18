@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "deepseek/deepseek-v4-flash",
+  "model": "deepseek/deepseek-v4",
   "small_model": "deepseek/deepseek-v4-flash",
   "default_agent": "lead-dev",
   "mcp": {
@@ -24,14 +24,6 @@
       "enabled": true,
       "headers": {
         "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/coolify}"
-      }
-    },
-    "paiement": {
-      "type": "remote",
-      "url": "https://paiement.ci/api/mcp",
-      "enabled": true,
-      "headers": {
-        "Authorization": "Bearer {file:/Users/silveremeya/.config/opencode/.tokens/paiement}"
       }
     }
   },

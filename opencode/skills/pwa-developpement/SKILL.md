@@ -2,7 +2,7 @@
 name: pwa-developpement
 description: Développement de code PWA Agence Bulles — scaffolding, structure de projet, AGENTS.md, SPEC-XXX, DATABASE.md, README.md, conventions de branche, refactoring, cleanup et bonnes pratiques par langage (HTML, CSS, JS, TS, Python, JSON). Charger pour toute phase de construction ou de nettoyage de code.
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: lead-dev
   domain: developpement
@@ -17,7 +17,7 @@ metadata:
 
 ## 1. Initialisation du projet
 - Créer `AGENTS.md` à la racine (point d'entrée unique IA) si absent — template avec section « Compatibilité Antigravity » incluse.
-- 🟩 Antigravity : dupliquer les règles projet dans `.agents/rules/*.md` (AGENTS.md n'y est pas lu) — template `~/.config/opencode/skills/opencode-admin/assets/antigravity/rule.md`.
+- 🟩 Antigravity : dupliquer les règles projet dans `.agents/rules/*.md` (AGENTS.md n'y est pas lu) — template `~/.config/opencode/skills/agents-skills-admin/assets/antigravity/rule.md`.
 - Créer `README.md` depuis l'ébauche du blueprint ; mise à jour à chaque feature.
 - Créer `.env.example` listant TOUTES les clés (paiement, Brevo/Mailtrap, Turnstile, R2, VAPID, Turso).
 - Créer `.github/workflows/ci.yml` depuis `assets/configs/ci.yml` — CI minimale bloquante sur PR (secrets → lint → typecheck → tests → build → **Lighthouse**).
@@ -66,37 +66,9 @@ metadata:
 - Tout ADR accepté qui contredit une doc existante → mettre à jour `BLUEPRINT.md` / `DATABASE.md` dans le même lot.
 
 ## 4. Conventions de code (tous langages)
-- **Nommage** : explicite (jamais `x`, `tmp`, `data`) ; camelCase JS/TS, snake_case Python, PascalCase composants.
-- **DRY** : factoriser dès la 2ᵉ occurrence ; pas de copier-coller config/styles.
-- **Fonctions** : une responsabilité ; pures si possible ; verbe d'action.
-- **Erreurs** : try/catch partout, messages explicites, jamais de Promise sans gestion d'erreur.
-- **Commentaires** : seulement le POURQUOI ; pas de code commenté.
-- **Imports** : groupés (libs → composants → styles), ordre alphabétique, jamais d'imports inutilisés.
-- Checklist : `assets/checklists/style-code.md`.
-
-### HTML/JSX
-- Balises sémantiques, un seul `<h1>`, fragments au lieu de `<div>` inutiles.
-- `alt` sur chaque img, `<label>` sur chaque champ, contraste ≥ 4.5:1.
-- `defer`/`async` sur les scripts, `loading="lazy"` images, pas de styles inline.
-- SEO : title unique, meta description < 160 car., JSON-LD.
-
-### CSS/Tailwind
-- Mobile-first (`min-width`) ; classes utilitaires ; motifs récurrents extraits (`@apply` ou composants).
-- Variables CSS / tokens pour tout ce qui se répète.
-
-### JavaScript/TypeScript
-- TypeScript strict, types explicites sur les APIs/contrats de données.
-- Pas d'`any` silencieux, pas de logique métier dans les composants.
-
-### Python (FastAPI / Micro-services / Workers / IA)
-- **Typage strict & validation** : Python 3.12+, `typing` systématique, modèles **Pydantic v2** pour tous les schemas d'entrée/sortie.
-- **Framework & Asynchronisme** : **FastAPI** avec handlers `async def` non bloquants ; dépendances injectées via `Depends()`.
-- **Outillage** : **Ruff** pour le linting/formatage (`ruff check .`, `ruff format .`) ; gestionnaire de paquets **uv** ou `pyproject.toml`.
-- **Architecture** : Séparation stricte : `routers/`, `services/` (logique métier), `models/` (Pydantic / DB), `workers/` (tâches de fond).
-- **Sécurité & secrets** : Variables d'environnement validées via `pydantic-settings` (`SettingsConfigDict`).
-
-### PWA
-- Manifest complet, service worker offline-first, IndexedDB pour les données locales.
+- Conventions complètes HTML, CSS, JS/TS, Python et PWA déportées dans [assets/references/code-standards.md](assets/references/code-standards.md).
+- Invariants : TypeScript strict sans `any`, nommage explicite, validation Zod ou Pydantic v2 systématique, try/catch explicites, balises sémantiques.
+- Checklist d'audit : `assets/checklists/style-code.md`.
 
 ## 5. Nettoyage & refactoring (après chaque feature)
 1. Supprimer code mort, imports/variables inutilisés, code commenté.
@@ -167,7 +139,6 @@ projet/
 - Ultra-léger : listes à puces partout ; zéro texte superflu.
 - Aucun emoji dans l'interface sauf demande explicite ; une seule bibliothèque d'icônes.
 - Images compressées AVIF/WebP avant upload R2 (jamais de PNG/JPEG bruts).
-- Toujours charger `shared-eco-tokens` en parallèle.
 
 ## Assets
 - `assets/templates/AGENTS.md`
