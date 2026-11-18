@@ -1,6 +1,6 @@
 ---
 name: apple-design
-description: Principes de design Apple et motion physique appliqués au web et PWA — latence zéro au pointerdown, manipulation directe 1:1, ressorts physiques interruptibles (springs), transfert de vélocité/momentum, matières translucides, typographie optique et accessibilité.
+description: Principes physiques de motion et micro-interactions Apple pour web et PWA (latence zero, suivi tactile 1:1, ressorts physiques interruptibles, transfert de velocite, matieres translucides). Utiliser lors de l'implementation de gestes tactiles ou d'animations fluides. Ne pas utiliser pour la DA globale (voir design-pwa-system) ni pour le scrollytelling marketing (voir scroll-craft).
 license: MIT
 compatibility: opencode, antigravity, claude
 metadata:

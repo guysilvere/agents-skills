@@ -1,0 +1,146 @@
+[
+  {
+    "id": "eval-01-cadrage",
+    "prompt": "J'ai une idée de SaaS de gestion de stocks pour les pharmacies à Abidjan. Aide-moi à cadrer le MVP, tester le modèle économique et trouver 5 propositions de naming.",
+    "expectedSkill": "pwa-cadrage",
+    "forbiddenSkills": ["pwa-developpement", "scroll-craft"],
+    "category": "cadrage",
+    "rationale": "Phase 0-1 du workflow : formalisation du problème, monétisation, stress-test et naming."
+  },
+  {
+    "id": "eval-02-ux-flow",
+    "prompt": "Je veux concevoir le parcours d'inscription et de premier ajout de produit en navigation couloir avec micro-victoires sans distractions.",
+    "expectedSkill": "design-ux-flow",
+    "forbiddenSkills": ["design-pwa-system", "scroll-craft"],
+    "category": "design",
+    "rationale": "Méthodologie UX en 10 étapes pour parcours applicatifs et user flows."
+  },
+  {
+    "id": "eval-03-pwa-design-system",
+    "prompt": "Définis la palette sémantique, la typographie et les tokens CSS MASTER.md pour le dashboard mobile-first de notre application.",
+    "expectedSkill": "design-pwa-system",
+    "forbiddenSkills": ["scroll-craft", "apple-design", "design-3d"],
+    "category": "design",
+    "rationale": "Direction artistique et tokens CSS pour UI applicative SaaS."
+  },
+  {
+    "id": "eval-04-apple-motion",
+    "prompt": "Je veux implémenter un swipe-to-delete sur les cartes avec un ressort physique interruptible et transfert de vélocité tactile 1:1.",
+    "expectedSkill": "apple-design",
+    "forbiddenSkills": ["design-pwa-system", "scroll-craft"],
+    "category": "design",
+    "rationale": "Principes physiques Apple pour gestes tactiles et ressorts dynamiques."
+  },
+  {
+    "id": "eval-05-scroll-craft",
+    "prompt": "On a besoin d'une landing page vitrine à fort impact avec un hero multi-plans et scrubbing cinématique au scroll.",
+    "expectedSkill": "scroll-craft",
+    "forbiddenSkills": ["design-pwa-system", "design-ux-flow"],
+    "category": "design",
+    "rationale": "Scrollytelling et cinématique de scroll pour site vitrine marketing."
+  },
+  {
+    "id": "eval-06-design-3d",
+    "prompt": "Je souhaite générer un cube procédural animé avec des reflets métalliques légers en Three.js sans importer de modèle glTF lourd.",
+    "expectedSkill": "design-3d",
+    "forbiddenSkills": ["design-pwa-system", "scroll-craft"],
+    "category": "design",
+    "rationale": "Visuels 3D procéduraux Three.js sans asset lourd."
+  },
+  {
+    "id": "eval-07-pwa-dev-spec",
+    "prompt": "Rédige la spécification technique SPEC-004 pour le module d'export comptable et crée la structure de dossiers SvelteKit associée.",
+    "expectedSkill": "pwa-developpement",
+    "forbiddenSkills": ["pwa-cadrage", "pwa-validation"],
+    "category": "dev",
+    "rationale": "Spécification de code, structure de projet et implémentation SvelteKit."
+  },
+  {
+    "id": "eval-08-test-harness",
+    "prompt": "Mets en place la page de banc de tests interactifs /admin/test avec persistance locale des scénarios QA pour valider les flux métier.",
+    "expectedSkill": "pwa-test-harness",
+    "forbiddenSkills": ["pwa-validation"],
+    "category": "dev",
+    "rationale": "Cockpit interactif de dev et suivi des specs en cours de construction."
+  },
+  {
+    "id": "eval-09-pwa-validation",
+    "prompt": "Le dev est terminé. Lance la validation pre-commit complète : tests HTTPS sous Caddy, audit Lighthouse mobile, TBT et checklist avant commit.",
+    "expectedSkill": "pwa-validation",
+    "forbiddenSkills": ["pwa-test-harness", "pwa-cadrage"],
+    "category": "qualite",
+    "rationale": "Validation complète avant commit et livraison via ops-quality."
+  },
+  {
+    "id": "eval-10-pwa-deploiement",
+    "prompt": "Configure le déploiement de production sur Coolify avec proxy Cloudflare orange et la sauvegarde quotidienne de la base vers Cloudflare R2.",
+    "expectedSkill": "pwa-deploiement",
+    "forbiddenSkills": ["pwa-validation", "pwa-developpement"],
+    "category": "ops",
+    "rationale": "Déploiement et exploitation d'une PWA en production."
+  },
+  {
+    "id": "eval-11-api-paiements",
+    "prompt": "Implémente le webhook de notification de paiement Wave et Orange Money avec vérification de signature à temps constant et idempotence en base.",
+    "expectedSkill": "api-paiements",
+    "forbiddenSkills": ["api-best-practices"],
+    "category": "paiements",
+    "rationale": "Intégration de la passerelle de paiement Mobile Money et cartes bancaires."
+  },
+  {
+    "id": "eval-12-api-best-practices",
+    "prompt": "Nous concevons l'API REST interne pour les organisations et abonnements. Fais-moi une revue d'architecture sur la pagination, les codes d'erreur et le versioning d'URL.",
+    "expectedSkill": "api-best-practices",
+    "forbiddenSkills": ["api-paiements"],
+    "category": "architecture",
+    "rationale": "Guide général de conception et d'audit d'API RESTful internes ou tierces."
+  },
+  {
+    "id": "eval-13-git-conventions",
+    "prompt": "On a trouvé une régression sur le formulaire de contact. Ouvre une Issue GitHub pour tracer le bug puis prépare le commit conventionnel sur la branche testing.",
+    "expectedSkill": "shared-git-conventions",
+    "forbiddenSkills": ["agents-skills-admin"],
+    "category": "git",
+    "rationale": "Gestion des bugs via GitHub Issues et respect des conventions Git."
+  },
+  {
+    "id": "eval-14-agents-skills-admin",
+    "prompt": "Je veux créer une nouvelle skill globale dans l'écosystème et ajuster les permissions dans opencode.jsonc et les agents Antigravity.",
+    "expectedSkill": "agents-skills-admin",
+    "forbiddenSkills": ["shared-git-conventions", "pwa-developpement"],
+    "category": "admin",
+    "rationale": "Administration des outils IA (OpenCode, Antigravity, Claude Code)."
+  },
+  {
+    "id": "eval-15-shared-graft",
+    "prompt": "Avant de toucher au code de ce gros projet, je veux interroger le graphe de dépendances pour trouver tous les appelants de la fonction parseInvoice.",
+    "expectedSkill": "shared-graft",
+    "forbiddenSkills": ["shared-eco-tokens"],
+    "category": "recherche",
+    "rationale": "Indexation et navigation dans le code via le graphe de contexte Graft."
+  },
+  {
+    "id": "eval-16-shared-eco-tokens",
+    "prompt": "Nous devons lancer un traitement de classification sur 5000 fiches. Peux-tu analyser la consommation de tokens et arbitrer entre flash et un modèle plus capable ?",
+    "expectedSkill": "shared-eco-tokens",
+    "forbiddenSkills": ["pwa-cadrage"],
+    "category": "tokens",
+    "rationale": "Arbitrage de modèles et optimisation budgétaire pour sessions longues ou lots."
+  },
+  {
+    "id": "eval-17-discrimination-dashboard-vs-landing",
+    "prompt": "Je développe l'écran d'accueil du SaaS pour les gestionnaires : vue d'ensemble des indicateurs, tableau de bord réactif et cartes de statistiques.",
+    "expectedSkill": "design-pwa-system",
+    "forbiddenSkills": ["scroll-craft", "design-3d"],
+    "category": "design",
+    "rationale": "Interface applicative SaaS mobile-first (dashboard) relevant de design-pwa-system et non de scroll-craft."
+  },
+  {
+    "id": "eval-18-discrimination-landing-vs-dashboard",
+    "prompt": "Je prépare la page de vente publique avec un scrollytelling en 5 sections animées pour convertir les visiteurs en prospects.",
+    "expectedSkill": "scroll-craft",
+    "forbiddenSkills": ["design-pwa-system", "design-ux-flow"],
+    "category": "design",
+    "rationale": "Landing marketing vitrine à défilement guidé relevant de scroll-craft et non de design-pwa-system."
+  }
+]

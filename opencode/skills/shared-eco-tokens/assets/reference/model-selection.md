@@ -21,5 +21,7 @@
 - Longues sessions sans compaction → laisser la compaction automatique résumer.
 
 ## Agence Bulles — config actuelle
-- Modèle par défaut : `deepseek/deepseek-v4-flash` (économique)
-- Principe : ne pas changer le provider ; garder le modèle par défaut d'OpenCode.
+- Modèle par défaut (`model`) : `deepseek/deepseek-v4` (implémentation et code)
+- Modèle rapide (`small_model`) : `deepseek/deepseek-v4-flash` (compaction, titres, summaries)
+- Plafonds mécaniques : `steps: 40` (lead-dev), `steps: 25` (ops-quality & integrations)
+- Claude Code subagents : `maxTurns: 40` (lead-dev avec model inherit), `maxTurns: 25` (ops-quality & integrations)

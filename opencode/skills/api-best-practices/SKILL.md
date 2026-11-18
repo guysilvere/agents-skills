@@ -1,8 +1,8 @@
 ---
 name: api-best-practices
-description: Guide de conception et d'intégration d'API RESTful — principes REST, sécurité, gestion d'erreur, webhooks, retry, idempotency, pagination, review checklist. À utiliser pour toute conception, intégration ou revue d'API (y compris la passerelle de paiement via api-paiements).
+description: Guide de conception et d'audit d'API RESTful (standards REST, gestion d'erreur, pagination, idempotence applicative, review checklist). Utiliser pour concevoir, auditer ou documenter des endpoints REST internes ou externes. Pour l'integration specifique de la passerelle de paiement Mobile Money et cartes, voir api-paiements.
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: integrations
   domain: api

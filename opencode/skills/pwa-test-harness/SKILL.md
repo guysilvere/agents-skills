@@ -1,8 +1,8 @@
 ---
 name: pwa-test-harness
-description: Cockpit de développement, spécifications vivantes et banc de tests QA pour PWA Agence Bulles — affichage Kanban et Liste des specs/tâches, scénarios de test interactifs, persistance Turso/SQLite, synchronisation Markdown docs/specs/, accès Super Admin strict. À initialiser dès le début de chaque projet avant le code métier.
+description: Cockpit de developpement, specifications vivantes et banc de tests QA pour PWA (Kanban et Liste de suivi, scenarios de test interactifs /admin/test, persistance SQLite). Utiliser pour piloter le developpement et tester les flux metier en cours de dev. Pour la validation globale pre-commit et audits CI, voir pwa-validation.
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: lead-dev
   domain: architecture

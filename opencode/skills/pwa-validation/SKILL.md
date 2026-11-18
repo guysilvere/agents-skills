@@ -1,8 +1,8 @@
 ---
 name: pwa-validation
-description: Validation complète d'une PWA avant commit et déploiement — tests locaux via Caddy (.test), lint, typecheck, tests unitaires, build, Lighthouse, audits a11y/SEO/sécurité, checklist pré-commit. Charger avant chaque commit (via ops-quality) pour valider build, performances, accessibilité et sécurité.
+description: Validation complete d'une PWA avant commit et deploiement (tests locaux via Caddy https, lint, typecheck, tests unitaires, build, Lighthouse, a11y, securite, checklist pre-commit). Utiliser avant chaque livraison Git ou release (via ops-quality). Pour le cockpit interactif de developpement et suivi des specs, voir pwa-test-harness.
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: ops-quality
   domain: validation
@@ -103,7 +103,6 @@ mon-projet.test, mon-projet.local, mon-projet.localhost {
 
 ## Règles
 - Ne pas modifier le code applicatif — signaler puis livrer.
-- Toujours charger `shared-eco-tokens` pour un rapport concis.
 - Outils externes : `playwright-cli` — paquet **`@playwright/cli`** (le paquet npm `playwright-cli` est déprécié) ; `impeccable` — à épingler en devDependency.
 
 ## Assets

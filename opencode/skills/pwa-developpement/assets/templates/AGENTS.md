@@ -79,6 +79,6 @@
 
 ## Compatibilité Antigravity
 - 🟦 OpenCode lit ce `AGENTS.md` (racine projet).
-- 🟩 Antigravity ne lit PAS `AGENTS.md` : créer des rules projet dans `.agents/rules/*.md` (mêmes règles, format Antigravity) — template : `assets/antigravity/rule.md` (skill opencode-admin).
+- 🟩 Antigravity ne lit PAS `AGENTS.md` : créer des rules projet dans `.agents/rules/*.md` (mêmes règles, format Antigravity) — template : `assets/antigravity/rule.md` (skill agents-skills-admin).
 - 🟩 Règles globales Antigravity : `~/.gemini/GEMINI.md` (équivalent global de ce fichier).
 - ⚪ Contenu du projet (`docs/*.md`, specs, conventions) : indépendant de l'outil — identique partout.

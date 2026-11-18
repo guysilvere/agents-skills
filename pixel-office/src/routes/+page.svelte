@@ -269,7 +269,7 @@
 		'pwa-deploiement',
 		'api-paiements',
 		'shared-git-conventions',
-		'opencode-admin',
+		'agents-skills-admin',
 		'shared-graft'
 	];
 
@@ -482,7 +482,7 @@
 		'api-paiements': 'Passerelle Paiement Wave, OM, MTN & Moov',
 		'api-best-practices': 'Design RESTful, Idempotence & Webhooks',
 		'shared-git-conventions': 'Conventions Git & PRs GitHub',
-		'opencode-admin': 'Administration IA OpenCode & Antigravity',
+		'agents-skills-admin': 'Administration IA OpenCode, Antigravity & Claude Code',
 		'pwa-test-harness': 'Cockpit de tests & Specs vivantes',
 		'shared-graft': 'Indexation du graphe de code Graft',
 		'apple-design': 'Motion physique & Principes Apple',

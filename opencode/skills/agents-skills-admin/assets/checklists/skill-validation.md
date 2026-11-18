@@ -10,8 +10,11 @@
 ## Frontmatter
 - [ ] 🟦 OpenCode : `name` obligatoire == nom du dossier, regex `^[a-z0-9]+(-[a-z0-9]+)*$` (kebab-case minuscules)
 - [ ] 🟩 Antigravity : `name` optionnel (défaut = dossier) — un frontmatter conforme OpenCode fonctionne aussi
-- [ ] `description` présente (obligatoire dans les deux outils), ≤ 1024 car., orientée déclencheur
-- [ ] Optionnels : `license`, `compatibility`, `metadata` (mapping chaîne→chaîne)
+- [ ] `description` présente (obligatoire dans les trois outils) :
+  - **CSO / Déclenchement** : rédigée à la 3e personne, verbes d'action et mots-clés de livrables précis.
+  - **Frontières explicites** : formule « Utiliser pour X... Ne pas utiliser pour Y (voir autre-skill) » pour éliminer les faux positifs.
+  - **Contraintes syntaxiques** : ≤ 500 car. recommandés (plafond dur 1024), **aucun chevron `<` ni `>`** (anti-injection prompt catalogue), **aucun ` : ` non échappé**.
+- [ ] Optionnels : `license`, `compatibility: opencode, antigravity, claude`, `metadata` (mapping chaîne→chaîne)
 
 ## Contenu
 - [ ] Corps en listes à puces (pas de texte superflu)

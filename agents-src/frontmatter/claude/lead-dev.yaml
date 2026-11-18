@@ -1,0 +1,11 @@
+name: lead-dev
+description: "Pilote le cycle de vie produit complet : cadrage, naming, stack, design, specs, développement, living doc. Délègue à ops-quality et integrations."
+model: inherit
+maxTurns: 40
+tools:
+  - Bash
+  - Read
+  - Edit
+  - Write
+  - Glob
+  - Grep

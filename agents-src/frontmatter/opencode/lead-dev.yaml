@@ -1,0 +1,5 @@
+description: "Pilote le cycle produit complet : cadrage, naming, stack, design, specs, dev, living doc"
+model: deepseek/deepseek-v4
+steps: 40
+tools:
+  "agent:*": deny

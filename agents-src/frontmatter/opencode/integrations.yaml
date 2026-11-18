@@ -1,0 +1,6 @@
+description: "Argent et intégrations : paiements (passerelle unifiée), webhooks, factures, emails, R2, DB Turso, n8n"
+mode: subagent
+model: deepseek/deepseek-v4-flash
+steps: 25
+tools:
+  "agent:*": deny

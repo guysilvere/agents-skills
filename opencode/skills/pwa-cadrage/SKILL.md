@@ -2,7 +2,7 @@
 name: pwa-cadrage
 description: Cadrage complet d'un projet PWA Agence Bulles — définition du problème, stress-test de l'idée, naming, blueprint, stack, monétisation, copywriting landing et feuille de route. Charger au démarrage de tout nouveau projet (phase 0–1 du workflow) ou avant une refonte majeure.
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: lead-dev
   domain: planification
@@ -61,7 +61,6 @@ metadata:
 - Template : `assets/templates/ROADMAP.md`.
 
 ## Règles
-- Toujours charger `shared-eco-tokens` en parallèle.
 - Marché : PME/TPE ivoiriennes, mobile-first, simplicité et robustesse.
 - Ultra-léger : listes à puces, pas de texte superflu.
 - Ne jamais inventer de chiffres ou de faits ; marquer les hypothèses non confirmées.

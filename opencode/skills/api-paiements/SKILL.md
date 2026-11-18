@@ -1,8 +1,8 @@
 ---
 name: api-paiements
-description: Référence d'intégration de la passerelle de paiement Agence Bulles (Wave, Orange Money, MTN, Moov, cartes). Authentification, endpoints, sandbox, webhooks signés, idempotence, réconciliation, factures PDF. Charger (via integrations) dès qu'un paiement, un webhook de paiement ou une facture est en jeu.
+description: Integration de la passerelle de paiement unifiee Agence Bulles (Wave, Orange Money, MTN, Moov, cartes bancaires). Endpoints sandbox et live, verification HMAC temps constant, dunning, idempotence et factures PDF. Utiliser des qu'un flux financier ou webhook de paiement est en jeu. Pour la conception generale d'API REST, voir api-best-practices.
 license: MIT
-compatibility: opencode
+compatibility: opencode, antigravity, claude
 metadata:
   audience: integrations
   domain: api

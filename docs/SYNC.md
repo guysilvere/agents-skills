@@ -1,79 +1,61 @@
-# SYNC — Script de synchronisation GitHub → OpenCode + Antigravity
+# SYNC — Script de synchronisation GitHub → OpenCode + Antigravity + Claude Code
 
-> `scripts/sync-skills.sh` : importe depuis GitHub la source de vérité et met à jour les deux outils automatiquement.
+> `scripts/sync-skills.sh` : importe depuis GitHub la source de vérité et met à jour les trois outils automatiquement.
 
 ## Principe
 
 ```
 GitHub (guysilvere/agents-skills)  ──clone/pull──►  repo local ~/agents-skills
-                                                       │
-                                                       ▼
-                                    scripts/sync-skills.sh
-                                                       │
+                                                        │
+                                                        ▼
+                                       Pré-vol : build-agents.mjs --check
+                                                        │
+                                                        ▼
+                                     scripts/sync-skills.sh
+                                                        │
             ┌───────────────────────────────────────────┼───────────────────────────────────────────┐
             ▼                                           ▼                                           ▼
-  🟦 OpenCode                                🟩 Antigravity Desktop                      🟩 Antigravity CLI (agy)
-  ~/.config/opencode/skills/                 ~/.gemini/config/skills/                    ~/.gemini/antigravity-cli/plugins/
-  ~/.config/opencode/agents/                 ~/.gemini/config/agents/                      agence-bulles/
-  ~/.config/opencode/commands/               ~/.gemini/workflows/                          ├── agents/ (3 agents)
-  ~/.config/opencode/opencode.jsonc          ~/.gemini/config/mcp_config.json              ├── skills/ (12 skills)
-                                             ~/.gemini/GEMINI.md                           ├── rules/GEMINI.md
-                                                                                           └── plugin.json
+  🟦 OpenCode                                🟩 Antigravity Desktop                      🟪 Claude Code
+  ~/.config/opencode/skills/                 ~/.gemini/config/skills/                    ~/.claude/skills/
+  ~/.config/opencode/agents/                 ~/.gemini/config/agents/                    ~/.claude/agents/
+  ~/.config/opencode/commands/               ~/.gemini/workflows/                        ~/.claude/hooks/
+  ~/.config/opencode/opencode.jsonc          ~/.gemini/config/mcp_config.json            ~/.claude/settings.json
+                                             ~/.gemini/GEMINI.md
+                                             ~/.gemini/antigravity-cli/plugins/
 ```
 
-- **Source de vérité** : `opencode/skills/` (12 skills), `opencode/agents/` (3 agents), `opencode/commands/` (8 commandes), `antigravity/workflows/` (8 workflows), `antigravity/agents/` (3 agents AG).
-- **Cible skills** : le même dossier de skills est copié dans OpenCode, Antigravity Desktop ET Antigravity CLI (format standard `SKILL.md`).
-- **Cible agents** : `opencode/agents/` → OpenCode ; `antigravity/agents/` → Antigravity Desktop (`~/.gemini/config/agents/`) ET Antigravity CLI (`~/.gemini/antigravity-cli/plugins/agence-bulles/agents/`).
-- **Cible workflows** : Antigravity Desktop (`~/.gemini/workflows/`).
-- **Parité garantie** : Zéro écart de version ou d'agents entre Antigravity Desktop et CLI.
+- **Source canonique agents** : `agents-src/` (corps unique + frontmatters par outil) compilé via `scripts/build-agents.mjs`.
+- **Source de vérité** : `opencode/skills/` (16 skills), `opencode/commands/` (11 commandes), `antigravity/workflows/` (11 workflows), `antigravity/GEMINI.md`, `hooks/`.
+- **Cible skills** : le même catalogue de 16 skills est déployé dans OpenCode, Antigravity Desktop, Antigravity CLI ET Claude Code.
+- **Cible agents** : chaque outil reçoit ses 3 agents configurés selon son runtime.
+- **Pré-vol déterministe** : vérification obligatoire que les 9 agents générés sont en parité stricte avec `agents-src/` avant toute synchronisation.
 
 ## Usage
 
 ```bash
 ./scripts/sync-skills.sh                 # clone/pull + backup + purge + copie
+./scripts/sync-skills.sh --local         # appliquer depuis le workspace local
 ./scripts/sync-skills.sh --dry-run       # affiche ce qui serait fait, sans rien modifier
 ./scripts/sync-skills.sh --opencode-only # ne touche qu'à ~/.config/opencode
 ./scripts/sync-skills.sh --antigravity-only # ne touche qu'à ~/.gemini
+./scripts/sync-skills.sh --claude-only   # ne touche qu'à ~/.claude
 ./scripts/sync-skills.sh --no-backup     # désactive le backup préalable (déconseillé)
 ./scripts/sync-skills.sh --help          # aide
 ```
 
 ## Étapes internes
 
-1. **Clone/pull** : `git clone` (1er run) ou `git pull` (runs suivants) depuis GitHub dans `~/.cache/agents-skills-sync/`.
-2. **Backup** : copie des dossiers cibles existants vers `~/.config/opencode-backups/bak/<horodatage>/`.
-3. **Purge** : suppression des anciens dossiers cibles (skills/agents/commands/workflows) — les fichiers hors des dossiers gérés ne sont PAS touchés.
-4. **Copie** : recopie depuis le repo local vers les cibles.
-5. **Rapport** : liste des dossiers installés par outil, chemin du backup.
+1. **Pré-vol** : validation de la parité des 9 agents via `node scripts/build-agents.mjs --check`.
+2. **Clone/pull** : `git clone` (1er run) ou `git pull` (runs suivants) depuis GitHub dans `~/.cache/agents-skills-sync/` (sauf si `--local`).
+3. **Backup** : copie des dossiers cibles existants vers `~/.config/opencode-backups/bak/<horodatage>/`.
+4. **Purge** : suppression des anciens dossiers cibles (skills/agents/commands/workflows) — les fichiers hors des dossiers gérés ne sont PAS touchés.
+5. **Copie** : recopie depuis la source vers les cibles.
+6. **MCP & Hooks** : injection sans secrets exposés et enregistrement automatique des serveurs MCP / hooks.
+7. **Rapport** : liste des dossiers installés par outil, chemin du backup.
 
 ## Garanties
 
-- **Idempotent** : l'état final = état du repo GitHub, à chaque run.
+- **Idempotent** : l'état final = état du repo GitHub (ou local si `--local`), à chaque run.
 - **Réversible** : backup complet avant modification (restauration manuelle possible).
 - **Ciblé** : ne purge QUE les dossiers gérés (skills, agents, commands, workflows) ; jamais `opencode.jsonc`, `GEMINI.md`, `mcp_config.json`, `.tokens/`, ni les projets.
 - **Sûr par défaut** : `--dry-run` recommandé avant chaque mise à jour majeure.
-
-## Symlinks (validation effectuée le 2026-08-20)
-
-Un test symlink a confirmé que les skills globales peuvent être **liées** au lieu d'être dupliquées :
-- `ln -s ~/.config/opencode/skills/<skill> ~/.gemini/config/skills/<skill>` → SKILL.md lisible, `find` détecte la skill, frontmatter OK.
-- Bénéfice : une seule copie physique des skills globales, mise à jour par le script dans les deux outils.
-- Limite : si le script purge puis recopie, il doit d'abord supprimer les symlinks orphelins (`find ... -type l -delete`). Prévoir un drapeau `--symlink` dans une future version du script pour créer les liens à la place des copies.
-
-## Structure des sources
-
-```
-opencode/
-├── skills/            # 12 skills (SKILL.md + assets/)
-├── agents/            # lead-dev.md, ops-quality.md, integrations.md (format OpenCode)
-└── commands/          # 8 commandes : audit, cadrage, deploy, docs-sync, new-pwa, release, spec, validate
-antigravity/
-├── agents/            # lead-dev.md, ops-quality.md, integrations.md (format Antigravity)
-└── workflows/         # 8 workflows : audit, cadrage, deploy, docs-sync, new-pwa, release, spec, validate
-```
-
-## Limites connues
-
-- Les **agents Antigravity** sont synchronisés depuis `antigravity/agents/` (format frontmatter différent d'OpenCode).
-- Les **règles Antigravity** (`GEMINI.md`, `.agents/rules/`) ne sont pas synchronisées — modèles dans `opencode-admin/assets/antigravity/`.
-- Les **MCP** (`opencode.jsonc`, `~/.gemini/config/mcp_config.json`) ne sont pas synchronisés — secrets locaux par machine.

@@ -1,0 +1,41 @@
+name: Validate Setup & CI Guardrails
+
+on:
+  push:
+    branches:
+      - main
+      - testing
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Ecosystem & Test Hooks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify Agents Parity (SPEC-010 REQ-01)
+        run: node scripts/build-agents.mjs --check
+
+      - name: Validate Setup & CSO Rules (SPEC-010 REQ-02)
+        run: node scripts/validate-setup.mjs
+
+      - name: Verify Skill Triggers Evals (SPEC-010 REQ-03)
+        run: node scripts/eval-triggers.mjs
+
+      - name: Run Hooks Unit Tests (SPEC-009)
+        run: node --test hooks/hooks.test.mjs
